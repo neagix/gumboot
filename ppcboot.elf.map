@@ -1,0 +1,578 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+otp                 0x80              main.o
+font_yuv            0x3fc             console.o
+seeprom             0x100             main.o
+req_recv            0x20              ipc.o
+
+Discarded input sections
+
+ .data          0x00000000        0x0 crt0.o
+ .bss           0x00000000        0x0 crt0.o
+ .text          0x00000000        0x0 realmode.o
+ .data          0x00000000        0x0 realmode.o
+ .bss           0x00000000        0x0 realmode.o
+ .text          0x00000000        0x0 main.o
+ .data          0x00000000        0x0 main.o
+ .bss           0x00000000        0x0 main.o
+ .text          0x00000000        0x0 string.o
+ .data          0x00000000        0x0 string.o
+ .bss           0x00000000        0x0 string.o
+ .text.strnlen  0x00000000        0x0 string.o
+ .text.strcmp   0x00000000        0x0 string.o
+ .text.strncmp  0x00000000        0x0 string.o
+ .text.strlcpy  0x00000000        0x0 string.o
+ .text.strlcat  0x00000000        0x0 string.o
+ .text.strchr   0x00000000        0x0 string.o
+ .text.strspn   0x00000000        0x0 string.o
+ .text.strcspn  0x00000000        0x0 string.o
+ .text          0x00000000        0x0 sync.o
+ .data          0x00000000        0x0 sync.o
+ .bss           0x00000000        0x0 sync.o
+ .text          0x00000000        0x0 time.o
+ .data          0x00000000        0x0 time.o
+ .bss           0x00000000        0x0 time.o
+ .text.mftb     0x00000000        0x0 time.o
+ .text          0x00000000        0x0 printf.o
+ .data          0x00000000        0x0 printf.o
+ .bss           0x00000000        0x0 printf.o
+ .text.sprintf  0x00000000        0x0 printf.o
+ .text          0x00000000        0x0 input.o
+ .data          0x00000000        0x0 input.o
+ .text.pad_read
+                0x00000000        0x0 input.o
+ .text.gpio_read
+                0x00000000        0x0 input.o
+ .text.input_read
+                0x00000000        0x0 input.o
+ .text.input_wait
+                0x00000000        0x0 input.o
+ .text          0x00000000        0x0 exception.o
+ .data          0x00000000        0x0 exception.o
+ .bss           0x00000000        0x0 exception.o
+ .data          0x00000000        0x0 exception_2200.o
+ .bss           0x00000000        0x0 exception_2200.o
+ .text          0x00000000        0x0 malloc.o
+ .data          0x00000000        0x0 malloc.o
+ .text.sbrk     0x00000000        0x0 malloc.o
+ .text.malloc_footprint
+                0x00000000        0x0 malloc.o
+ .text.malloc_max_footprint
+                0x00000000        0x0 malloc.o
+ .text.malloc_usable_size
+                0x00000000        0x0 malloc.o
+ .text.mallopt  0x00000000        0x0 malloc.o
+ .text.T.235    0x00000000        0x0 malloc.o
+ .text.T.240    0x00000000        0x0 malloc.o
+ .text.T.242    0x00000000        0x0 malloc.o
+ .text.mallinfo
+                0x00000000        0x0 malloc.o
+ .text.malloc_stats
+                0x00000000        0x0 malloc.o
+ .text.malloc_trim
+                0x00000000        0x0 malloc.o
+ .text.calloc   0x00000000        0x0 malloc.o
+ .text.T.231    0x00000000        0x0 malloc.o
+ .text.independent_calloc
+                0x00000000        0x0 malloc.o
+ .text.independent_comalloc
+                0x00000000        0x0 malloc.o
+ .text.realloc  0x00000000        0x0 malloc.o
+ .text.pvalloc  0x00000000        0x0 malloc.o
+ .text.valloc   0x00000000        0x0 malloc.o
+ .text          0x00000000        0x0 gecko.o
+ .data          0x00000000        0x0 gecko.o
+ .text          0x00000000        0x0 video_low.o
+ .data          0x00000000        0x0 video_low.o
+ .text.VIDEO_WaitVSync
+                0x00000000        0x0 video_low.o
+ .text.VIDEO_BlackOut
+                0x00000000        0x0 video_low.o
+ .text.VIDEO_Shutdown
+                0x00000000        0x0 video_low.o
+ .text          0x00000000        0x0 ipc.o
+ .data          0x00000000        0x0 ipc.o
+ .text.ipc_process_unhandled
+                0x00000000        0x0 ipc.o
+ .text.ipc_flush
+                0x00000000        0x0 ipc.o
+ .text.ipc_shutdown
+                0x00000000        0x0 ipc.o
+ .text.ipc_post
+                0x00000000        0x0 ipc.o
+ .text          0x00000000        0x0 mini_ipc.o
+ .data          0x00000000        0x0 mini_ipc.o
+ .bss           0x00000000        0x0 mini_ipc.o
+ .text.sd_protected
+                0x00000000        0x0 mini_ipc.o
+ .text.sd_select
+                0x00000000        0x0 mini_ipc.o
+ .text.sd_getsize
+                0x00000000        0x0 mini_ipc.o
+ .text.sd_get_state
+                0x00000000        0x0 mini_ipc.o
+ .text.sd_mount
+                0x00000000        0x0 mini_ipc.o
+ .text.nand_erase
+                0x00000000        0x0 mini_ipc.o
+ .text.nand_reset
+                0x00000000        0x0 mini_ipc.o
+ .text.aes_set_iv
+                0x00000000        0x0 mini_ipc.o
+ .text.aes_set_key
+                0x00000000        0x0 mini_ipc.o
+ .text.aes_reset
+                0x00000000        0x0 mini_ipc.o
+ .text.boot2_run
+                0x00000000        0x0 mini_ipc.o
+ .text.sd_write
+                0x00000000        0x0 mini_ipc.o
+ .text.nand_write
+                0x00000000        0x0 mini_ipc.o
+ .text.ipc_powerpc_boot
+                0x00000000        0x0 mini_ipc.o
+ .text.sd_read  0x00000000        0x0 mini_ipc.o
+ .text.nand_read
+                0x00000000        0x0 mini_ipc.o
+ .text.nand_status
+                0x00000000        0x0 mini_ipc.o
+ .text.nand_getid
+                0x00000000        0x0 mini_ipc.o
+ .text.aes_decrypt
+                0x00000000        0x0 mini_ipc.o
+ .text.boot2_tmd
+                0x00000000        0x0 mini_ipc.o
+ .text.getMiniGitVer
+                0x00000000        0x0 mini_ipc.o
+ .text          0x00000000        0x0 nandfs.o
+ .data          0x00000000        0x0 nandfs.o
+ .bss           0x00000000        0x0 nandfs.o
+ .text.nandfs_seek
+                0x00000000        0x0 nandfs.o
+ .text.nandfs_get_usage
+                0x00000000        0x0 nandfs.o
+ .text.nandfs_open
+                0x00000000        0x0 nandfs.o
+ .text.nand_read_cluster
+                0x00000000        0x0 nandfs.o
+ .text.nandfs_initialize
+                0x00000000        0x0 nandfs.o
+ .text.nand_read_decrypted_cluster
+                0x00000000        0x0 nandfs.o
+ .text.nandfs_read
+                0x00000000        0x0 nandfs.o
+ .rodata.str1.1
+                0x00000000        0x0 nandfs.o
+ .text          0x00000000        0x0 ff.o
+ .data          0x00000000        0x0 ff.o
+ .bss           0x00000000        0x0 ff.o
+ .text.clust2sect
+                0x00000000        0x0 ff.o
+ .text.get_fileinfo
+                0x00000000        0x0 ff.o
+ .text.f_mount  0x00000000        0x0 ff.o
+ .text.f_mkfs   0x00000000        0x0 ff.o
+ .text.validate
+                0x00000000        0x0 ff.o
+ .text.move_window
+                0x00000000        0x0 ff.o
+ .text.get_cluster
+                0x00000000        0x0 ff.o
+ .text.dir_seek
+                0x00000000        0x0 ff.o
+ .text.f_check_contig
+                0x00000000        0x0 ff.o
+ .text.put_cluster
+                0x00000000        0x0 ff.o
+ .text.create_chain
+                0x00000000        0x0 ff.o
+ .text.remove_chain
+                0x00000000        0x0 ff.o
+ .text.f_truncate
+                0x00000000        0x0 ff.o
+ .text.dir_next
+                0x00000000        0x0 ff.o
+ .text.dir_register
+                0x00000000        0x0 ff.o
+ .text.dir_remove
+                0x00000000        0x0 ff.o
+ .text.sync     0x00000000        0x0 ff.o
+ .text.dir_read
+                0x00000000        0x0 ff.o
+ .text.f_readdir
+                0x00000000        0x0 ff.o
+ .text.f_sync   0x00000000        0x0 ff.o
+ .text.f_close  0x00000000        0x0 ff.o
+ .text.f_lseek  0x00000000        0x0 ff.o
+ .text.f_write  0x00000000        0x0 ff.o
+ .text.f_read   0x00000000        0x0 ff.o
+ .text.check_fs
+                0x00000000        0x0 ff.o
+ .text.auto_mount
+                0x00000000        0x0 ff.o
+ .text.f_getfree
+                0x00000000        0x0 ff.o
+ .text.follow_path
+                0x00000000        0x0 ff.o
+ .text.f_rename
+                0x00000000        0x0 ff.o
+ .text.f_utime  0x00000000        0x0 ff.o
+ .text.f_chmod  0x00000000        0x0 ff.o
+ .text.f_mkdir  0x00000000        0x0 ff.o
+ .text.f_unlink
+                0x00000000        0x0 ff.o
+ .text.f_stat   0x00000000        0x0 ff.o
+ .text.f_opendir
+                0x00000000        0x0 ff.o
+ .text.f_open   0x00000000        0x0 ff.o
+ .rodata        0x00000000        0x0 ff.o
+ .rodata.str1.1
+                0x00000000        0x0 ff.o
+ .text          0x00000000        0x0 diskio.o
+ .data          0x00000000        0x0 diskio.o
+ .bss           0x00000000        0x0 diskio.o
+ .text.get_fattime
+                0x00000000        0x0 diskio.o
+ .text.disk_ioctl
+                0x00000000        0x0 diskio.o
+ .text.disk_write
+                0x00000000        0x0 diskio.o
+ .text.disk_read
+                0x00000000        0x0 diskio.o
+ .text.disk_status
+                0x00000000        0x0 diskio.o
+ .text.disk_initialize
+                0x00000000        0x0 diskio.o
+ .rodata        0x00000000        0x0 diskio.o
+ .text          0x00000000        0x0 fat.o
+ .data          0x00000000        0x0 fat.o
+ .bss           0x00000000        0x0 fat.o
+ .text.fat_clust2sect
+                0x00000000        0x0 fat.o
+ .text.fat_umount
+                0x00000000        0x0 fat.o
+ .text.fat_mount
+                0x00000000        0x0 fat.o
+ .text          0x00000000        0x0 font.o
+ .bss           0x00000000        0x0 font.o
+ .text          0x00000000        0x0 console.o
+ .data          0x00000000        0x0 console.o
+ .text.pal_idx  0x00000000        0x0 console.o
+ .text.fill_rect
+                0x00000000        0x0 console.o
+ .text.scroll   0x00000000        0x0 console.o
+ .text.print_str
+                0x00000000        0x0 console.o
+ .text.gfx_printf
+                0x00000000        0x0 console.o
+ .rodata.str1.1
+                0x00000000        0x0 console.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+                0x00003400                . = 0x3400
+
+.realmode       0x00003400      0x140
+ *(.realmode)
+ .realmode      0x00003400      0x140 realmode.o
+                0x00003400                _realmode_vector
+                0x80004000                . = 0x80004000
+
+.start          0x80004000      0x370 load address 0x00004000
+ crt0.o(*)
+ .text          0x80004000      0x370 crt0.o
+                0x80004000                _start
+ .rela.text     0x00000000        0x0 crt0.o
+ .rela.text.testOTP
+                0x00000000        0x0 crt0.o
+ .rela.text.exception_init
+                0x00000000        0x0 crt0.o
+ .rela.text.sbrk
+                0x00000000        0x0 crt0.o
+ .rela.text.T.248
+                0x00000000        0x0 crt0.o
+ .rela.text.malloc
+                0x00000000        0x0 crt0.o
+ .rela.text.ipc_receive
+                0x00000000        0x0 crt0.o
+ .rela.text.print_str
+                0x00000000        0x0 crt0.o
+ .rela.text.font_to_yuv
+                0x00000000        0x0 crt0.o
+ .rela.text.print_str_noscroll
+                0x00000000        0x0 crt0.o
+
+.text           0x80004370     0x6450 load address 0x00004370
+ *(.text)
+ .text          0x80004370       0x5c exception_2200.o
+                0x80004370                exception_2200_start
+                0x800043cc                exception_2200_end
+ *(.text.*)
+ .text.hexdump  0x800043cc      0x170 main.o
+                0x800043cc                hexdump
+ .text.testOTP  0x8000453c       0xb8 main.o
+                0x8000453c                testOTP
+ .text.main     0x800045f4      0x144 main.o
+                0x800045f4                main
+ .text.strlen   0x80004738       0x20 string.o
+                0x80004738                strlen
+ .text.memset   0x80004758       0x2c string.o
+                0x80004758                memset
+ .text.memcpy   0x80004784       0x30 string.o
+                0x80004784                memcpy
+ .text.memcmp   0x800047b4       0x44 string.o
+                0x800047b4                memcmp
+ .text.sync_before_read
+                0x800047f8       0x30 sync.o
+                0x800047f8                sync_before_read
+ .text.sync_after_write
+                0x80004828       0x30 sync.o
+                0x80004828                sync_after_write
+ .text.sync_before_exec
+                0x80004858       0x38 sync.o
+                0x80004858                sync_before_exec
+ .text.udelay   0x80004890       0x6c time.o
+                0x80004890                udelay
+ .text.fmtstr   0x800048fc      0x130 printf.o
+ .text.fmtint   0x80004a2c      0x378 printf.o
+ .text.vsnprintf
+                0x80004da4      0x928 printf.o
+                0x80004da4                vsnprintf
+ .text.vsprintf
+                0x800056cc       0x18 printf.o
+                0x800056cc                vsprintf
+ .text.input_init
+                0x800056e4      0x1d4 input.o
+                0x800056e4                input_init
+ .text.exception_init
+                0x800058b8       0xac exception.o
+                0x800058b8                exception_init
+ .text.exception_handler
+                0x80005964      0x108 exception.o
+                0x80005964                exception_handler
+ .text.init_mparams
+                0x80005a6c       0x60 malloc.o
+ .text.T.237    0x80005acc      0x1cc malloc.o
+ .text.T.238    0x80005c98       0x80 malloc.o
+ .text.T.233    0x80005d18       0xcc malloc.o
+ .text.T.236    0x80005de4       0xec malloc.o
+ .text.T.232    0x80005ed0      0x228 malloc.o
+ .text.T.248    0x800060f8      0x230 malloc.o
+ .text.free     0x80006328      0xab0 malloc.o
+                0x80006328                free
+ .text.malloc   0x80006dd8     0x2108 malloc.o
+                0x80006dd8                malloc
+ .text.memalign
+                0x80008ee0      0x24c malloc.o
+                0x80008ee0                memalign
+ .text.gecko_init
+                0x8000912c      0x1cc gecko.o
+                0x8000912c                gecko_init
+ .text.printf   0x800092f8      0x148 gecko.o
+                0x800092f8                printf
+ .text.VIDEO_SetFrameBuffer
+                0x80009440       0x4c video_low.o
+                0x80009440                VIDEO_SetFrameBuffer
+ .text.VIDEO_Init
+                0x8000948c      0x118 video_low.o
+                0x8000948c                VIDEO_Init
+ .text.T.15     0x800095a4      0x3fc video_low.o
+ .text.T.13     0x800099a0       0x4c video_low.o
+ .text.__VIWriteI2CRegister8
+                0x800099ec       0x38 video_low.o
+ .text.__VIWriteI2CRegister16
+                0x80009a24       0x44 video_low.o
+ .text.__VIWriteI2CRegisterBuf
+                0x80009a68       0x50 video_low.o
+ .text.VISetupEncoder
+                0x80009ab8      0x168 video_low.o
+                0x80009ab8                VISetupEncoder
+ .text.ipc_receive
+                0x80009c20      0x104 ipc.o
+                0x80009c20                ipc_receive
+ .text.ipc_receive_tagged
+                0x80009d24       0xa4 ipc.o
+                0x80009d24                ipc_receive_tagged
+ .text.ipc_vpost
+                0x80009dc8      0x23c ipc.o
+                0x80009dc8                ipc_vpost
+ .text.ipc_exchange
+                0x8000a004       0xc4 ipc.o
+                0x8000a004                ipc_exchange
+ .text.ipc_initialize
+                0x8000a0c8      0x138 ipc.o
+                0x8000a0c8                ipc_initialize
+ .text.getseeprom
+                0x8000a200       0x48 mini_ipc.o
+                0x8000a200                getseeprom
+ .text.getotp   0x8000a248       0x44 mini_ipc.o
+                0x8000a248                getotp
+ .text.get_xfb  0x8000a28c        0xc console.o
+                0x8000a28c                get_xfb
+ .text.make_yuv
+                0x8000a298      0x124 console.o
+                0x8000a298                make_yuv
+ .text.gfx_draw_rect
+                0x8000a3bc       0xe0 console.o
+                0x8000a3bc                gfx_draw_rect
+ .text.font_to_yuv
+                0x8000a49c      0x12c console.o
+                0x8000a49c                font_to_yuv
+ .text.init_fb  0x8000a5c8      0x10c console.o
+                0x8000a5c8                init_fb
+ .text.print_str_noscroll
+                0x8000a6d4       0xe0 console.o
+                0x8000a6d4                print_str_noscroll
+                0x8000a7c0                . = ALIGN (0x20)
+ *fill*         0x8000a7b4        0xc 00
+
+.data           0x8000a7c0     0x1000 load address 0x0000a7c0
+ *(.data)
+ .data          0x8000a7c0     0x1000 font.o
+                0x8000a7c0                console_font_8x16
+ *(.data.*)
+                0x8000b7c0                . = ALIGN (0x20)
+
+.sdata          0x8000b7c0        0x0
+ *(.sdata)
+ *(.sdata.*)
+                0x8000b7c0                . = ALIGN (0x20)
+
+.rodata         0x8000b7c0      0x680 load address 0x0000b7c0
+ *(.rodata)
+ .rodata        0x8000b7c0       0xc0 printf.o
+ .rodata        0x8000b880      0x22c video_low.o
+ *(.rodata.*)
+ .rodata.str1.1
+                0x8000baac       0xec main.o
+                                 0xf0 (size before relaxing)
+ .rodata.str1.1
+                0x8000bb98       0x2f printf.o
+ .rodata.str1.1
+                0x8000bbc7       0x85 exception.o
+ .rodata.str1.1
+                0x8000bc4c       0x75 malloc.o
+ .rodata.str1.1
+                0x8000bcc1      0x178 ipc.o
+                0x8000be40                . = ALIGN (0x20)
+ *fill*         0x8000be39        0x7 00
+
+.stack          0x8000be40     0x8000 load address 0x0000be40
+                0x8000be40                _stack_top = .
+                0x80013e40                . = (. + 0x8000)
+ *fill*         0x8000be40     0x8000 00
+                0x80013e40                _stack_bot = .
+                0x80013e40                . = ALIGN (0x20)
+                0x80013e40                __bss_start = .
+
+.bss            0x80013e40      0x7c0 load address 0x00013e40
+ *(.bss)
+ .bss           0x80013e40        0xc input.o
+ .bss           0x80013e4c      0x1e4 malloc.o
+ .bss           0x80014030        0x4 gecko.o
+ .bss           0x80014034        0x4 video_low.o
+ .bss           0x80014038       0x24 ipc.o
+ .bss           0x8001405c        0x8 console.o
+ COMMON         0x80014064      0x180 main.o
+                0x80014064                otp
+                0x800140e4                seeprom
+ COMMON         0x800141e4       0x20 ipc.o
+                0x800141e4                req_recv
+ COMMON         0x80014204      0x3fc console.o
+                0x80014204                font_yuv
+
+.sbss
+ *(.sbss)
+                0x80014600                __bss_end = .
+                0x80020000                . = ALIGN (0x10000)
+                0x80020000                _sbrk_start = .
+                0x816ffff0                _sbrk_end = 0x816ffff0
+LOAD realmode.o
+LOAD crt0.o
+LOAD main.o
+LOAD string.o
+LOAD sync.o
+LOAD time.o
+LOAD printf.o
+LOAD input.o
+LOAD exception.o
+LOAD exception_2200.o
+LOAD malloc.o
+LOAD gecko.o
+LOAD video_low.o
+LOAD ipc.o
+LOAD mini_ipc.o
+LOAD nandfs.o
+LOAD ff.o
+LOAD diskio.o
+LOAD fat.o
+LOAD font.o
+LOAD console.o
+LOAD /opt/wiidev/lib/gcc/powerpc-elf/4.4.0/libgcc.a
+OUTPUT(ppcboot.elf elf32-powerpc)
+
+.comment        0x00000000      0x144
+ .comment       0x00000000       0x12 main.o
+ .comment       0x00000012       0x12 string.o
+ .comment       0x00000024       0x12 sync.o
+ .comment       0x00000036       0x12 time.o
+ .comment       0x00000048       0x12 printf.o
+ .comment       0x0000005a       0x12 input.o
+ .comment       0x0000006c       0x12 exception.o
+ .comment       0x0000007e       0x12 malloc.o
+ .comment       0x00000090       0x12 gecko.o
+ .comment       0x000000a2       0x12 video_low.o
+ .comment       0x000000b4       0x12 ipc.o
+ .comment       0x000000c6       0x12 mini_ipc.o
+ .comment       0x000000d8       0x12 nandfs.o
+ .comment       0x000000ea       0x12 ff.o
+ .comment       0x000000fc       0x12 diskio.o
+ .comment       0x0000010e       0x12 fat.o
+ .comment       0x00000120       0x12 font.o
+ .comment       0x00000132       0x12 console.o
+
+.gnu.attributes
+                0x00000000       0x12
+ .gnu.attributes
+                0x00000000       0x14 main.o
+ .gnu.attributes
+                0x00000014       0x14 string.o
+ .gnu.attributes
+                0x00000028       0x14 sync.o
+ .gnu.attributes
+                0x0000003c       0x14 time.o
+ .gnu.attributes
+                0x00000050       0x14 printf.o
+ .gnu.attributes
+                0x00000064       0x14 input.o
+ .gnu.attributes
+                0x00000078       0x14 exception.o
+ .gnu.attributes
+                0x0000008c       0x14 malloc.o
+ .gnu.attributes
+                0x000000a0       0x14 gecko.o
+ .gnu.attributes
+                0x000000b4       0x14 video_low.o
+ .gnu.attributes
+                0x000000c8       0x14 ipc.o
+ .gnu.attributes
+                0x000000dc       0x14 mini_ipc.o
+ .gnu.attributes
+                0x000000f0       0x14 nandfs.o
+ .gnu.attributes
+                0x00000104       0x14 ff.o
+ .gnu.attributes
+                0x00000118       0x14 diskio.o
+ .gnu.attributes
+                0x0000012c       0x14 fat.o
+ .gnu.attributes
+                0x00000140       0x14 font.o
+ .gnu.attributes
+                0x00000154       0x14 console.o
