@@ -15,6 +15,7 @@ Copyright (C) 2008, 2009	Sven Peter <svenpeter@gmail.com>
 #include "mini_ipc.h"
 #include "nandfs.h"
 #include "string.h"
+#include "gecko.h"
 
 #define	PAGE_SIZE	2048
 #define NANDFS_FREE 	0xFFFE
@@ -98,13 +99,13 @@ s32 nandfs_initialize(void)
 	}
 
 	if(supercluster == 0) {
-		printf("no supercluster found. "
+		gecko_printf("no supercluster found. "
 			     " your nand filesystem is seriously broken...\n");
 		return -1;
 	}
 
 	for(i = 0; i < 16; i++) {
-		printf("reading...\n");
+		gecko_printf("reading...\n");
 		nand_read_cluster(supercluster + i*8,
 				(sffs.buffer) + (i * PAGE_SIZE * 8));
 	}
@@ -119,7 +120,7 @@ u32 nandfs_get_usage(void) {
 	for (i=0; i < sizeof(sffs.sffs.cluster_table) / sizeof(u16); i++)
 		if(sffs.sffs.cluster_table[i] != NANDFS_FREE) used_clusters++;
 		
-	printf("Used clusters: %d\n", used_clusters);
+	gecko_printf("Used clusters: %d\n", used_clusters);
 	return 1000 * used_clusters / (sizeof(sffs.sffs.cluster_table)/sizeof(u16));
 }
 
@@ -135,7 +136,7 @@ s32 nandfs_open(struct nandfs_fp *fp, const char *path)
 	memset(fp, 0, sizeof(*fp));
 
 	if(strcmp(cur->name, "/") != 0) {
-		printf("your nandfs is corrupted. fixit!\n");
+		gecko_printf("your nandfs is corrupted. fixit!\n");
 		return -1;
 	}
 
@@ -153,7 +154,7 @@ s32 nandfs_open(struct nandfs_fp *fp, const char *path)
 		}
 		if (len > 12)
 		{
-			printf("invalid length: %s %s %s [%d]\n",
+			gecko_printf("invalid length: %s %s %s [%d]\n",
 					ptr, ptr2, path, len);
 			return -1;
 		}

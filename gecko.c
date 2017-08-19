@@ -201,7 +201,7 @@ void gecko_init(void)
 	gecko_console_enabled = 1;
 }
 
-int printf(const char *fmt, ...) {
+int gecko_printf(const char *fmt, ...) {
 	if (!gecko_console_enabled)
 		return 0;
 

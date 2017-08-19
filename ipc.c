@@ -12,6 +12,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 
 #include "bootmii_ppc.h"
 #include "ipc.h"
+#include "gecko.h"
 #include "string.h"
 #include <stdarg.h>
 
@@ -82,14 +83,14 @@ int ipc_initialize(void)
 	infohdr = (ipc_infohdr*)(read32(0x13fffffc)|0x80000000);
 	sync_before_read((void*)infohdr, sizeof(ipc_infohdr));
 
-	printf("IPC: infoheader at %p %08x\n", infohdr);
+	gecko_printf("IPC: infoheader at %p %08x\n", infohdr);
 
 	if(memcmp(infohdr->magic, "IPC", 3)) {
-		printf("IPC: bad magic on info structure\n",infohdr);
+		gecko_printf("IPC: bad magic on info structure\n",infohdr);
 		return -1;
 	}
 	if(infohdr->version != 1) {
-		printf("IPC: unknown IPC version %d\n",infohdr->version);
+		gecko_printf("IPC: unknown IPC version %d\n",infohdr->version);
 		return -1;
 	}
 
@@ -102,7 +103,7 @@ int ipc_initialize(void)
 	in_tail = read32(HW_IPC_PPCMSG) & 0xffff;
 	out_head = read32(HW_IPC_PPCMSG) >> 16;
 
-	printf("IPC: initial in tail: %d, out head: %d\n", in_tail, out_head);
+	gecko_printf("IPC: initial in tail: %d, out head: %d\n", in_tail, out_head);
 
 	cur_tag = 1;
 
@@ -124,16 +125,16 @@ void ipc_vpost(u32 code, u32 tag, u32 num_args, va_list ap)
 	int n = 0;
 
 	if(!initialized) {
-		printf("IPC: not inited\n");
+		gecko_printf("IPC: not inited\n");
 		return;
 	}
 
 	if(peek_inhead() == ((in_tail + 1)&(in_size-1))) {
-		printf("IPC: in queue full, spinning\n");
+		gecko_printf("IPC: in queue full, spinning\n");
 		while(peek_inhead() == ((in_tail + 1)&(in_size-1))) {
 			udelay(10);
 			if(n++ > 20000) {
-				printf("IPC: ARM might be stuck, still waiting for inhead %d != %d\n",
+				gecko_printf("IPC: ARM might be stuck, still waiting for inhead %d != %d\n",
 					peek_inhead(), ((in_tail + 1)&(in_size-1)));
 				n = 0;
 			}
@@ -167,13 +168,13 @@ void ipc_flush(void)
 {
 	int n = 0;
 	if(!initialized) {
-		printf("IPC: not inited\n");
+		gecko_printf("IPC: not inited\n");
 		return;
 	}
 	while(peek_inhead() != in_tail) {
 		udelay(10);
 		if(n++ > 20000) {
-			printf("IPC: ARM might be stuck, still waiting for inhead %d == intail %d\n",
+			gecko_printf("IPC: ARM might be stuck, still waiting for inhead %d == intail %d\n",
 				peek_inhead(), in_tail);
 			n = 0;
 		}
@@ -197,7 +198,7 @@ ipc_request *ipc_receive(void)
 
 void ipc_process_unhandled(volatile ipc_request *rep)
 {
-	printf("IPC: Unhandled message: %08x %08x [%08x %08x %08x %08x %08x %08x]\n",
+	gecko_printf("IPC: Unhandled message: %08x %08x [%08x %08x %08x %08x %08x %08x]\n",
 		rep->code, rep->tag, rep->args[0], rep->args[1], rep->args[2], rep->args[3], 
 		rep->args[4], rep->args[5]);
 }

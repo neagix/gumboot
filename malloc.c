@@ -441,55 +441,27 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 // Wii / bootmii environment settings
 #define HAVE_MMAP 0
 #define malloc_getpagesize 8
-#define ABORT {printf("malloc fail! file=%s line=%d\n", __FILE__, __LINE__); while (1);}
+#define ABORT {gecko_printf("malloc fail! file=%s line=%d\n", __FILE__, __LINE__); while (1);}
 #define MALLOC_FAILURE_ACTION /**/
 #define DEBUG 1
 
 #include "bootmii_ppc.h"
 #include "string.h"
+#include "gecko.h"
 
 extern unsigned int _sbrk_start, _sbrk_end;
 
 void *sbrk(int incr) {
 	static unsigned int limit = 0;
-//	printf ("sbrk(%d) limit=%x\n", incr, limit);
+//	gecko_printf ("sbrk(%d) limit=%x\n", incr, limit);
 	if (limit == 0) limit = (unsigned int) &_sbrk_start;
 	if (incr < 0) return 0;
 	if ((limit + incr) > (unsigned int) &_sbrk_end) return 0;
 	void *retval = (void*)limit;
 	limit += incr;
-//	printf("Returning %p\n", retval);
+//	gecko_printf("Returning %p\n", retval);
 	return retval;
 }
-
-#ifndef WIN32
-#ifdef _WIN32
-#define WIN32 1
-#endif  /* _WIN32 */
-#endif  /* WIN32 */
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#define HAVE_MMAP 1
-#define HAVE_MORECORE 0
-#define LACKS_UNISTD_H
-#define LACKS_SYS_PARAM_H
-#define LACKS_SYS_MMAN_H
-#define LACKS_STRING_H
-#define LACKS_STRINGS_H
-#define LACKS_SYS_TYPES_H
-#define LACKS_ERRNO_H
-#define MALLOC_FAILURE_ACTION
-#define MMAP_CLEARS 0 /* WINCE and some others apparently don't clear */
-#endif  /* WIN32 */
-
-#if defined(DARWIN) || defined(_DARWIN)
-/* Mac OSX docs advise not to use sbrk; it seems better to use mmap */
-#ifndef HAVE_MORECORE
-#define HAVE_MORECORE 0
-#define HAVE_MMAP 1
-#endif  /* HAVE_MORECORE */
-#endif  /* DARWIN */
 
 #ifndef LACKS_SYS_TYPES_H
 #include <sys/types.h>  /* For size_t */
@@ -1184,7 +1156,7 @@ int mspace_mallopt(int, int);
 #define assert(x) if(!(x)) ABORT
 #else /* ABORT_ON_ASSERT_FAILURE */
 //#include <assert.h>
-#define assert(x) if(!(x)) {printf("Assert failed: \"" #x "\"\n"; while(1);)}
+#define assert(x) if(!(x)) {gecko_printf("Assert failed: \"" #x "\"\n"; while(1);)}
 #endif /* ABORT_ON_ASSERT_FAILURE */
 #else  /* DEBUG */
 #define assert(x)
@@ -2870,9 +2842,9 @@ static void internal_malloc_stats(mstate m) {
       }
     }
 
-    printf("max system bytes = %10lu\n", (unsigned long)(maxfp));
-    printf("system bytes     = %10lu\n", (unsigned long)(fp));
-    printf("in use bytes     = %10lu\n", (unsigned long)(used));
+    gecko_printf("max system bytes = %10lu\n", (unsigned long)(maxfp));
+    gecko_printf("system bytes     = %10lu\n", (unsigned long)(fp));
+    gecko_printf("in use bytes     = %10lu\n", (unsigned long)(used));
 
     POSTACTION(m);
   }

@@ -117,11 +117,6 @@ u64 mftb(void);
 void exception_init(void);
 
 
-// Console.
-
-void gecko_init(void);
-int printf(const char *fmt, ...);
-
 
 // Debug: blink the tray led.
 

@@ -16,6 +16,7 @@ Copyright (C) 2017              neagix
 #include "bootmii_ppc.h"
 #include "string.h"
 #include "ipc.h"
+#include "gecko.h"
 #include "mini_ipc.h"
 #include "nandfs.h"
 #include "fat.h"
@@ -66,20 +67,26 @@ int main(void)
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
 	u16 mini_version_minor = version & 0xFFFF;
-	printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
+	gecko_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
 
 	if (version < MINIMUM_MINI_VERSION) {
-		printf("Sorry, this version of MINI (armboot.bin)\n"
+		gecko_printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
 		powerpc_hang();
 		return 1; /* never reached */
 	}
 
-    print_str_noscroll(112, 112, "ohai, world!\n");
+    print_str_noscroll(12, 62, "ohai, world!\n");
 
+	while (1) {
+		u16 btn = input_wait();
+	
+		gfx_printf("key pressed: %d\n", btn);
+	}
+	//gecko_printf("bye, world!\n");
+	
 	powerpc_hang();
-	printf("bye, world!\n");
 
 	return 0;
 }

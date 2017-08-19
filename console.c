@@ -187,7 +187,7 @@ int gfx_printf(const char *fmt, ...)
 
 	if (i > 0) {
 		print_str(buffer, i);
-		printf("%s\n", buffer);
+		//printf("%s\n", buffer);
 	} else
 		scroll();
 
