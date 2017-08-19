@@ -77,7 +77,8 @@ int main(void)
 		return 1; /* never reached */
 	}
 
-    print_str_noscroll(12, 62, "ohai, world!\n");
+	gfx_printf("\xc9\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xbb\n");
+    gfx_printf("\xba Gumboot menu\n");
     
     int power_pressed = 0, reset_pressed = 0, eject_pressed = 0;
 
@@ -106,7 +107,6 @@ int main(void)
 		}
 		
 	}
-	//gecko_printf("bye, world!\n");
 	
 	powerpc_hang();
 

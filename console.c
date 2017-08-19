@@ -28,13 +28,18 @@ typedef struct {
         u8 has_alpha;
 } gfx_rect;
 
-#define CONSOLE_WIDTH 500
-#define CONSOLE_LINES 10
-#define CONSOLE_Y 100
+#define RESOLUTION_W 640
+#define RESOLUTION_H 480
 
-#define CONSOLE_X  58
+#define CONSOLE_Y 0
+#define CONSOLE_X  0
+
+#define CONSOLE_CHAR_WIDTH 8
 #define CONSOLE_CHAR_HEIGHT 16
 #define CONSOLE_ROW_HEIGHT (CONSOLE_CHAR_HEIGHT + 1) 
+
+#define CONSOLE_WIDTH RESOLUTION_W
+#define CONSOLE_LINES (RESOLUTION_H/CONSOLE_ROW_HEIGHT)
 
 static u32 *xfb = NULL;
 static int y_add = 0;
@@ -92,12 +97,12 @@ void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
 	u32 *fb = xfb;
 	u32 col = make_yuv(r,g,b, r,g,b);
 
-	fb += ((y + y_add) * (640 >> 1));
+	fb += ((y + y_add) * (RESOLUTION_W >> 1));
 	fb += (x >> 1);
 
 	for(y = 0; y < h; y++) {
 		memset32(fb, col, w >> 1);
-		fb += (640 >> 1);
+		fb += (RESOLUTION_W >> 1);
 	}
 }
 
@@ -108,12 +113,12 @@ void gfx_draw_rect(gfx_rect *n) {
 
         d_rect = n;
 
-        fb += ((d_rect->y + y_add) * (640 >> 1));
+        fb += ((d_rect->y + y_add) * (RESOLUTION_W >> 1));
         fb += (d_rect->x >> 1);
 
         for(y = 0; y < d_rect->height; y++) {
                 memcpy32(fb, d_rect->yuv_data + ((d_rect->width >> 1) * y), d_rect->width >> 1);
-                fb += (640 >> 1);
+                fb += (RESOLUTION_W >> 1);
         }
 }
 
@@ -121,14 +126,12 @@ void scroll(void) {
 	unsigned int y;
 	u32 *fb = xfb;
 
-	fb += ((CONSOLE_Y+y_add) * (640 >> 1));
+	fb += ((CONSOLE_Y+y_add+CONSOLE_ROW_HEIGHT) * (RESOLUTION_W >> 1));
 	fb += (CONSOLE_X >> 1);
 
-	fb += (CONSOLE_ROW_HEIGHT * (640 >> 1));
-
 	for (y = 0; y < CONSOLE_LINES*CONSOLE_ROW_HEIGHT; y++) {
-		memcpy32(fb - (CONSOLE_ROW_HEIGHT * 320), fb, CONSOLE_WIDTH >> 1);
-		fb += 320;
+		memcpy32(fb - (CONSOLE_ROW_HEIGHT * RESOLUTION_W/2), fb, CONSOLE_WIDTH >> 1);
+		fb += RESOLUTION_W/2;
 	}
 	
 	fill_rect(CONSOLE_X, CONSOLE_Y+(CONSOLE_LINES-1)*CONSOLE_ROW_HEIGHT,
@@ -163,12 +166,12 @@ void print_str(const char *str, size_t len) {
 	gfx_rect d_char;
 
 	scroll();
-	d_char.width  = 8;
+	d_char.width  = CONSOLE_CHAR_WIDTH;
 	d_char.height = CONSOLE_CHAR_HEIGHT;
 	d_char.y = CONSOLE_Y + ((CONSOLE_LINES - 1) * CONSOLE_ROW_HEIGHT);
 
 	for (i = 0; i < len; i++) {
-		d_char.x = CONSOLE_X + (i * 10);
+		d_char.x = CONSOLE_X + (i * (CONSOLE_CHAR_WIDTH+2));
 		d_char.yuv_data = font_yuv[(int) str[i]];
 		gfx_draw_rect(&d_char);
 	}
@@ -186,7 +189,7 @@ int gfx_printf(const char *fmt, ...)
 	va_end(args);
 
 	if (i > 0) {
-		print_str(buffer, i);
+		print_str(buffer, i-1);
 		//printf("%s\n", buffer);
 	} else
 		scroll();
@@ -202,14 +205,14 @@ void font_to_yuv(void) {
 		font_yuv[i] = (u32*)malloc(8*CONSOLE_CHAR_HEIGHT*2);
 
 		for (y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
-			for (x = 0; x < 8; x+=2) {
-				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (7-x)) & 0x01) == 1) {
+			for (x = 0; x < CONSOLE_CHAR_WIDTH; x+=2) {
+				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (CONSOLE_CHAR_WIDTH-1-x)) & 0x01) == 1) {
 					lr = 255; lg = 255; lb = 255;
 				} else {
 					lr = 0; lg = 0; lb = 0;
 				}
 
-				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (7-(x+1))) & 0x01) == 1) {
+				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (CONSOLE_CHAR_WIDTH-1-(x+1))) & 0x01) == 1) {
 					rr = 255; rg = 255; rb = 255;
 				} else {
 					rr = 0; rg = 0; rb = 0;
@@ -240,10 +243,10 @@ void init_fb(int vmode) {
 		break;
 	}
 
-	xfb = memalign(32, 640 * (480 + (y_add*2)) * 2);
+	xfb = memalign(32, RESOLUTION_W * (RESOLUTION_H + (y_add*2)) * 2);
 
 	fb  = xfb;
-	for (i = 0; i < (480 + (y_add*2)) * 2 * (640 >> 1); i++) {
+	for (i = 0; i < (RESOLUTION_H + (y_add*2)) * 2 * (RESOLUTION_W >> 1); i++) {
 		*fb = fill_col;
 		sync_after_write(fb, 4);
 		fb++;
