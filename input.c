@@ -88,21 +88,14 @@ u16 pad_read(GC_Pad *pad, int chan) {
 	return btns;
 }
 
-// TODO: Hackity hack, prevent ghost presses
-static u8 reset_delay = 5;
-
 
 u16 gpio_read(void) {
 	u16 res = 0;
 	u32 irq_flag = 0;
 
-	if (!((read32(0x0C003000) >> 16) & 1) && reset_delay == 0) {
+	if (!((read32(0x0C003000) >> 16) & 1)) {
 		res |= GPIO_RESET;
-		reset_delay = 5;
 	}
-
-	if (reset_delay > 0)
-		reset_delay--;
 
 	if (read32(0x0d800030) & (1<<10)) {
 		irq_flag = read32(0x0d8000f0);
