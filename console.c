@@ -31,8 +31,8 @@ typedef struct {
 #define RESOLUTION_W 640
 #define RESOLUTION_H 480
 
-#define CONSOLE_Y 0
-#define CONSOLE_X  0
+#define CONSOLE_Y_OFFSET 0
+#define CONSOLE_X_OFFSET  0
 
 #define CONSOLE_CHAR_WIDTH 8
 #define CONSOLE_CHAR_HEIGHT 16
@@ -43,6 +43,8 @@ typedef struct {
 
 static u32 *xfb = NULL;
 static int y_add = 0;
+// current cursor position
+static int console_x = 0, console_y = 0;
 
 u32 *font_yuv[255];
 
@@ -126,15 +128,15 @@ void scroll(void) {
 	unsigned int y;
 	u32 *fb = xfb;
 
-	fb += ((CONSOLE_Y+y_add+CONSOLE_ROW_HEIGHT) * (RESOLUTION_W >> 1));
-	fb += (CONSOLE_X >> 1);
+	fb += ((CONSOLE_Y_OFFSET+y_add+CONSOLE_ROW_HEIGHT) * (RESOLUTION_W >> 1));
+	fb += (CONSOLE_X_OFFSET >> 1);
 
 	for (y = 0; y < CONSOLE_LINES*CONSOLE_ROW_HEIGHT; y++) {
 		memcpy32(fb - (CONSOLE_ROW_HEIGHT * RESOLUTION_W/2), fb, CONSOLE_WIDTH >> 1);
 		fb += RESOLUTION_W/2;
 	}
 	
-	fill_rect(CONSOLE_X, CONSOLE_Y+(CONSOLE_LINES-1)*CONSOLE_ROW_HEIGHT,
+	fill_rect(CONSOLE_X_OFFSET, CONSOLE_Y_OFFSET+(CONSOLE_LINES-1)*CONSOLE_ROW_HEIGHT,
 		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, 0, 0, 0);
 }
 
@@ -157,7 +159,7 @@ void print_str_noscroll(int x, int y, char *str) {
 
 		d_char.yuv_data = font_yuv[ (int)str[i] ];
 		gfx_draw_rect(&d_char);
-		d_char.x += 10;
+		d_char.x += CONSOLE_CHAR_WIDTH+2;
 	}
 }
 
@@ -168,10 +170,10 @@ void print_str(const char *str, size_t len) {
 	scroll();
 	d_char.width  = CONSOLE_CHAR_WIDTH;
 	d_char.height = CONSOLE_CHAR_HEIGHT;
-	d_char.y = CONSOLE_Y + ((CONSOLE_LINES - 1) * CONSOLE_ROW_HEIGHT);
+	d_char.y = CONSOLE_Y_OFFSET + ((CONSOLE_LINES - 1) * CONSOLE_ROW_HEIGHT);
 
 	for (i = 0; i < len; i++) {
-		d_char.x = CONSOLE_X + (i * (CONSOLE_CHAR_WIDTH+2));
+		d_char.x = CONSOLE_X_OFFSET + (i * (CONSOLE_CHAR_WIDTH+2));
 		d_char.yuv_data = font_yuv[(int) str[i]];
 		gfx_draw_rect(&d_char);
 	}
