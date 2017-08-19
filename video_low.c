@@ -163,16 +163,6 @@ void VIDEO_Shutdown(void)
 	write16(R_VIDEO_STATUS1, 0);
 }
 
-#define		HW_REG_BASE		0xd800000
-
-// PPC side of GPIO1 (Starlet can access this too)
-// Output state
-#define		HW_GPIO1BOUT		(HW_REG_BASE + 0x0c0)
-// Direction (1=output)
-#define		HW_GPIO1BDIR		(HW_REG_BASE + 0x0c4)
-// Input state
-#define		HW_GPIO1BIN			(HW_REG_BASE + 0x0c8)
-
 #define SLAVE_AVE 0xe0
 
 static inline void aveSetDirection(u32 dir)

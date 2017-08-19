@@ -40,11 +40,11 @@ static ipc_infohdr *infohdr;
 
 static u32 cur_tag;
 
-#define		HW_REG_BASE			0xd000000
+#define		HW_PPC_REG_BASE			0xd000000
 
-#define		HW_IPC_PPCMSG		(HW_REG_BASE + 0x000) //PPC to ARM
-#define		HW_IPC_PPCCTRL		(HW_REG_BASE + 0x004)
-#define		HW_IPC_ARMMSG		(HW_REG_BASE + 0x008) //ARM to PPC
+#define		HW_IPC_PPCMSG		(HW_PPC_REG_BASE + 0x000) //PPC to ARM
+#define		HW_IPC_PPCCTRL		(HW_PPC_REG_BASE + 0x004)
+#define		HW_IPC_ARMMSG		(HW_PPC_REG_BASE + 0x008) //ARM to PPC
 
 #define		IPC_CTRL_SEND		0x01
 // Set by peer to acknowledge a message. Write one to clear.

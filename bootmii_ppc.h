@@ -29,6 +29,19 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 	type *name = (type*)(((u32)(_al__##name)) + ((alignment) - (( \
 	(u32)(_al__##name))&((alignment)-1))))
 
+// Hollywood stuff
+
+#define		HW_REG_BASE		0xd800000
+#define		HW_RESETS		(HW_REG_BASE + 0x194)
+
+// PPC side of GPIO1 (Starlet can access this too)
+// Output state
+#define		HW_GPIO1BOUT		(HW_REG_BASE + 0x0c0)
+// Direction (1=output)
+#define		HW_GPIO1BDIR		(HW_REG_BASE + 0x0c4)
+// Input state
+#define		HW_GPIO1BIN			(HW_REG_BASE + 0x0c8)
+
 // Basic I/O.
 
 static inline u32 read32(u32 addr)

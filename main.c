@@ -35,6 +35,14 @@ static void dsp_reset(void)
 	write16(0x0c005036, 0);
 }
 
+void powerpc_hang(void)
+{
+	ipc_sys_clear32(HW_RESETS, 0x30);
+	udelay(100);
+	ipc_sys_set32(HW_RESETS, 0x20);
+	udelay(100);
+}
+
 int main(void)
 {
 	int vmode = -1;
@@ -64,12 +72,13 @@ int main(void)
 		printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
-		for (;;) 
-			; // better ideas welcome!
+		powerpc_hang();
+		return 1; /* never reached */
 	}
 
     print_str_noscroll(112, 112, "ohai, world!\n");
 
+	powerpc_hang();
 	printf("bye, world!\n");
 
 	return 0;
