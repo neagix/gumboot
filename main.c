@@ -78,11 +78,33 @@ int main(void)
 	}
 
     print_str_noscroll(12, 62, "ohai, world!\n");
+    
+    int power_pressed = 0, reset_pressed = 0, eject_pressed = 0;
 
 	while (1) {
 		u16 btn = input_wait();
+		
+		if (btn & GPIO_POWER) {
+			power_pressed = !power_pressed;
+			if (!power_pressed) {
+				gfx_printf("power button event: %d\n", btn);
+			}
+		}
+
+		if (btn & GPIO_RESET) {
+			reset_pressed = !reset_pressed;
+			if (!reset_pressed) {
+				gfx_printf("reset button event: %d\n", btn);
+			}
+		}
 	
-		gfx_printf("key pressed: %d\n", btn);
+		if (btn & GPIO_EJECT) {
+			eject_pressed = !eject_pressed;
+			if (!eject_pressed) {
+				gfx_printf("eject button event: %d\n", btn);
+			}
+		}
+		
 	}
 	//gecko_printf("bye, world!\n");
 	

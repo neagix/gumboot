@@ -12,6 +12,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #ifndef __CONSOLE_H__
 #define __CONSOLE_H__
 
+int gfx_printf(const char *fmt, ...);
 void init_fb(int vmode);
 void print_str(const char *str, size_t len);
 void print_str_noscroll(int x, int y, char *str);
