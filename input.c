@@ -126,7 +126,7 @@ u16 input_wait(void) {
 	u16 res;
 
 	do {
-		udelay(20000);
+		udelay(10000);
 		res = input_read();
 	} while (!(res & PAD_ANY));
 	

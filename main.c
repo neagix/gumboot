@@ -87,21 +87,21 @@ int main(void)
 		if (btn & GPIO_POWER) {
 			power_pressed = !power_pressed;
 			if (!power_pressed) {
-				gfx_printf("power button event: %d\n", btn);
+				gfx_printf("power event: %d\n", btn);
 			}
 		}
 
 		if (btn & GPIO_RESET) {
 			reset_pressed = !reset_pressed;
 			if (!reset_pressed) {
-				gfx_printf("reset button event: %d\n", btn);
+				gfx_printf("reset event: %d\n", btn);
 			}
 		}
 	
 		if (btn & GPIO_EJECT) {
 			eject_pressed = !eject_pressed;
 			if (!eject_pressed) {
-				gfx_printf("eject button event: %d\n", btn);
+				gfx_printf("eject event: %d\n", btn);
 			}
 		}
 		
