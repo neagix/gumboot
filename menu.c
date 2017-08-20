@@ -62,6 +62,10 @@ void menu_draw(int seconds) {
 }
 
 void menu_draw_entries(void) {
+	int i;
+	for(i=0;i<config_entries_count;i++) {
+		gfx_print_at(2, 4+i, config_entries[i].title);
+	}
 }
 
 void menu_update_timeout(int seconds) {

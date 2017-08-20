@@ -8,6 +8,7 @@
 
 splashimage (sd0)/gumboot/splash.ppm
 
+#color NORMAL HIGHLIGHT HELPTEXT HEADING
 color red/blue green/black white/blue white/blue
 #color blue/green green/black white/magenta white/magenta
 

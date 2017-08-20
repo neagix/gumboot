@@ -3,6 +3,7 @@
 #define _MENU_H
 
 #include "console.h"
+#include "config.h"
 
 #define HELP_LINES 5
 
