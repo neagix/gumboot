@@ -44,7 +44,7 @@
 /  f_truncate and useless f_getfree. */
 
 
-#define _FS_MINIMIZE	2
+#define _FS_MINIMIZE	1
 /* The _FS_MINIMIZE option defines minimization level to remove some functions.
 /
 /   0: Full function.

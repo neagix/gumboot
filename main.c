@@ -81,6 +81,35 @@ int main(void)
     gfx_printf("\xba Gumboot menu v0.1 \xba\n");
     gfx_printf("\xc8\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xbc\n");
     
+	DIR dirs;
+	FRESULT res;
+	FILINFO Fno;				/* File properties (fs/fl command) */
+	const char path[512] = "bootmii";
+	FATFS fatfs;
+	
+	res = f_mount(0, &fatfs);
+	if (res != FR_OK) {
+		gfx_printf("failed to mount volume: %d\n", res);
+	}
+
+	res = f_opendir(&dirs, path);	/* Open the directory */
+	if (res != FR_OK) {
+		gfx_printf("failed to open directory: %d\n", res);
+	} else {
+		while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {	/* Get an entry from the dir */
+			if (Fno.fattrib & AM_DIR) {	/* It is a directory */
+				gfx_printf("directory: %s\n", Fno.fname);
+/*				i = strlen(path);
+				path[i] = '/'; strcpy(path+i+1, Fno.fname);
+				path[i] = '\0'; */
+			} else {						/* It is a file  */
+				gfx_printf("file: %s\n", Fno.fname);
+			}
+		}
+	}
+	
+	gfx_printf("last res: %d\n", res);
+    
 	while (1) {
 		// print debug information
 		//gfx_printf_at(300, 16, "abs pos: %d", console_pos);

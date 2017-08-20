@@ -847,7 +847,7 @@ FRESULT dir_find (
 /*-----------------------------------------------------------------------*/
 /* Read an object from the directory                                     */
 /*-----------------------------------------------------------------------*/
-#if (_FS_MINIMIZE <= 2) && !_FS_READONLY
+#if (_FS_MINIMIZE <= 2)
 static
 FRESULT dir_read (
 	DIR *dj			/* Pointer to the directory object to store read object name */
@@ -2028,7 +2028,7 @@ FRESULT f_lseek (
 
 #if _FS_MINIMIZE <= 1
 /*-----------------------------------------------------------------------*/
-/* Create a Directroy Object                                             */
+/* Create a Directory Object                                             */
 /*-----------------------------------------------------------------------*/
 
 FRESULT f_opendir (
