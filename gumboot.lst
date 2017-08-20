@@ -2,12 +2,17 @@
 ## This is a sample menu.lst file for gumboot.
 ##
 
+## do not display the menu
+## Gumboot-specific behaviour: if used with timeout=0, this means directly boot
+#hiddenmenu
+
 splashimage (sd0)/gumboot/splash.ppm
 
 color red/blue green/black white/blue white/blue
 #color blue/green green/black white/magenta white/magenta
 
-timeout 15
+## timeout 0 means show the menu and do not enable any countdown
+timeout 30
 
 # default is poweroff
 default 3
@@ -20,7 +25,7 @@ title wii-linux-ngx\nOpen default boot menu
 	## 'boot' is always implicit, but must be the last line of a menu entry
 	boot
 
-title Find zImage\nBoot zImage where it can be found
+title Find and boot zImage\nBoot zImage on any partition where it can be found
 	find --set-root /zImage
 	kernel /zImage
 	boot

@@ -3,9 +3,6 @@
 #include "string.h"
 
 int menu_selection = 0;
-int menu_entries_count;
-char *menu_entries[MAX_MENU_ENTRIES];
-char *menu_entries_help[MAX_MENU_ENTRIES];
 
 const char	top_right_corner = 191,
 			bottom_left_corner = 192,
@@ -65,9 +62,6 @@ void menu_draw(int seconds) {
 }
 
 void menu_draw_entries(void) {
-	// a poorly configured menu
-	if (menu_entries_count == 0)
-		return;
 }
 
 void menu_update_timeout(int seconds) {

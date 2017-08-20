@@ -11,6 +11,7 @@ https://negix.net/trac/pdclib
 */
 
 #include "string.h"
+#include "malloc.h"
 
 size_t strlen(const char *s)
 {
@@ -30,6 +31,13 @@ size_t strnlen(const char *s, size_t count)
 		;
 
 	return len;
+}
+
+char *strdup(char *s) {
+	size_t l = strlen(s)+1;
+	char *r = malloc(l);
+	memcpy(r, s, l);
+	return r;
 }
 
 void *memset(void *b, int c, size_t len)
@@ -106,12 +114,28 @@ size_t strlcat(char *dest, const char *src, size_t maxlen)
 	return used + strlcpy(dest + used, src, maxlen - used);
 }
 
-char * strchr(const char *s, int c)
+char * strchr(const char *s, char c)
 {
 	size_t i;
 	
 	for (i = 0; s[i]; i++)
-		if (s[i] == (char)c) return (char *)s + i;
+		if (s[i] == c) return (char *)s + i;
+
+	return NULL;
+}
+
+char * strchr2(const char *s, char c1, char c2)
+{
+	size_t i;
+	
+	for (i = 0; s[i]; i++) {
+		if (s[i] == c1) {
+			if (!s[i+1])
+				break;
+			if (s[i+1] == c2)
+				return (char *)s + i;
+		}
+	}
 
 	return NULL;
 }

@@ -445,7 +445,6 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #define MALLOC_FAILURE_ACTION /**/
 #define DEBUG 1
 
-//#include "bootmii_ppc.h"
 #include "string.h"
 #include "gecko.h"
 
