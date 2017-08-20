@@ -48,9 +48,9 @@
 /* The _FS_MINIMIZE option defines minimization level to remove some functions.
 /
 /   0: Full function.
-/   1: f_stat, f_getfree, f_unlink, f_mkdir, f_chmod, f_truncate and f_rename
+/   1: f_getfree, f_unlink, f_mkdir, f_chmod, f_truncate and f_rename
 /      are removed.
-/   2: f_opendir and f_readdir are removed in addition to level 1.
+/   2: f_opendir, f_stat and f_readdir are removed in addition to level 1.
 /   3: f_lseek is removed in addition to level 2. */
 
 

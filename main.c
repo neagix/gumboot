@@ -27,6 +27,7 @@ Copyright (C) 2017              neagix
 #include "input.h"
 #include "console.h"
 #include "menu.h"
+#include "config.h"
 
 #define MINIMUM_MINI_VERSION 0x00010001
 
@@ -74,18 +75,17 @@ int main(void)
 												"Long-press (2s) power or press eject to boot.\n\n"
 												"The highlighted entry will be booted automatically in 15 seconds.");
     
+    // update internal console position
+    gfx_printf("\n\n\n\n");
+    
+	config_load();
+	
+/*
 	DIR dirs;
-	FRESULT res;
-	FILINFO Fno;				/* File properties (fs/fl command) */
+	FILINFO Fno;
 	const char path[512] = "bootmii";
-	FATFS fatfs;
-	
-	res = f_mount(0, &fatfs);
-	if (res != FR_OK) {
-		gfx_printf("failed to mount volume: %d\n", res);
-	}
-	
-/*	res = f_opendir(&dirs, path);
+
+	res = f_opendir(&dirs, path);
 	if (res != FR_OK) {
 		gfx_printf("failed to open directory: %d\n", res);
 	} else {
@@ -98,19 +98,14 @@ int main(void)
 		}
 	}
 	gfx_printf("last res: %d\n", res); */
-	gfx_printf("\n\n\n\n");
 	
 	while (1) {
-		u16 btn = input_read();
+		u16 btn = input_wait();
 		
 		if (btn) {
 			gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
 			gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 1, "reset: %d long press %d", (btn & GPIO_RESET) != 0, (btn & GPIO_RESET_LP) != 0);
 			gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 2, "eject: %d long press %d", (btn & GPIO_EJECT) != 0, (btn & GPIO_EJECT_LP) != 0);
-		} else {
-			gfx_printf("sleeping 1 second...");
-			usleep(1000000);
-			gfx_printf("done\n");
 		}
 	}
 	

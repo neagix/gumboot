@@ -2109,7 +2109,7 @@ FRESULT f_readdir (
 
 
 
-#if _FS_MINIMIZE == 0
+#if _FS_MINIMIZE >= 1
 /*-----------------------------------------------------------------------*/
 /* Get File Status                                                       */
 /*-----------------------------------------------------------------------*/
@@ -2128,7 +2128,7 @@ FRESULT f_stat (
 	if (res == FR_OK) {
 		INITBUF(dj, sfn, lfn);
 		res = follow_path(&dj, path);	/* Follow the file path */
-		if (res == FR_OK) {				/* Follwo completed */
+		if (res == FR_OK) {				/* Follow completed */
 			if (dj.dir)	/* Found an object */
 				get_fileinfo(&dj, fno);
 			else		/* It is root dir */
@@ -2138,8 +2138,9 @@ FRESULT f_stat (
 
 	LEAVE_FF(dj.fs, res);
 }
+#endif
 
-
+#if _FS_MINIMIZE == 0
 
 #if !_FS_READONLY
 /*-----------------------------------------------------------------------*/
