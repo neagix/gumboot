@@ -26,21 +26,6 @@ typedef struct {
         u8 has_alpha;
 } gfx_rect;
 
-#define RESOLUTION_W 640
-#define RESOLUTION_H 480
-
-#define CONSOLE_X_OFFSET  0
-
-#define CONSOLE_CHAR_WIDTH 8
-#define CONSOLE_CHAR_HEIGHT 16
-#define CONSOLE_ROW_HEIGHT (CONSOLE_CHAR_HEIGHT + 1) 
-
-#define CONSOLE_Y_OFFSET (CONSOLE_CHAR_HEIGHT-2)
-
-#define CONSOLE_WIDTH RESOLUTION_W
-#define CONSOLE_LINES ((RESOLUTION_H-CONSOLE_Y_OFFSET)/CONSOLE_ROW_HEIGHT)
-#define CONSOLE_COLUMNS (CONSOLE_WIDTH/(CONSOLE_CHAR_WIDTH+2))
-
 static u32 *xfb = NULL;
 static int y_add = 0;
 // current absolute cursor position
@@ -140,27 +125,40 @@ void scroll(void) {
 		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, 0, 0, 0);
 }
 
-void gfx_print_at(int x, int y, char *str) {
+void gfx_print_at(int x, int y, const char *str) {
 	unsigned int i;
 	gfx_rect d_char;
 
-	d_char.x = x;
+	int orig_x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
+	d_char.x = orig_x;
 
 	for (i = 0; i < strlen(str); i++) {
-		d_char.width  = 8;
+		d_char.width  = CONSOLE_CHAR_WIDTH;
 		d_char.height = CONSOLE_CHAR_HEIGHT;
-		d_char.y = y;
+		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 
 		if (str[i] == '\n') {
 			y += CONSOLE_ROW_HEIGHT;
-			d_char.x = x;
+			d_char.x = orig_x;
 			continue;
 		}	
 
 		d_char.yuv_data = font_yuv[ (int)str[i] ];
 		gfx_draw_rect(&d_char);
-		d_char.x += CONSOLE_CHAR_WIDTH+2;
+		d_char.x += CONSOLE_CHAR_WIDTH;
 	}
+}
+
+void gfx_printch_at(int x, int y, char c) {
+	gfx_rect d_char;
+
+	d_char.width  = CONSOLE_CHAR_WIDTH;
+	d_char.height = CONSOLE_CHAR_HEIGHT;
+	d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
+	d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
+
+	d_char.yuv_data = font_yuv[ (int)c ];
+	gfx_draw_rect(&d_char);
 }
 
 void gfx_print(const char *str, size_t len) {
@@ -198,9 +196,9 @@ void gfx_print(const char *str, size_t len) {
 			continue;
 		}
 
+		d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
 		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
-
-		d_char.x = CONSOLE_X_OFFSET + x * (CONSOLE_CHAR_WIDTH+2);
+		
 		d_char.yuv_data = font_yuv[(int) str[i]];
 		gfx_draw_rect(&d_char);
 	}

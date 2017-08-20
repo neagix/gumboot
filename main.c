@@ -26,6 +26,7 @@ Copyright (C) 2017              neagix
 #include "video_low.h"
 #include "input.h"
 #include "console.h"
+#include "menu.h"
 
 #define MINIMUM_MINI_VERSION 0x00010001
 
@@ -76,10 +77,16 @@ int main(void)
 		powerpc_hang();
 		return 1; /* never reached */
 	}
+	const char *menu_title = "Gumboot menu v0.1";
 
-	gfx_printf("\xc9\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xbb\n");
-    gfx_printf("\xba Gumboot menu v0.1 \xba\n");
-    gfx_printf("\xc8\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xbc\n");
+    gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
+    
+    draw_box_at(0, 3, CONSOLE_COLUMNS, CONSOLE_LINES-4-HELP_LINES);
+    
+    // draw help text
+    gfx_print_at(2, CONSOLE_LINES-HELP_LINES-2, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
+												"Long-press power or press eject to boot.\n\n"
+												"The highlighted entry will be booted automatically in 15 seconds.");
     
 	DIR dirs;
 	FRESULT res;
@@ -91,42 +98,35 @@ int main(void)
 	if (res != FR_OK) {
 		gfx_printf("failed to mount volume: %d\n", res);
 	}
-
-	res = f_opendir(&dirs, path);	/* Open the directory */
+	
+/*	res = f_opendir(&dirs, path);
 	if (res != FR_OK) {
 		gfx_printf("failed to open directory: %d\n", res);
 	} else {
-		while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {	/* Get an entry from the dir */
-			if (Fno.fattrib & AM_DIR) {	/* It is a directory */
-				gfx_printf("directory: %s\n", Fno.fname);
-/*				i = strlen(path);
-				path[i] = '/'; strcpy(path+i+1, Fno.fname);
-				path[i] = '\0'; */
-			} else {						/* It is a file  */
-				gfx_printf("file: %s\n", Fno.fname);
+		while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {
+			if (Fno.fattrib & AM_DIR) {
+				gfx_printf(" directory: %s\n", Fno.fname);
+			} else {
+				gfx_printf(" file: %s\n", Fno.fname);
 			}
 		}
 	}
-	
-	gfx_printf("last res: %d\n", res);
+	gfx_printf("last res: %d\n", res); */
+	gfx_printf("\n\n\n\n");
     
 	while (1) {
-		// print debug information
-		//gfx_printf_at(300, 16, "abs pos: %d", console_pos);
-		
-		
 		u16 btn = input_wait();
 		
 		if (btn & GPIO_POWER) {
-			gfx_printf("power button pressed: %x\n", btn);
+			gfx_printf(" power button pressed: %x\n", btn);
 		}
 
 		if (btn & GPIO_RESET) {
-			gfx_printf("reset button pressed: %x\n", btn);
+			gfx_printf(" reset button pressed: %x\n", btn);
 		}
 	
 		if (btn & GPIO_EJECT) {
-			gfx_printf("eject button pressed: %x\n", btn);
+			gfx_printf(" eject button pressed: %x\n", btn);
 		}
 		
 	}
