@@ -154,9 +154,9 @@ void gfx_print_at(int x, int y, const char *str) {
 	}
 }
 
-void gfx_clear(int x, int y, int w, int h) {
+void gfx_clear(int x, int y, int w, int h, rgb c) {
 	fill_rect(CONSOLE_X_OFFSET + x*CONSOLE_CHAR_WIDTH, CONSOLE_Y_OFFSET+ y * CONSOLE_ROW_HEIGHT,
-		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, 0, 0, 0);
+		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, c.r, c.g, c.b);
 }
 
 void gfx_printch_at(int x, int y, char c) {

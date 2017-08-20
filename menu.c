@@ -42,36 +42,54 @@ void draw_box_at(int x, int y, int w, int h) {
 
 const char	*timeout_prompt = "The highlighted entry will be booted automatically in ",
 			*timeout_prompt_term = " seconds.";
+const char *menu_title = "Gumboot menu v0.1";			
 
 #define BOX_H (CONSOLE_LINES-4-HELP_LINES)
 
 void menu_draw(int seconds) {
-	const char *menu_title = "Gumboot menu v0.1";
-
-    gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
-    
-    draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
-    
     // draw help text
+    selected_font_yuv = font_yuv_helptext;
     gfx_print_at(2, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
 												"Long-press (2s) power or press eject to boot.");
 
 	// draw timeout text
 	if (seconds != 0)
-		gfx_printf_at(2, BOX_H+3+3, "%s%*d", timeout_prompt, 2, seconds, timeout_prompt_term);
+		gfx_printf_at(2, BOX_H+3+3, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
+
+	selected_font_yuv = font_yuv_normal;
+    gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
+    
+    draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
 }
 
 void menu_draw_entries(void) {
 	int i;
+	u32 **prev = NULL;
 	for(i=0;i<config_entries_count;i++) {
-		gfx_print_at(2, 4+i, config_entries[i].title);
+		if (i == menu_selection && (selected_font_yuv != font_yuv_highlight)) {
+			prev = selected_font_yuv;
+			selected_font_yuv = font_yuv_highlight;
+		}
+		gfx_print_at(1, 4+i, config_entries[i].title);
+		if (prev) {
+			selected_font_yuv = prev;
+			prev = NULL;
+		}
 	}
 }
 
 void menu_update_timeout(int seconds) {
+	u32 **prev = NULL;
+	if (selected_font_yuv != font_yuv_helptext) {
+		prev = selected_font_yuv;
+		selected_font_yuv = font_yuv_helptext;
+	}
 	gfx_printf_at(2 + strlen(timeout_prompt), BOX_H+3+3, "%*d", 2, seconds);
+	if (prev) {
+		selected_font_yuv = prev;
+	}
 }
 
 void menu_clear_timeout(void) {
-	gfx_clear(2, BOX_H+3+3, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1);
+	gfx_clear(2, BOX_H+3+3, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
 }

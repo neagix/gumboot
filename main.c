@@ -92,6 +92,8 @@ int main(void)
 	menu_draw(config_timeout);
     // update internal console position
     //gfx_printf("\n\n\n\n");
+    
+    menu_selection = config_default;
 	
 	menu_draw_entries();
 	

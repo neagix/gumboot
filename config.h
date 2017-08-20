@@ -21,7 +21,7 @@ typedef struct {
 
 void config_load(void);
 
-extern int config_timeout, config_entries_count;
+extern int config_timeout, config_default, config_entries_count;
 extern stanza config_entries[MAX_CONFIG_ENTRIES];
 
 #define rgbcmp(a,b) memcmp(&a, &b, sizeof(a))
