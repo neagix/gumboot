@@ -13,8 +13,6 @@ timeout 15
 default 3
 
 title wii-linux-ngx\nOpen default boot menu
-	## currently not supported
-	#find --set-root /zImage
 	root (sd0)/bootmii
 	kernel /zImage
 	## will save as default if user selects it
@@ -33,12 +31,3 @@ title Reboot
 title Poweroff
 	# 'halt' can also be used
 	poweroff
-
-title Write to memory test
-	#####################################################################
-	# write string "cmdcons" to memory 0000:7C03 in 2 steps:
-	#####################################################################
-	# step 1. Write 4 chars "cmdc" at 0000:7C03
-	write 0x7C03 0x63646D63
-	# step 2. Write 3 chars "ons" and an ending null at 0000:7C07
-	write 0x7C07 0x00736E6F
