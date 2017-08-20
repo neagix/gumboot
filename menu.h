@@ -12,5 +12,6 @@
 void draw_box_at(int x, int y, int w, int h);
 void menu_draw(int seconds);
 void menu_update_timeout(int seconds);
+void menu_clear_timeout(void);
 
 #endif // _MENU_H

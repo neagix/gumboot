@@ -38,7 +38,8 @@ void draw_box_at(int x, int y, int w, int h) {
 	gfx_printch_at(x, y, bottom_right_corner);
 }
 
-const char *timeout_prompt = "The highlighted entry will be booted automatically in ";
+const char	*timeout_prompt = "The highlighted entry will be booted automatically in ",
+			*timeout_prompt_term = " seconds.";
 
 #define BOX_H (CONSOLE_LINES-4-HELP_LINES)
 
@@ -54,9 +55,13 @@ void menu_draw(int seconds) {
 												"Long-press (2s) power or press eject to boot.");
 
 	if (seconds != 0)
-		gfx_printf_at(2, BOX_H+3+3, "%s%*d seconds.", timeout_prompt, 2, seconds);
+		gfx_printf_at(2, BOX_H+3+3, "%s%*d", timeout_prompt, 2, seconds, timeout_prompt_term);
 }
 
 void menu_update_timeout(int seconds) {
 	gfx_printf_at(2 + strlen(timeout_prompt), BOX_H+3+3, "%*d", 2, seconds);
+}
+
+void menu_clear_timeout(void) {
+	gfx_clear(2, BOX_H+3+3, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1);
 }

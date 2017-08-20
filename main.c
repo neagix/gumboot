@@ -44,11 +44,21 @@ int main(void)
 	ipc_slowping();
 
 	gecko_init();
+	// is this a gamecube?
+	if (read32(0x0d800190) & 2) {
+		gecko_printf("GameCube compatibility mode detected...\n");
+
+		powerpc_hang();
+		return 1; /* never reached */
+	}
+
     input_init();
 	init_fb(vmode);
 
 	VIDEO_Init(vmode);
 	VIDEO_SetFrameBuffer(get_xfb());
+	
+	// Wii mode
 	VISetupEncoder();
 
 	u32 version = ipc_getvers();
@@ -113,6 +123,13 @@ int main(void)
 			
 			usleep(INPUT_WAIT_CYCLE_DELAY);
 			btn = input_read();
+			
+			// disable timeout sequence
+			if ((btn != 0) && (last_time_elapsed > 1)) {
+				config_timeout = 0;
+				menu_clear_timeout();
+			}
+			
 		} while (!btn);
 		
 		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);

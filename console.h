@@ -20,6 +20,7 @@ void init_fb(int vmode);
 void gfx_print(const char *str, size_t len);
 void gfx_printch_at(int x, int y, char c);
 void gfx_print_at(int x, int y, const char *str);
+void gfx_clear(int x, int y, int w, int h);
 u32 *get_xfb(void);
 
 extern unsigned char console_font_8x16[];
