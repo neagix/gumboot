@@ -13,7 +13,7 @@ Copyright (C) 2009		bLAStY <blasty@bootmii.org>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
+#include "powerpc.h"
 #include "input.h"
 #include "string.h"
 

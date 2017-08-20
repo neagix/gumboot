@@ -13,7 +13,7 @@ Copyright (C) 2017              neagix
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
+#include "powerpc.h"
 #include "string.h"
 #include "ipc.h"
 #include "gecko.h"
@@ -29,21 +29,6 @@ Copyright (C) 2017              neagix
 #include "menu.h"
 
 #define MINIMUM_MINI_VERSION 0x00010001
-
-static void dsp_reset(void)
-{
-	write16(0x0c00500a, read16(0x0c00500a) & ~0x01f8);
-	write16(0x0c00500a, read16(0x0c00500a) | 0x0010);
-	write16(0x0c005036, 0);
-}
-
-void powerpc_hang(void)
-{
-	ipc_sys_clear32(HW_RESETS, 0x30);
-	udelay(100);
-	ipc_sys_set32(HW_RESETS, 0x20);
-	udelay(100);
-}
 
 int main(void)
 {

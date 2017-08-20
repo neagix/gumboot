@@ -14,7 +14,7 @@ Some routines and initialization constants originally came from the
 of Crazy Nation and the GC Linux project.
 */
 
-#include "bootmii_ppc.h"
+#include "powerpc.h"
 #include "video_low.h"
 #include "string.h"
 

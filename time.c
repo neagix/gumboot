@@ -8,7 +8,7 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
+#include "hollywood.h"
 
 // Timebase frequency is bus frequency / 4.  Ignore roundoff, this
 // doesn't have to be very accurate.
@@ -36,3 +36,6 @@ void udelay(u32 us)
 	__delay(TICKS_PER_USEC * (u64)us);
 }
 
+u32 gettime() {
+	return read32(HW_TIMER);
+}

@@ -8,7 +8,7 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
+#include "powerpc.h"
 #include "gecko.h"
 #include "string.h"
 
@@ -60,4 +60,3 @@ void exception_init(void)
 	memcpy((void *)0x80002200, &exception_2200_start, len_2200);
 	sync_before_exec((void *)0x80002200, len_2200);
 }
-

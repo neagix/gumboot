@@ -15,6 +15,8 @@ Copyright (C) 2008, 2009	Sven Peter <svenpeter@gmail.com>
 #ifndef __IPC_H__
 #define __IPC_H__
 
+#include "types.h"
+
 /* TODO: It would be nice to somehow link this header file with mini/ipc.h.
    Until then, if you do make any changes here, you MUST make them here
    (or vice-versa).  See warnings in mini/ipc.h. --bushing */

@@ -11,6 +11,13 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 #ifndef __PPC_H__
 #define __PPC_H__
 
+#include "time.h"
+#include "hollywood.h"
+
+void dsp_reset(void);
+
+void powerpc_hang(void);
+
 #include "types.h"
 #include "printf.h"
 
@@ -28,54 +35,6 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 	((sizeof(type)*(cnt))%(alignment))) : 0))]; \
 	type *name = (type*)(((u32)(_al__##name)) + ((alignment) - (( \
 	(u32)(_al__##name))&((alignment)-1))))
-
-// Hollywood stuff
-
-#define		HW_REG_BASE		0xd800000
-#define		HW_RESETS		(HW_REG_BASE + 0x194)
-
-// PPC side of GPIO1 (Starlet can access this too)
-// Output state
-#define		HW_GPIO1BOUT		(HW_REG_BASE + 0x0c0)
-// Direction (1=output)
-#define		HW_GPIO1BDIR		(HW_REG_BASE + 0x0c4)
-// Input state
-#define		HW_GPIO1BIN			(HW_REG_BASE + 0x0c8)
-
-// Basic I/O.
-
-static inline u32 read32(u32 addr)
-{
-	u32 x;
-
-	asm volatile("lwz %0,0(%1) ; sync" : "=r"(x) : "b"(0xc0000000 | addr));
-
-	return x;
-}
-
-static inline void write32(u32 addr, u32 x)
-{
-	asm("stw %0,0(%1) ; eieio" : : "r"(x), "b"(0xc0000000 | addr));
-}
-
-static inline void mask32(u32 addr, u32 clear, u32 set)
-{
-	write32(addr, (read32(addr)&(~clear)) | set);
-}
-
-static inline u16 read16(u32 addr)
-{
-	u16 x;
-
-	asm volatile("lhz %0,0(%1) ; sync" : "=r"(x) : "b"(0xc0000000 | addr));
-
-	return x;
-}
-
-static inline void write16(u32 addr, u16 x)
-{
-	asm("sth %0,0(%1) ; eieio" : : "r"(x), "b"(0xc0000000 | addr));
-}
 
 
 // Address mapping.
@@ -98,12 +57,6 @@ void sync_after_write(const void *p, u32 len);
 void sync_before_exec(const void *p, u32 len);
 
 
-// Time.
-
-void udelay(u32 us);
-u64 mftb(void);
-
-
 // Special purpose registers.
 
 #define mtspr(n, x) do { asm("mtspr %1,%0" : : "r"(x), "i"(n)); } while (0)
@@ -117,7 +70,6 @@ u64 mftb(void);
 void exception_init(void);
 
 
-
 // Debug: blink the tray led.
 
 static inline void blink(void)
@@ -125,5 +77,5 @@ static inline void blink(void)
 	write32(0x0d8000c0, read32(0x0d8000c0) ^ 0x20);
 }
 
-#endif
 
+#endif
