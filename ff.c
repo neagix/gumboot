@@ -3,7 +3,7 @@
 /-----------------------------------------------------------------------------/
 / FatFs module is an open source software to implement FAT file system to
 / small embedded systems. This is a free software and is opened for education,
-/ research and commecial developments under license policy of following trems.
+/ research and commercial developments under license policy of following terms.
 /
 /  Copyright (C) 2009, ChaN, all right reserved.
 /
@@ -11,8 +11,7 @@
 / * No restriction on use. You can use, modify and redistribute it for
 /   personal, non-profit or commercial use UNDER YOUR RESPONSIBILITY.
 / * Redistributions of source code must retain the above copyright notice.
-/
-/-----------------------------------------------------------------------------/
+//-----------------------------------------------------------------------------/
 / Feb 26,'06 R0.00  Prototype.
 /
 / Apr 29,'06 R0.01  First stable version.
@@ -848,7 +847,7 @@ FRESULT dir_find (
 /*-----------------------------------------------------------------------*/
 /* Read an object from the directory                                     */
 /*-----------------------------------------------------------------------*/
-#if _FS_MINIMIZE <= 2
+#if (_FS_MINIMIZE <= 2) && !_FS_READONLY
 static
 FRESULT dir_read (
 	DIR *dj			/* Pointer to the directory object to store read object name */
@@ -1402,7 +1401,7 @@ FRESULT auto_mount (	/* FR_OK(0): successful, !=0: any error occured */
 		}
 	}
 
-	/* The logical drive must be re-mounted. Following code attempts to mount the logical drive */
+	/* The logical drive must be re-mounted. Following code attempts to mount the volume */
 
 	fs->fs_type = 0;					/* Clear the file system object */
 	fs->drive = LD2PD(drv);				/* Bind the logical drive and a physical drive */
@@ -1802,6 +1801,17 @@ FRESULT f_write (
 					cc = fp->fs->csize - fp->csect;
 				if (disk_write(fp->fs->drive, wbuff, sect, (BYTE)cc) != RES_OK)
 					ABORT(fp->fs, FR_DISK_ERR);
+#if _FS_TINY
+				if (fp->fs->winsect - sect < cc) {  /* Refill sector cache if it gets dirty by the direct write */
+					MemCpy(fp->fs->win, wbuff + ((fp->fs->winsect - sect) * SS(fp->fs)), SS(fp->fs));
+					fp->fs->wflag = 0;
+				}
+#else
+				if (fp->dsect - sect < cc) {  /* Refill sector cache if it gets dirty by the direct write */
+					MemCpy(fp->buf, wbuff + ((fp->dsect - sect) * SS(fp->fs)), SS(fp->fs));
+					fp->flag &= ~FA__DIRTY;
+				}
+#endif
 				fp->csect += (BYTE)cc;				/* Next sector address in the cluster */
 				wcnt = SS(fp->fs) * cc;				/* Number of bytes transferred */
 				continue;
@@ -2286,7 +2296,7 @@ FRESULT f_unlink (
 		if (res == FR_OK) res = sync(dj.fs);
 	}
 
-	LEAVE_FF(dj.fs, FR_OK);
+	LEAVE_FF(dj.fs, res);
 }
 
 
@@ -2706,7 +2716,6 @@ FRESULT f_mkfs (
 	tbl = fs->win;								/* Clear buffer */
 	MemSet(tbl, 0, SS(fs));
 	ST_DWORD(tbl+BS_jmpBoot, 0x90FEEB);			/* Boot code (jmp $, nop) */
-	memcpy(&tbl[BS_OEMName], "bootmii", 8);
 	ST_WORD(tbl+BPB_BytsPerSec, SS(fs));		/* Sector size */
 	tbl[BPB_SecPerClus] = (BYTE)allocsize;		/* Sectors per cluster */
 	ST_WORD(tbl+BPB_RsvdSecCnt, n_rsv);			/* Reserved sectors */
@@ -2727,7 +2736,7 @@ FRESULT f_mkfs (
 		ST_WORD(tbl+BPB_FATSz16, n_fat);		/* Number of secters per FAT */
 		tbl[BS_DrvNum] = 0x80;					/* Drive number */
 		tbl[BS_BootSig] = 0x29;					/* Extended boot signature */
-		MemCpy(tbl+BS_VolLab, "backupmii  FAT     ", 19);	/* Volume lavel, FAT signature */
+		MemCpy(tbl+BS_VolLab, "NO NAME    FAT     ", 19);	/* Volume lavel, FAT signature */
 	} else {
 		ST_DWORD(tbl+BS_VolID32, n);			/* Volume serial number */
 		ST_DWORD(tbl+BPB_FATSz32, n_fat);		/* Number of secters per FAT */
@@ -2736,7 +2745,7 @@ FRESULT f_mkfs (
 		ST_WORD(tbl+BPB_BkBootSec, 6);			/* Backup boot record offset (bs+6) */
 		tbl[BS_DrvNum32] = 0x80;				/* Drive number */
 		tbl[BS_BootSig32] = 0x29;				/* Extended boot signature */
-		MemCpy(tbl+BS_VolLab32, "backupmii  FAT32   ", 19);	/* Volume lavel, FAT signature */
+		MemCpy(tbl+BS_VolLab32, "NO NAME    FAT32   ", 19);	/* Volume lavel, FAT signature */
 	}
 	ST_WORD(tbl+BS_55AA, 0xAA55);				/* Signature */
 	if (disk_write(drv, tbl, b_part+0, 1) != RES_OK)
