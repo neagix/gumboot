@@ -132,7 +132,7 @@ void ipc_vpost(u32 code, u32 tag, u32 num_args, va_list ap)
 	if(peek_inhead() == ((in_tail + 1)&(in_size-1))) {
 		gecko_printf("IPC: in queue full, spinning\n");
 		while(peek_inhead() == ((in_tail + 1)&(in_size-1))) {
-			udelay(10);
+			usleep(10);
 			if(n++ > 20000) {
 				gecko_printf("IPC: ARM might be stuck, still waiting for inhead %d != %d\n",
 					peek_inhead(), ((in_tail + 1)&(in_size-1)));
@@ -172,7 +172,7 @@ void ipc_flush(void)
 		return;
 	}
 	while(peek_inhead() != in_tail) {
-		udelay(10);
+		usleep(10);
 		if(n++ > 20000) {
 			gecko_printf("IPC: ARM might be stuck, still waiting for inhead %d == intail %d\n",
 				peek_inhead(), in_tail);

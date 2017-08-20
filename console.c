@@ -21,7 +21,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 typedef struct {
         u32 x, y;
         u32 width, height;
-        u32 *yuv_data;  
+        u32 *yuv_data;
         u8 has_alpha;
 } gfx_rect;
 
@@ -137,7 +137,7 @@ void gfx_print_at(int x, int y, const char *str) {
 		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 
 		if (str[i] == '\n') {
-			y += CONSOLE_ROW_HEIGHT;
+			y++;
 			d_char.x = orig_x;
 			continue;
 		}	
@@ -210,7 +210,6 @@ int gfx_printf(const char *fmt, ...)
 	va_list args;
 	int i;
 
-	//memset(pf_buffer, 0, sizeof pf_buffer);
 	va_start(args, fmt);
 	i = vsnprintf(pf_buffer, sizeof(pf_buffer), fmt, args);
 	va_end(args);
@@ -227,7 +226,6 @@ int gfx_printf_at(int x, int y, const char *fmt, ...)
 	va_list args;
 	int i;
 
-	//memset(buffer, 0, sizeof pf_buffer);
 	va_start(args, fmt);
 	i = vsnprintf(pf_buffer, sizeof(pf_buffer), fmt, args);
 	va_end(args);

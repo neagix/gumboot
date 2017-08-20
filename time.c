@@ -31,11 +31,11 @@ static void __delay(u64 ticks)
 		;
 }
 
-void udelay(u32 us)
+void usleep(u32 us)
 {
 	__delay(TICKS_PER_USEC * (u64)us);
 }
 
-u32 gettime() {
-	return read32(HW_TIMER);
+u64 mftb_usec(void) {
+	return mftb()/TICKS_PER_USEC;
 }

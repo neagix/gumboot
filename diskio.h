@@ -3,6 +3,7 @@
 /-----------------------------------------------------------------------*/
 
 #ifndef _DISKIO
+#define _DISKIO
 
 #define _READONLY	1	/* 1: Read-only mode */
 
@@ -48,5 +49,4 @@ DWORD get_fattime(void);
 #define GET_SECTOR_SIZE		2
 #define GET_BLOCK_SIZE		3	/* Mandatory for only f_mkfs() */
 
-#define _DISKIO
-#endif
+#endif // _DISKIO

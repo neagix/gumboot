@@ -88,18 +88,27 @@ u16 pad_read(GC_Pad *pad, int chan) {
 	return btns;
 }
 
-#define INPUT_WAIT_CYCLE_DELAY 10000
+#define LONG_PRESS_USEC 2000000 // 2 seconds
+#define INPUT_WAIT_CYCLE_DELAY 20000
 #define	RST_DOWN	!((read32(0x0C003000) >> 16) & 1)
 
 u16 gpio_read(void) {
 	u16 res = 0;
 	u32 irq_flag = 0;
+	u64 press_start;
 
 	// while reset is signalled
 	if (RST_DOWN) {
 		res |= GPIO_RESET;
+		
+		press_start = mftb_usec();
+		
 		// wait for user to release the button
 		while (RST_DOWN);
+		
+		if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
+			res |= GPIO_RESET_LP;
+		}
 	}
 
 	if (read32(0x0d800030) & (1<<10)) {
@@ -107,14 +116,26 @@ u16 gpio_read(void) {
 
 		if (irq_flag & 1) {
 			res |= GPIO_POWER;
+			
+			press_start = mftb_usec();
 
 			while(read32(0x0d8000c8) & 1);
 			write32(0x0d8000d0, 1);
+
+			if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
+				res |= GPIO_POWER_LP;
+			}
 		} else if (irq_flag & 0x40) {
 			res |= GPIO_EJECT;
 
+			press_start = mftb_usec();
+
 			while(read32(0x0d8000c8) & 0x40);
 			write32(0x0d8000d0, 0x40);
+
+			if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
+				res |= GPIO_POWER_LP;
+			}
 		}
 
 		write32(0x0d800030, 1<<10); // ack GPIO irq
@@ -131,9 +152,9 @@ u16 input_wait(void) {
 	u16 res;
 
 	do {
-		udelay(INPUT_WAIT_CYCLE_DELAY);
+		usleep(INPUT_WAIT_CYCLE_DELAY);
 		res = input_read();
-	} while (!(res & PAD_ANY));
+	} while (!res);
 	
 	return res;
 }

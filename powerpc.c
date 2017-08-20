@@ -12,7 +12,7 @@ void dsp_reset(void)
 void powerpc_hang(void)
 {
 	ipc_sys_clear32(HW_RESETS, 0x30);
-	udelay(100);
+	usleep(100);
 	ipc_sys_set32(HW_RESETS, 0x20);
-	udelay(100);
+	usleep(100);
 }

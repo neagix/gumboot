@@ -34,6 +34,7 @@ Copyright (C) 2009		bLAStY <blasty@bootmii.org>
 #define GPIO_RESET	PAD_BUTTON_DOWN
 #define GPIO_EJECT	PAD_BUTTON_A
 
+// button long presses
 #define GPIO_POWER_LP	PAD_BUTTON_START
 #define GPIO_RESET_LP	PAD_BUTTON_B
 #define GPIO_EJECT_LP	PAD_BUTTON_X
