@@ -89,7 +89,7 @@ u16 pad_read(GC_Pad *pad, int chan) {
 }
 
 #define LONG_PRESS_USEC 2000000 // 2 seconds
-#define INPUT_WAIT_CYCLE_DELAY 20000
+
 #define	RST_DOWN	!((read32(0x0C003000) >> 16) & 1)
 
 u16 gpio_read(void) {

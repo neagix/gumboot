@@ -8,7 +8,7 @@
 #define MAX_LST_SIZE 16*1024
 
 // data read from .lst file
-int config_timeout = 0;
+int config_timeout = 15;
 
 int process_line(char *line);
 

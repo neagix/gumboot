@@ -90,8 +90,30 @@ int main(void)
 	}
 	gfx_printf("last res: %d\n", res); */
 	
+	u64 start_time = mftb_usec();
+	int last_time_elapsed = 0;
+	
 	while (1) {
-		u16 btn = input_wait();
+		u16 btn;
+		do {
+			if (config_timeout) {
+				// update timeout as needed
+				int new_time_elapsed = (int)((mftb_usec()-start_time)/1000000);
+				
+				if (new_time_elapsed != last_time_elapsed) {
+					last_time_elapsed = new_time_elapsed;
+					int left = config_timeout-last_time_elapsed;
+					if (left <= 0) {
+						//TODO: would pick default action now
+						gfx_printf("DEFAULT PICK\n");
+					}
+					menu_update_timeout(left);
+				}
+			}
+			
+			usleep(INPUT_WAIT_CYCLE_DELAY);
+			btn = input_read();
+		} while (!btn);
 		
 		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
 		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 1, "reset: %d long press %d", (btn & GPIO_RESET) != 0, (btn & GPIO_RESET_LP) != 0);

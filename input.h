@@ -39,6 +39,8 @@ Copyright (C) 2009		bLAStY <blasty@bootmii.org>
 #define GPIO_RESET_LP	PAD_BUTTON_B
 #define GPIO_EJECT_LP	PAD_BUTTON_X
 
+#define INPUT_WAIT_CYCLE_DELAY 20000
+
 typedef struct {
         u16 btns_held;
         u16 btns_up;
