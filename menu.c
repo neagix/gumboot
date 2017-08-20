@@ -1,6 +1,7 @@
 
 #include "menu.h"
 #include "string.h"
+#include "powerpc.h"
 
 int menu_selection = 0;
 
@@ -71,6 +72,10 @@ void menu_draw_entries(void) {
 			selected_font_yuv = font_yuv_highlight;
 		}
 		gfx_print_at(1, 4+i, config_entries[i].title);
+		if (i == menu_selection) {
+			// make a whole bar of highlighted selection
+			gfx_clear(1, 4+i, CONSOLE_COLUMNS-strlen(config_entries[i].title)-2, 1, config_color_highlight[1]);
+		}
 		if (prev) {
 			selected_font_yuv = prev;
 			prev = NULL;
@@ -92,4 +97,28 @@ void menu_update_timeout(int seconds) {
 
 void menu_clear_timeout(void) {
 	gfx_clear(2, BOX_H+3+3, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
+}
+
+void menu_up(void) {
+	menu_selection++;
+	if (menu_selection == config_entries_count)
+		menu_selection = 0;
+	menu_draw_entries();
+}
+
+void menu_down(void) {
+	if (menu_selection == 0)
+		menu_selection = config_entries_count-1;
+	menu_draw_entries();
+}
+
+void menu_activate(void) {
+	stanza *sel = &config_entries[menu_selection];
+	
+	if (sel->reboot) {
+		powerpc_reset();
+	}
+	if (sel->poweroff) {
+		powerpc_poweroff();
+	}
 }

@@ -16,6 +16,10 @@ void menu_update_timeout(int seconds);
 void menu_clear_timeout(void);
 void menu_draw_entries(void);
 
+void menu_up(void);
+void menu_down(void);
+void menu_activate(void);
+
 extern int menu_selection;
 
 #endif // _MENU_H

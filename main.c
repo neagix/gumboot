@@ -130,10 +130,14 @@ int main(void)
 					last_time_elapsed = new_time_elapsed;
 					int left = config_timeout-last_time_elapsed;
 					if (left <= 0) {
-						//TODO: would pick default action now
-						gfx_printf("DEFAULT PICK\n");
+						config_timeout = 0;
+						menu_clear_timeout();
+						
+						menu_activate();
+						goto out_menu_loop;
+					} else {
+						menu_update_timeout(left);
 					}
-					menu_update_timeout(left);
 				}
 			}
 			
@@ -148,11 +152,22 @@ int main(void)
 			
 		} while (!btn);
 		
-		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
+		if (btn & GPIO_POWER_LP) {
+			menu_activate();
+		} else if (btn & GPIO_POWER) {
+			menu_down();
+		} else if (btn & GPIO_RESET_LP) {
+			menu_up();
+		} else if (btn & GPIO_EJECT) {
+			menu_activate();
+			break;
+		}
+		
+/*		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
 		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 1, "reset: %d long press %d", (btn & GPIO_RESET) != 0, (btn & GPIO_RESET_LP) != 0);
-		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 2, "eject: %d long press %d", (btn & GPIO_EJECT) != 0, (btn & GPIO_EJECT_LP) != 0);
+		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 2, "eject: %d long press %d", (btn & GPIO_EJECT) != 0, (btn & GPIO_EJECT_LP) != 0); */
 	}
-	
+out_menu_loop:
 	powerpc_hang();
 
 	return 0;

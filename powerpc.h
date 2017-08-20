@@ -17,6 +17,8 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 void dsp_reset(void);
 
 void powerpc_hang(void);
+void powerpc_reset(void);
+void powerpc_poweroff(void);
 
 #include "types.h"
 #include "printf.h"

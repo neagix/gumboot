@@ -21,6 +21,19 @@
 #define		HW_TIMER		(HW_REG_BASE + 0x010)
 #define		HW_ALARM		(HW_REG_BASE + 0x014)
 
+#define		HW_PPCIRQMASK		(HW_REG_BASE + 0x034)
+#define		HW_EXICTRL		(HW_REG_BASE + 0x070)
+#define		EXICTRL_ENABLE_EXI	1
+
+
+// Starlet side of GPIO1
+// Output state
+#define		HW_GPIO1OUT		(HW_REG_BASE + 0x0e0)
+// Direction (1=output)
+#define		HW_GPIO1DIR		(HW_REG_BASE + 0x0e4)
+
+#define HW_GPIO_SHUTDOWN	(1<<1)
+
 // Basic I/O.
 
 static inline u32 read32(u32 addr)
