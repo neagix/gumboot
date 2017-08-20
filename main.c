@@ -51,9 +51,24 @@ int main(void)
 		powerpc_hang();
 		return 1; /* never reached */
 	}
+	
+	config_load();
+	
+	// initialise normal/highlight combinations,
+	// in case there are errors to display
+/*	font_to_yuv(font_yuv_normal, 255, 255, 255, 0, 0, 0);
+	font_to_yuv(font_yuv_highlight, 0, 0, 0, 255, 255, 255);
+	selected_font_yuv = font_yuv_normal; */	
+	
+	init_font(config_color_normal, font_yuv_normal);
+	init_font(config_color_highlight, font_yuv_highlight);
+	init_font(config_color_helptext, font_yuv_helptext);
+	init_font(config_color_heading, font_yuv_heading);
+	
+	selected_font_yuv = font_yuv_normal;
 
     input_init();
-	init_fb(vmode);
+	init_fb(vmode, config_color_normal[1]);
 
 	VIDEO_Init(vmode);
 	VIDEO_SetFrameBuffer(get_xfb());
@@ -74,12 +89,9 @@ int main(void)
 		return 1; /* never reached */
 	}
     
-    // update internal console position
-    gfx_printf("\n\n\n\n");
-    
-	config_load();
-	
 	menu_draw(config_timeout);
+    // update internal console position
+    //gfx_printf("\n\n\n\n");
 	
 	menu_draw_entries();
 	

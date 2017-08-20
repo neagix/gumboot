@@ -1,11 +1,11 @@
 
 #include "config.h"
-#include "console.h"
 #include "ff.h"
 #include "malloc.h"
 #include "string.h"
 #include "atoi.h"
 #include "menu.h"
+#include "gecko.h"
 
 #define DEFAULT_LST "gumboot.lst"
 #define MAX_LST_SIZE 16*1024
@@ -28,17 +28,14 @@ int config_timeout = 0,
 	config_entries_count = 0;
 char *config_splashimage = NULL;
 
-#define COLOR_STATE_DEFAULT	0xAAAAAA
-#define COLOR_STATE_NORMAL	COLOR_STATE_DEFAULT
-#define COLOR_STATE_HIGHLIGHT 0xAAAAAA00000000ULL
-#define COLOR_STATE_HELPTEXT	COLOR_STATE_DEFAULT
-#define COLOR_STATE_HEADING		COLOR_STATE_DEFAULT
+rgb color_default[2] = {{0xAA, 0xAA, 0xAA}, {0,0,0}};
+rgb color_default_invert[2] = {{0,0,0}, {0xAA, 0xAA, 0xAA}};
 
 // color configuration
-unsigned long long config_color_normal = COLOR_STATE_NORMAL,
-	config_color_highlight = COLOR_STATE_HIGHLIGHT,
-	config_color_helptext = COLOR_STATE_HELPTEXT,
-	config_color_heading = COLOR_STATE_HEADING;
+rgb config_color_normal[2] = {{0xAA, 0xAA, 0xAA}, {0,0,0}},
+	config_color_highlight[2] = {{0,0,0}, {0xAA, 0xAA, 0xAA}},
+	config_color_helptext[2] = {{0xAA, 0xAA, 0xAA}, {0,0,0}},
+	config_color_heading[2] = {{0xAA, 0xAA, 0xAA}, {0,0,0}};
 
 stanza config_entries[MAX_CONFIG_ENTRIES];
 static stanza *wip_stanza = NULL;
@@ -56,32 +53,32 @@ void config_load(void) {
 	
 	res = f_mount(0, &fatfs);
 	if (res != FR_OK) {
-		gfx_printf("failed to mount volume: %d\n", res);
+		gecko_printf("failed to mount volume: %d\n", res);
 		return;
 	}
 	
 	res = f_stat(DEFAULT_LST, &stat);
 	if (res != FR_OK) {
-		gfx_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
+		gecko_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
 		return;
 	}
 
 	res = f_open(&fd, DEFAULT_LST, FA_READ);
 	if (res != FR_OK) {
-		gfx_printf("failed to open %s: %d\n", DEFAULT_LST, res);
+		gecko_printf("failed to open %s: %d\n", DEFAULT_LST, res);
 		return;
 	}
 	
 	int fsize = stat.fsize;
 	if (fsize > MAX_LST_SIZE) {
 		fsize = MAX_LST_SIZE;
-		gfx_printf("truncating %s to %d bytes\n", DEFAULT_LST, fsize);
+		gecko_printf("truncating %s to %d bytes\n", DEFAULT_LST, fsize);
 	}
 	char *cfg_data = malloc(fsize);
 	
 	res = f_read(&fd, cfg_data, fsize, &read);
 	if (res != FR_OK) {
-		gfx_printf("failed to read %s: %d\n", DEFAULT_LST, res);
+		gecko_printf("failed to read %s: %d\n", DEFAULT_LST, res);
 		free(cfg_data);
 		return;
 	}
@@ -100,7 +97,7 @@ void config_load(void) {
 		
 		int err = process_line(last_line);
 		if (err) {
-			gfx_printf("error processing line %d: %d\n", line_no, err);
+			gecko_printf("error processing line %d: %d\n", line_no, err);
 			// in case of error, abort
 			free(cfg_data);
 			return;
@@ -121,16 +118,16 @@ void config_load(void) {
 	if (wip_stanza) {
 		int err = complete_stanza();
 		if (err)
-			gfx_printf("invalid last menu entry: %d\n", err);
+			gecko_printf("invalid last menu entry: %d\n", err);
 	}
 	
 	if (config_entries_count == 0) {
-		gfx_printf("no config entries defined\n");
+		gecko_printf("no config entries defined\n");
 		return;
 	}
 	
 	if (config_default >= config_entries_count) {
-		gfx_printf("invalid default selected\n");
+		gecko_printf("invalid default selected\n");
 		config_timeout = 0;
 		config_default = 0;
 		return;
@@ -191,7 +188,7 @@ int complete_stanza() {
 	if (wip_stanza->poweroff)
 		actions++;
 	if (actions > 1) {
-		gfx_printf("completing stanza with %d actions: %p %d %d\n", actions, wip_stanza->kernel, wip_stanza->reboot, wip_stanza->poweroff);
+		gecko_printf("completing stanza with %d actions: %p %d %d\n", actions, wip_stanza->kernel, wip_stanza->reboot, wip_stanza->poweroff);
 		
 		return ERR_TOO_MANY_ACTIONS;
 	}
@@ -320,35 +317,25 @@ int parse_splashimage(char *s) {
 	return 0;
 }
 
-// from grub4dos
-unsigned long long color_4_to_32 (unsigned char color4)
-{
-    switch (color4)
-    {
-	case 0x00: return 0;
-	case 0x01: return 0x0000AA;
-	case 0x02: return 0x00AA00;
-	case 0x03: return 0x00AAAA;
-	case 0x04: return 0xAA0000;
-	case 0x05: return 0xAA00AA;
-	case 0x06: return 0xAA5500;
-	case 0x07: return 0xAAAAAA;
-	case 0x08: return 0x555555;
-	case 0x09: return 0x5555FF;
-	case 0x0A: return 0x55FF55;
-	case 0x0B: return 0x55FFFF;
-	case 0x0C: return 0xFF5555;
-	case 0x0D: return 0xFF55FF;
-	case 0x0E: return 0xFFFF55;
-	case 0x0F: return 0xFFFFFF;
-	default: return 0;
-    }
-}
 
-unsigned long long color_8_to_64 (unsigned char color8)
-{
-    return (color_4_to_32 (color8 >> 4) << 32) | color_4_to_32 (color8 & 15);
-}
+rgb color_to_rgb[16]={
+		{0,0,0}, 
+		{0,0,0xAA}, 
+		{0,0xAA,0}, 
+		{0,0xAA,0xAA}, 
+		{0xAA,0,0}, 
+		{0xAA,0,0xAA}, 
+		{0xAA,0x55,0}, 
+		{0xAA,0xAA,0xAA}, 
+		{0x55,0x55,0x55}, 
+		{0x55,0x55,0xFF}, 
+		{0x55,0xFF,0x55}, 
+		{0x55,0xFF,0xFF}, 
+		{0xFF,0x55,0x55}, 
+		{0xFF,0x55,0xFF}, 
+		{0xFF,0xFF,0x55}, 
+		{0xFF,0xFF,0xFF}
+};
 
 static char *color_list[16] =
 {
@@ -371,11 +358,10 @@ static char *color_list[16] =
 };
 
 /* Convert the color name STR into the magical number.  */
-static int atocolor(char *str)
+static int atocolor(char *str, rgb *result)
 {
       char *ptr;
       int i;
-      int color = 0;
       
       /* Find the separator.  */
       for (ptr = str; *ptr && *ptr != '/'; ptr++){
@@ -392,7 +378,7 @@ static int atocolor(char *str)
       for (i = 0; i < 16; i++) {
 		if (strcmp (color_list[i], str) == 0)
 		  {
-			color |= i;
+			result[0] = color_to_rgb[i];
 			break;
 		  }
 	  }
@@ -405,7 +391,7 @@ static int atocolor(char *str)
       for (i = 0; i < 16; i++) {
 		if (strcmp (color_list[i], str) == 0)
 		  {
-			color |= i << 4;
+			result[1] = color_to_rgb[i];
 			break;
 		  }
 	  }
@@ -413,48 +399,46 @@ static int atocolor(char *str)
       if (i == 16)
 		return -1;
 
-	return color;
+	return 0;
 }
 
 // parse colors second:
 // color NORMAL [HIGHLIGHT [HELPTEXT [HEADING]]]
 // see http://diddy.boot-land.net/grub4dos/files/commands.htm#color
 int parse_color(char *s) {
+	int parsed;
 	char *next_token = tokenize(s);
-	int color = atocolor(s);
-	if (color == -1)
+	
+	parsed = atocolor(s, (rgb *)&config_color_normal);
+	if (parsed == -1)
 		return ERR_INVALID_COLOR;
-	config_color_normal = color;
 
 	if (!next_token)
 		return 0;
 	s = next_token;
 	next_token = tokenize(s);
 
-	color = atocolor(s);
-	if (color == -1)
+	parsed = atocolor(s, (rgb *)&config_color_highlight);
+	if (parsed == -1)
 		return ERR_INVALID_COLOR;
-	config_color_highlight = color;
 
 	if (!next_token)
 		return 0;
 	s = next_token;
 	next_token = tokenize(s);
 
-	color = atocolor(s);
-	if (color == -1)
+	parsed = atocolor(s, (rgb *)&config_color_helptext);
+	if (parsed == -1)
 		return ERR_INVALID_COLOR;
-	config_color_helptext = color;
 
 	if (!next_token)
 		return 0;
 	s = next_token;
 	next_token = tokenize(s);
 
-	color = atocolor(s);
-	if (color == -1)
+	parsed = atocolor(s, (rgb *)&config_color_heading);
+	if (parsed == -1)
 		return ERR_INVALID_COLOR;
-	config_color_heading = color;
 	
 	if (next_token)
 		return ERR_TOO_MANY_COLORS;
@@ -605,7 +589,7 @@ int process_line(char *line) {
 		
 		return parse_hiddenmenu();
 	} else {
-		gfx_printf("unknown token: %s\n", line);
+		gecko_printf("unknown token: %s\n", line);
 	}
 	
 	return 0;

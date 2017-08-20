@@ -13,10 +13,13 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #define __CONSOLE_H__
 
 #include "types.h"
+#include "config.h"
 
 int gfx_printf(const char *fmt, ...);
 int gfx_printf_at(int x, int y, const char *fmt, ...);
-void init_fb(int vmode);
+void init_fb(int vmode, rgb fill_rgb);
+void free_font(u32 *font_yuv[255]);
+void init_font(rgb c[2], u32 *font_yuv[255]);
 void gfx_print(const char *str, size_t len);
 void gfx_printch_at(int x, int y, char c);
 void gfx_print_at(int x, int y, const char *str);
@@ -24,6 +27,12 @@ void gfx_clear(int x, int y, int w, int h);
 u32 *get_xfb(void);
 
 extern unsigned char console_font_8x16[];
+
+extern u32 **selected_font_yuv;
+extern u32 *font_yuv_normal[255],
+	*font_yuv_highlight[255],
+	*font_yuv_helptext[255],
+	*font_yuv_heading[255];
 
 #define CONSOLE_CHAR_WIDTH 8
 #define CONSOLE_CHAR_HEIGHT 16

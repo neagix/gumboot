@@ -15,6 +15,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #include "string.h"
 #include "printf.h"
 #include "malloc.h"
+#include "config.h"
 
 #include <stdarg.h>
 
@@ -247,6 +248,13 @@ int gfx_printf_at(int x, int y, const char *fmt, ...)
 	return i;
 }
 
+void free_font(u32 *font_yuv[255]) {
+	int i;
+
+	for (i = 0; i < 255; i++) {
+		free(font_yuv[i]);
+	}
+}
 
 void font_to_yuv(u32 *font_yuv[255], u8 fill_r, u8 fill_g, u8 fill_b, u8 back_r, u8 back_g, u8 back_b) {
 	int i, x, y;
@@ -275,18 +283,15 @@ void font_to_yuv(u32 *font_yuv[255], u8 fill_r, u8 fill_g, u8 fill_b, u8 back_r,
 	}
 }
 
-void init_fonts() {
-	font_to_yuv(font_yuv_normal, 255, 255, 255, 0, 0, 0);
-	font_to_yuv(font_yuv_highlight, 0, 0, 0, 255, 255, 255);
-	selected_font_yuv = font_yuv_normal;
+void init_font(rgb c[2], u32 *font_yuv[255]) {
+	// re-initialise color
+	font_to_yuv(font_yuv, c[0].r, c[0].g, c[0].b, c[1].r, c[1].g, c[1].b);
 }
 
-void init_fb(int vmode) {
+void init_fb(int vmode, rgb fill_rgb) {
 	int i;
 	u32 *fb;
-	u32 fill_col = make_yuv(0,0,0, 0,0,0);
-	
-	init_fonts();
+	u32 fill_yuv = make_yuv(fill_rgb.r, fill_rgb.g, fill_rgb.b,fill_rgb.r, fill_rgb.g, fill_rgb.b);
 	
 	switch(vmode) {
 	case VIDEO_640X480_NTSCi_YUV16:
@@ -304,7 +309,7 @@ void init_fb(int vmode) {
 
 	fb  = xfb;
 	for (i = 0; i < (RESOLUTION_H + (y_add*2)) * 2 * (RESOLUTION_W >> 1); i++) {
-		*fb = fill_col;
+		*fb = fill_yuv;
 		sync_after_write(fb, 4);
 		fb++;
 	}
