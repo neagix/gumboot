@@ -1,17 +1,16 @@
 /*---------------------------------------------------------------------------/
 /  FatFs - FAT file system module include file  R0.07        (C)ChaN, 2009
 /----------------------------------------------------------------------------/
-/ FatFs module is an open source project to implement FAT file system to small
-/ embedded systems. It is opened for education, research and development under
-/ license policy of following trems.
+/ FatFs module is an open source software to implement FAT file system to
+/ small embedded systems. This is a free software and is opened for education,
+/ research and commercial developments under license policy of following trems.
 /
 /  Copyright (C) 2009, ChaN, all right reserved.
 /
-/ * The FatFs module is a free software and there is no warranty.
-/ * You can use, modify and/or redistribute it for personal, non-profit or
-/   commercial use without any restriction under your responsibility.
+/ * The FatFs module is a free software and there is NO WARRANTY.
+/ * No restriction on use. You can use, modify and redistribute it for
+/   personal, non-profit or commercial use UNDER YOUR RESPONSIBILITY.
 / * Redistributions of source code must retain the above copyright notice.
-/
 /----------------------------------------------------------------------------*/
 
 #include "types.h"
@@ -39,13 +38,13 @@
 /  performance and code efficiency. */
 
 
-#define _FS_READONLY	0
+#define _FS_READONLY	1
 /* Setting _FS_READONLY to 1 defines read only configuration. This removes
 /  writing functions, f_write, f_sync, f_unlink, f_mkdir, f_chmod, f_rename,
 /  f_truncate and useless f_getfree. */
 
 
-#define _FS_MINIMIZE	0
+#define _FS_MINIMIZE	2
 /* The _FS_MINIMIZE option defines minimization level to remove some functions.
 /
 /   0: Full function.
@@ -55,21 +54,17 @@
 /   3: f_lseek is removed in addition to level 2. */
 
 
-#define	_FS_TINY	0
+#define	_FS_TINY	1
 /* When _FS_TINY is set to 1, FatFs uses the sector buffer in the file system
 /  object instead of the sector buffer in the individual file object for file
 /  data transfer. This reduces memory consumption 512 bytes each file object. */
-
-
-#define _DRIVES		1
-/* Number of volumes (logical drives) to be used. */
 
 
 #define	_USE_STRFUNC	0
 /* To enable string functions, set _USE_STRFUNC to 1 or 2. */
 
 
-#define	_USE_MKFS	1
+#define	_USE_MKFS	0
 /* To enable f_mkfs function, set _USE_MKFS to 1 and set _FS_READONLY to 0 */
 
 
@@ -77,16 +72,16 @@
 /* To enable f_forward function, set _USE_FORWARD to 1 and set _FS_TINY to 1. */
 
 
-#define	_USE_LFN	0
-#define	_MAX_LFN	255		/* Maximum LFN length to handle (max:255) */
-/* The _USE_LFN option switches the LFN support.
-/
-/   0: Disable LFN.
-/   1: Enable LFN with static working buffer on the bss. Not re-entrant.
-/   2: Enable LFN with dynamic working buffer on the caller's 'stack'.
-/
-/  The working buffer occupies (_MAX_LFN + 1) * 2 bytes. When enable LFN,
-/  a Unicode - OEM code conversion function ff_convert() must be linked. */
+#define _DRIVES		1
+/* Number of volumes (logical drives) to be used. */
+
+
+
+#define	_MULTI_PARTITION	0
+/* When _MULTI_PARTITION is set to 0, each volume is bound to the same physical
+/ drive number and can mount only first primaly partition. When it is set to 1,
+/ each volume is tied to the partitions listed in Drives[]. */
+
 
 
 #define _CODE_PAGE	437
@@ -113,11 +108,17 @@
 */
 
 
-#define	_MULTI_PARTITION	0
-/* When _MULTI_PARTITION is set to 0, each volume is bound to same physical
-/ drive number and can mount only 1st primaly partition. When it is set to 1,
-/ each volume is tied to the partition listed in Drives[]. */
-
+#define	_USE_LFN	0
+#define	_MAX_LFN	255		/* Maximum LFN length to handle (max:255) */
+/* The _USE_LFN option switches the LFN support.
+/
+/   0: Disable LFN.
+/   1: Enable LFN with static working buffer on the bss. Not re-entrant.
+/   2: Enable LFN with dynamic working buffer on the caller's 'stack'.
+/
+/  The working buffer occupies (_MAX_LFN + 1) * 2 bytes. When enable LFN,
+/  a Unicode - OEM code conversion function ff_convert() must be added to
+/  the project. */
 
 #define _FS_REENTRANT	0
 #define _TIMEOUT		1000
@@ -213,7 +214,7 @@ typedef struct _FIL {
 	DWORD	org_clust;	/* File start cluster */
 	DWORD	curr_clust;	/* Current cluster */
 	DWORD	dsect;		/* Current data sector */
-#if _FS_READONLY == 0
+#if !_FS_READONLY
 	DWORD	dir_sect;	/* Sector containing the directory entry */
 	BYTE*	dir_ptr;	/* Ponter to the directory entry in the window */
 #endif
@@ -396,13 +397,15 @@ char* f_gets (char*, int, FIL*);					/* Get a string from the file */
 #endif
 
 
+
 /*--------------------------------------------------------------*/
 /* User defined functions                                       */
 
-
 /* Real time clock */
+#if !_FS_READONLY
 DWORD get_fattime (void);	/* 31-25: Year(0-127 org.1980), 24-21: Month(1-12), 20-16: Day(1-31) */
 							/* 15-11: Hour(0-23), 10-5: Minute(0-59), 4-0: Second(0-29 *2) */
+#endif
 
 /* Unicode - OEM code conversion */
 #if _USE_LFN
