@@ -13,6 +13,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #define __CONSOLE_H__
 
 int gfx_printf(const char *fmt, ...);
+int gfx_printf_at(int x, int y, const char *fmt, ...);
 void init_fb(int vmode);
 void gfx_print(const char *str, size_t len);
 void gfx_print_at(int x, int y, char *str);

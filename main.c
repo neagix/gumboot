@@ -84,6 +84,11 @@ int main(void)
     int power_pressed = 0, reset_pressed = 0, eject_pressed = 0;
 
 	while (1) {
+		// print debug information
+		//gfx_printf_at(300, 16, "abs pos: %d", console_pos);
+		gfx_printf_at(300, 32, "power %d, reset %d, eject %d", power_pressed, reset_pressed, eject_pressed);
+		
+		
 		u16 btn = input_wait();
 		
 		if (btn & GPIO_POWER) {
