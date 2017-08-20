@@ -81,35 +81,23 @@ int main(void)
     gfx_printf("\xba Gumboot menu v0.1 \xba\n");
     gfx_printf("\xc8\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xcd\xbc\n");
     
-    int power_pressed = 0, reset_pressed = 0, eject_pressed = 0;
-
 	while (1) {
 		// print debug information
 		//gfx_printf_at(300, 16, "abs pos: %d", console_pos);
-		gfx_printf_at(300, 32, "power %d, reset %d, eject %d", power_pressed, reset_pressed, eject_pressed);
 		
 		
 		u16 btn = input_wait();
 		
 		if (btn & GPIO_POWER) {
-			power_pressed = !power_pressed;
-			if (!power_pressed) {
-				gfx_printf("power event: %d\n", btn);
-			}
+			gfx_printf("power button pressed: %x\n", btn);
 		}
 
 		if (btn & GPIO_RESET) {
-			reset_pressed = !reset_pressed;
-			if (!reset_pressed) {
-				gfx_printf("reset event: %d\n", btn);
-			}
+			gfx_printf("reset button pressed: %x\n", btn);
 		}
 	
 		if (btn & GPIO_EJECT) {
-			eject_pressed = !eject_pressed;
-			if (!eject_pressed) {
-				gfx_printf("eject event: %d\n", btn);
-			}
+			gfx_printf("eject button pressed: %x\n", btn);
 		}
 		
 	}
