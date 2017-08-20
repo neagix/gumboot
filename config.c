@@ -367,11 +367,13 @@ int process_line(char *line) {
 	if (!eol_reached) {
 		while (1) {
 			if (!*eot) {
+				eol_reached = 1;
 				break;
 			}
 			if (isspace(*eot))
 				eot++;
 			else
+				/* good token */
 				break;
 		}
 	}
@@ -454,9 +456,6 @@ int process_line(char *line) {
 	} else {
 		gfx_printf("unknown token: %s\n", line);
 	}
-	
-//	if (eol_reached)
-//		return 0;
 	
 	return 0;
 }
