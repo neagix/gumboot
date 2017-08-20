@@ -335,24 +335,15 @@ int parse_find(char *s) {
 	return 0;
 }
 
-int process_line(char *line) {
-	// skip whitespace
-	while (isspace(*line))
-		line++;
-	if (!*line)
-		return 0;
-	
-	// is this a comment?
-	if (*line == '#')
-		return 0;
-		
-	// find next space or end of line
+// tokenize will set 0x0 at first whitespace in 's',
+// and return the address of the next token (skipping whitespaces)
+// or NULL if no other token is available
+char *tokenize(char *line) {
+// find next space or end of line
 	char *eot = line;
-	int eol_reached = 0;
 	while (1) {
 		if (!*eot) {
-			eol_reached = 1;
-			break;
+			return NULL;
 		}
 		if (!isspace(*eot))
 			eot++;
@@ -364,10 +355,10 @@ int process_line(char *line) {
 	}
 	
 	// skip some more leading whitespaces
-	if (!eol_reached) {
+	if (eot != NULL) {
 		while (1) {
 			if (!*eot) {
-				eol_reached = 1;
+				eot = NULL;
 				break;
 			}
 			if (isspace(*eot))
@@ -377,6 +368,25 @@ int process_line(char *line) {
 				break;
 		}
 	}
+
+	return eot;	
+}
+
+int process_line(char *line) {
+	// skip whitespace
+	while (isspace(*line))
+		line++;
+	if (!*line)
+		return 0;
+	
+	// is this a comment?
+	if (*line == '#')
+		return 0;
+		
+	char *eot = tokenize(line);
+	int eol_reached = (eot == NULL);
+	if (eol_reached)
+		eot = "";
 	
 	if (0 == strcmp(line, "timeout")) {
 		if (eol_reached) {
