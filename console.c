@@ -22,9 +22,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 typedef struct {
         u32 x, y;
         u32 width, height;
-        u8 *raw_data;
         u32 *yuv_data;  
-        u32 active;
         u8 has_alpha;
 } gfx_rect;
 
@@ -45,7 +43,7 @@ typedef struct {
 
 static u32 *xfb = NULL;
 static int y_add = 0;
-// current cursor position
+// current absolute cursor position
 static int console_pos = 0;
 
 u32 *font_yuv[255];
@@ -142,7 +140,7 @@ void scroll(void) {
 		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, 0, 0, 0);
 }
 
-void print_str_noscroll(int x, int y, char *str) {
+void gfx_print_at(int x, int y, char *str) {
 	unsigned int i;
 	gfx_rect d_char;
 
@@ -165,7 +163,7 @@ void print_str_noscroll(int x, int y, char *str) {
 	}
 }
 
-void print_str(const char *str, size_t len) {
+void gfx_print(const char *str, size_t len) {
 	unsigned int i;
 	gfx_rect d_char;
 	
@@ -220,10 +218,8 @@ int gfx_printf(const char *fmt, ...)
 	va_end(args);
 
 	if (i > 0) {
-		print_str(buffer, i);
-		//printf("%s\n", buffer);
-	} else
-		scroll();
+		gfx_print(buffer, i);
+	}
 
 	return i;
 }

@@ -14,9 +14,8 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 
 int gfx_printf(const char *fmt, ...);
 void init_fb(int vmode);
-void print_str(const char *str, size_t len);
-void print_str_noscroll(int x, int y, char *str);
-int console_printf(const char *fmt, ...);
+void gfx_print(const char *str, size_t len);
+void gfx_print_at(int x, int y, char *str);
 u32 *get_xfb(void);
 
 extern unsigned char console_font_8x16[];
