@@ -1,39 +1,44 @@
-# This is a sample menu.lst file for gumboot.
-#
+##
+## This is a sample menu.lst file for gumboot.
+##
 
-## currently not supported
-#splashimage (sd0)/bootmii/splash.xpm.gz
+splashimage (sd0)/gumboot/splash.ppm
 
-#color red/blue green/black white/blue white/blue
-
+color red/blue green/black white/blue white/blue
 #color blue/green green/black white/magenta white/magenta
+
 timeout 15
 
-default 0
+# default is poweroff
+default 3
 
 title wii-linux-ngx\nOpen default boot menu
 	## currently not supported
 	#find --set-root /zImage
 	root (sd0)/bootmii
 	kernel /zImage
+	## will save as default if user selects it
+	savedefault
+	## 'boot' is always implicit, but must be the last line of a menu entry
 	boot
 
-## 'write' is currently not supported
-#####################################################################
-# write string "cmdcons" to memory 0000:7C03 in 2 steps:
-#####################################################################
-# step 1. Write 4 chars "cmdc" at 0000:7C03
-#write 0x7C03 0x63646D63
-# step 2. Write 3 chars "ons" and an ending null at 0000:7C07
-#write 0x7C07 0x00736E6F
+title Find zImage\nBoot zImage where it can be found
+	find --set-root /zImage
+	kernel /zImage
+	boot
 
-## savedefault is currently not supported
-#savedefault --wait=2
+title Reboot
+	reboot
 
-## reboot is currently not supported
-#title reboot
-#reboot
+title Poweroff
+	# 'halt' can also be used
+	poweroff
 
-## halt is currently not supported
-#title halt
-#halt
+title Write to memory test
+	#####################################################################
+	# write string "cmdcons" to memory 0000:7C03 in 2 steps:
+	#####################################################################
+	# step 1. Write 4 chars "cmdc" at 0000:7C03
+	write 0x7C03 0x63646D63
+	# step 2. Write 3 chars "ons" and an ending null at 0000:7C07
+	write 0x7C07 0x00736E6F

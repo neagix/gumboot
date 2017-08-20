@@ -4,6 +4,7 @@
 #include "ff.h"
 #include "malloc.h"
 #include "string.h"
+#include "atoi.h"
 
 #define DEFAULT_LST "gumboot.lst"
 #define MAX_LST_SIZE 16*1024
@@ -82,7 +83,27 @@ void config_load(void) {
 	gfx_printf("configuration loaded successfully\n");
 }
 
-#define ERR_MISSING_TOKEN 0x10
+void trim_right(char *s, char *beginning) {
+	s--;
+	while (1) {
+		if (s == beginning)
+			return;
+		if (*s == 0x0)
+			return;
+		if ((*s == ' ') ||(*s == '\t')) {
+			*s = 0x0;
+			s--;
+		} else
+			return;
+	}
+}
+
+int parse_timeout(char *s);
+int parse_default(char *s);
+int parse_title(char *s);
+
+#define ERR_MISSING_TOKEN 	0x10
+#define ERR_INVALID_NUMBER	0x20
 
 int process_line(char *line) {
 	//gfx_printf("first line: %s\n", last_line);
@@ -127,33 +148,60 @@ int process_line(char *line) {
 		}
 	}
 	
+	trim_right(eot, line);
+	
 	if (0 == strcmp(line, "timeout")) {
 		if (eol_reached) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		// parse next token
-		gfx_printf("token for %s is: '%s'\n", line, eot);
+		return parse_timeout(eot);
 	} else if (0 == strcmp(line, "default")) {
 		if (eol_reached) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		// parse next token
-		gfx_printf("token for %s is: '%s'\n", line, eot);
+		return parse_default(eot);
 	} else if (0 == strcmp(line, "title")) {
 		if (eol_reached) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		// parse next token
-		gfx_printf("token for %s is: '%s'\n", line, eot);
+		return parse_title(eot);
 	} else {
 		gfx_printf("unknown token: %s\n", line);
 	}
 	
 //	if (eol_reached)
 //		return 0;
+	
+	return 0;
+}
+
+int parse_timeout(char *s) {
+	size_t parsed;
+	int val = atoi(s, 10, &parsed);
+	if (parsed != strlen(s))
+		return ERR_INVALID_NUMBER;
+	
+	gfx_printf("timeout will be %d\n", val);
+	
+	return 0;
+}
+
+int parse_default(char *s) {
+	size_t parsed;
+	int val = atoi(s, 10, &parsed);
+	if (!parsed || (parsed != strlen(s)))
+		return ERR_INVALID_NUMBER;
+	
+	gfx_printf("default will be %d\n", val);
+	
+	return 0;
+}
+
+int parse_title(char *s) {
+	gfx_printf("title will be %s\n", s);
 	
 	return 0;
 }
