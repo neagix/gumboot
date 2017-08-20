@@ -173,21 +173,17 @@ void print_str(const char *str, size_t len) {
 	d_char.height = CONSOLE_CHAR_HEIGHT;
 	
 	for (i = 0; i < len; i++) {
-		// calculate current coordinates
-		int x = console_pos % CONSOLE_COLUMNS;
-		int y = console_pos / CONSOLE_COLUMNS;
-
 		// special case: a newline forces to reposition on next line
 		if (str[i] == '\n') {
-			y++;
-			x = 0;
-			// adjust to new line position
-			console_pos = y * CONSOLE_COLUMNS + x;
+			console_pos += (CONSOLE_COLUMNS - console_pos % CONSOLE_COLUMNS);
 		} else {
 			// increase absolute position by 1
 			console_pos++;
 		}
-		
+		// calculate new coordinates
+		int x = console_pos % CONSOLE_COLUMNS;
+		int y = console_pos / CONSOLE_COLUMNS;
+
 		// did the line number increase?
 		if (x == 0) {
 			// is the new y coordinate overflowing height?
@@ -200,8 +196,9 @@ void print_str(const char *str, size_t len) {
 		}
 		
 		// nothing to draw for newlines
-		if (str[i] == '\n')
+		if (str[i] == '\n') {
 			continue;
+		}
 
 		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 
