@@ -31,20 +31,22 @@ typedef struct {
 #define RESOLUTION_W 640
 #define RESOLUTION_H 480
 
-#define CONSOLE_Y_OFFSET 0
 #define CONSOLE_X_OFFSET  0
 
 #define CONSOLE_CHAR_WIDTH 8
 #define CONSOLE_CHAR_HEIGHT 16
 #define CONSOLE_ROW_HEIGHT (CONSOLE_CHAR_HEIGHT + 1) 
 
+#define CONSOLE_Y_OFFSET (CONSOLE_CHAR_HEIGHT-2)
+
 #define CONSOLE_WIDTH RESOLUTION_W
-#define CONSOLE_LINES (RESOLUTION_H/CONSOLE_ROW_HEIGHT)
+#define CONSOLE_LINES ((RESOLUTION_H-CONSOLE_Y_OFFSET)/CONSOLE_ROW_HEIGHT)
+#define CONSOLE_COLUMNS (CONSOLE_WIDTH/(CONSOLE_CHAR_WIDTH+2))
 
 static u32 *xfb = NULL;
 static int y_add = 0;
 // current cursor position
-static int console_x = 0, console_y = 0;
+static int console_pos = 0;
 
 u32 *font_yuv[255];
 
@@ -152,7 +154,7 @@ void print_str_noscroll(int x, int y, char *str) {
 		d_char.y = y;
 
 		if (str[i] == '\n') {
-			y += CONSOLE_CHAR_HEIGHT;
+			y += CONSOLE_ROW_HEIGHT;
 			d_char.x = x;
 			continue;
 		}	
@@ -166,14 +168,44 @@ void print_str_noscroll(int x, int y, char *str) {
 void print_str(const char *str, size_t len) {
 	unsigned int i;
 	gfx_rect d_char;
-
-	scroll();
+	
 	d_char.width  = CONSOLE_CHAR_WIDTH;
 	d_char.height = CONSOLE_CHAR_HEIGHT;
-	d_char.y = CONSOLE_Y_OFFSET + ((CONSOLE_LINES - 1) * CONSOLE_ROW_HEIGHT);
-
+	
 	for (i = 0; i < len; i++) {
-		d_char.x = CONSOLE_X_OFFSET + (i * (CONSOLE_CHAR_WIDTH+2));
+		// calculate current coordinates
+		int x = console_pos % CONSOLE_COLUMNS;
+		int y = console_pos / CONSOLE_COLUMNS;
+
+		// special case: a newline forces to reposition on next line
+		if (str[i] == '\n') {
+			y++;
+			x = 0;
+			// adjust to new line position
+			console_pos = y * CONSOLE_COLUMNS + x;
+		} else {
+			// increase absolute position by 1
+			console_pos++;
+		}
+		
+		// did the line number increase?
+		if (x == 0) {
+			// is the new y coordinate overflowing height?
+			if (y == CONSOLE_LINES) {
+				scroll();
+				y = CONSOLE_LINES - 1;
+				// adjust to new scrolled position
+				console_pos = y * CONSOLE_COLUMNS + x;
+			}
+		}
+		
+		// nothing to draw for newlines
+		if (str[i] == '\n')
+			continue;
+
+		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
+
+		d_char.x = CONSOLE_X_OFFSET + x * (CONSOLE_CHAR_WIDTH+2);
 		d_char.yuv_data = font_yuv[(int) str[i]];
 		gfx_draw_rect(&d_char);
 	}
@@ -191,7 +223,7 @@ int gfx_printf(const char *fmt, ...)
 	va_end(args);
 
 	if (i > 0) {
-		print_str(buffer, i-1);
+		print_str(buffer, i);
 		//printf("%s\n", buffer);
 	} else
 		scroll();
