@@ -7,7 +7,7 @@
 #color red/blue green/black white/blue white/blue
 
 #color blue/green green/black white/magenta white/magenta
-timeout 1
+timeout 15
 
 default 0
 

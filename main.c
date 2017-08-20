@@ -63,22 +63,13 @@ int main(void)
 		powerpc_hang();
 		return 1; /* never reached */
 	}
-	const char *menu_title = "Gumboot menu v0.1";
-
-    gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
-    
-    int box_h = CONSOLE_LINES-4-HELP_LINES;
-    draw_box_at(0, 3, CONSOLE_COLUMNS, box_h);
-    
-    // draw help text
-    gfx_print_at(2, box_h+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
-												"Long-press (2s) power or press eject to boot.\n\n"
-												"The highlighted entry will be booted automatically in 15 seconds.");
     
     // update internal console position
     gfx_printf("\n\n\n\n");
     
 	config_load();
+	
+	menu_draw(config_timeout);
 	
 /*
 	DIR dirs;
@@ -102,11 +93,9 @@ int main(void)
 	while (1) {
 		u16 btn = input_wait();
 		
-		if (btn) {
-			gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
-			gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 1, "reset: %d long press %d", (btn & GPIO_RESET) != 0, (btn & GPIO_RESET_LP) != 0);
-			gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 2, "eject: %d long press %d", (btn & GPIO_EJECT) != 0, (btn & GPIO_EJECT_LP) != 0);
-		}
+		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
+		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 1, "reset: %d long press %d", (btn & GPIO_RESET) != 0, (btn & GPIO_RESET_LP) != 0);
+		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 2, "eject: %d long press %d", (btn & GPIO_EJECT) != 0, (btn & GPIO_EJECT_LP) != 0);
 	}
 	
 	powerpc_hang();

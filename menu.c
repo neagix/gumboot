@@ -1,5 +1,6 @@
 
 #include "menu.h"
+#include "string.h"
 
 const char	top_right_corner = 191,
 			bottom_left_corner = 192,
@@ -35,5 +36,27 @@ void draw_box_at(int x, int y, int w, int h) {
 		gfx_printch_at(x, y, horiz_line);
 	}
 	gfx_printch_at(x, y, bottom_right_corner);
-	
+}
+
+const char *timeout_prompt = "The highlighted entry will be booted automatically in ";
+
+#define BOX_H (CONSOLE_LINES-4-HELP_LINES)
+
+void menu_draw(int seconds) {
+	const char *menu_title = "Gumboot menu v0.1";
+
+    gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
+    
+    draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
+    
+    // draw help text
+    gfx_print_at(2, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
+												"Long-press (2s) power or press eject to boot.");
+
+	if (seconds != 0)
+		gfx_printf_at(2, BOX_H+3+3, "%s%*d seconds.", timeout_prompt, 2, seconds);
+}
+
+void menu_update_timeout(int seconds) {
+	gfx_printf_at(2 + strlen(timeout_prompt), BOX_H+3+3, "%*d", 2, seconds);
 }
