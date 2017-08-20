@@ -89,23 +89,18 @@ u16 pad_read(GC_Pad *pad, int chan) {
 }
 
 #define INPUT_WAIT_CYCLE_DELAY 10000
-#define RESET_GHOST_PRESS_SKIP (INPUT_WAIT_CYCLE_DELAY/4000)
-
-// TODO: Hackity hack, prevent ghost presses
-static u8 reset_delay = RESET_GHOST_PRESS_SKIP;
-
+#define	RST_DOWN	!((read32(0x0C003000) >> 16) & 1)
 
 u16 gpio_read(void) {
 	u16 res = 0;
 	u32 irq_flag = 0;
 
-	if (!((read32(0x0C003000) >> 16) & 1) && reset_delay == 0) {
+	// while reset is signalled
+	if (RST_DOWN) {
 		res |= GPIO_RESET;
-		reset_delay = RESET_GHOST_PRESS_SKIP;
+		// wait for user to release the button
+		while (RST_DOWN);
 	}
-
-	if (reset_delay > 0)
-		reset_delay--;
 
 	if (read32(0x0d800030) & (1<<10)) {
 		irq_flag = read32(0x0d8000f0);
