@@ -206,23 +206,42 @@ void gfx_print(const char *str, size_t len) {
 	}
 }
 
+static char pf_buffer[4096];
+
 int gfx_printf(const char *fmt, ...)
 {
 	va_list args;
-	char buffer[40];
 	int i;
 
-	memset(buffer, 0, sizeof buffer);
+	//memset(pf_buffer, 0, sizeof pf_buffer);
 	va_start(args, fmt);
-	i = vsnprintf(buffer, sizeof(buffer), fmt, args);
+	i = vsnprintf(pf_buffer, sizeof(pf_buffer), fmt, args);
 	va_end(args);
 
 	if (i > 0) {
-		gfx_print(buffer, i);
+		gfx_print(pf_buffer, i);
 	}
 
 	return i;
 }
+
+int gfx_printf_at(int x, int y, const char *fmt, ...)
+{
+	va_list args;
+	int i;
+
+	//memset(buffer, 0, sizeof pf_buffer);
+	va_start(args, fmt);
+	i = vsnprintf(pf_buffer, sizeof(pf_buffer), fmt, args);
+	va_end(args);
+
+	if (i > 0) {
+		gfx_print_at(x, y, pf_buffer);
+	}
+
+	return i;
+}
+
 
 void font_to_yuv(void) {
 	int i, x, y;
