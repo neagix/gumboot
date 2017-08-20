@@ -1,0 +1,39 @@
+# This is a sample menu.lst file for gumboot.
+#
+
+## currently not supported
+#splashimage (sd0)/bootmii/splash.xpm.gz
+
+#color red/blue green/black white/blue white/blue
+
+#color blue/green green/black white/magenta white/magenta
+timeout 1
+
+default 0
+
+title wii-linux-ngx\nOpen default boot menu
+	## currently not supported
+	#find --set-root /zImage
+	root (sd0)/bootmii
+	kernel /zImage
+	boot
+
+## 'write' is currently not supported
+#####################################################################
+# write string "cmdcons" to memory 0000:7C03 in 2 steps:
+#####################################################################
+# step 1. Write 4 chars "cmdc" at 0000:7C03
+#write 0x7C03 0x63646D63
+# step 2. Write 3 chars "ons" and an ending null at 0000:7C07
+#write 0x7C07 0x00736E6F
+
+## savedefault is currently not supported
+#savedefault --wait=2
+
+## reboot is currently not supported
+#title reboot
+#reboot
+
+## halt is currently not supported
+#title halt
+#halt
