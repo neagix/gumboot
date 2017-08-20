@@ -57,9 +57,10 @@ void menu_draw(int seconds) {
 	if (seconds != 0)
 		gfx_printf_at(2, BOX_H+3+3, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
 
-	selected_font_yuv = font_yuv_normal;
+	selected_font_yuv = font_yuv_heading;
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
-    
+   
+    selected_font_yuv = font_yuv_normal;
     draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
 }
 
@@ -67,15 +68,20 @@ void menu_draw_entries(void) {
 	int i;
 	u32 **prev = NULL;
 	for(i=0;i<config_entries_count;i++) {
+		rgb c;
 		if (i == menu_selection && (selected_font_yuv != font_yuv_highlight)) {
 			prev = selected_font_yuv;
 			selected_font_yuv = font_yuv_highlight;
+			c = config_color_highlight[1];
+		} else {
+			c = config_color_normal[1];
 		}
 		gfx_print_at(1, 4+i, config_entries[i].title);
-		if (i == menu_selection) {
-			// make a whole bar of highlighted selection
-			gfx_clear(1, 4+i, CONSOLE_COLUMNS-strlen(config_entries[i].title)-2, 1, config_color_highlight[1]);
-		}
+
+		// make a whole bar of highlighted selection
+		int l = strlen(config_entries[i].title);
+		gfx_clear(1 + l, 4+i, CONSOLE_COLUMNS-l-2, 1, c);
+
 		if (prev) {
 			selected_font_yuv = prev;
 			prev = NULL;
@@ -99,16 +105,18 @@ void menu_clear_timeout(void) {
 	gfx_clear(2, BOX_H+3+3, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
 }
 
-void menu_up(void) {
+void menu_down(void) {
 	menu_selection++;
 	if (menu_selection == config_entries_count)
 		menu_selection = 0;
 	menu_draw_entries();
 }
 
-void menu_down(void) {
+void menu_up(void) {
 	if (menu_selection == 0)
 		menu_selection = config_entries_count-1;
+	else
+		menu_selection--;
 	menu_draw_entries();
 }
 

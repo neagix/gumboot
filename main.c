@@ -156,16 +156,12 @@ int main(void)
 			menu_activate();
 		} else if (btn & GPIO_POWER) {
 			menu_down();
-		} else if (btn & GPIO_RESET_LP) {
+		} else if (btn & GPIO_RESET) {
 			menu_up();
 		} else if (btn & GPIO_EJECT) {
 			menu_activate();
 			break;
 		}
-		
-/*		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2, "power: %d long press %d",     (btn & GPIO_POWER) != 0, (btn & GPIO_POWER_LP) != 0);
-		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 1, "reset: %d long press %d", (btn & GPIO_RESET) != 0, (btn & GPIO_RESET_LP) != 0);
-		gfx_printf_at(CONSOLE_COLUMNS/2, CONSOLE_LINES/2 + 2, "eject: %d long press %d", (btn & GPIO_EJECT) != 0, (btn & GPIO_EJECT_LP) != 0); */
 	}
 out_menu_loop:
 	powerpc_hang();
