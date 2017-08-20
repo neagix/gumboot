@@ -2,6 +2,11 @@
 #include "menu.h"
 #include "string.h"
 
+int menu_selection = 0;
+int menu_entries_count;
+char *menu_entries[MAX_MENU_ENTRIES];
+char *menu_entries_help[MAX_MENU_ENTRIES];
+
 const char	top_right_corner = 191,
 			bottom_left_corner = 192,
 			horiz_line = 196,
@@ -54,8 +59,15 @@ void menu_draw(int seconds) {
     gfx_print_at(2, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
 												"Long-press (2s) power or press eject to boot.");
 
+	// draw timeout text
 	if (seconds != 0)
 		gfx_printf_at(2, BOX_H+3+3, "%s%*d", timeout_prompt, 2, seconds, timeout_prompt_term);
+}
+
+void menu_draw_entries(void) {
+	// a poorly configured menu
+	if (menu_entries_count == 0)
+		return;
 }
 
 void menu_update_timeout(int seconds) {

@@ -3,6 +3,7 @@
 #include "console.h"
 #include "ff.h"
 #include "malloc.h"
+#include "string.h"
 
 #define DEFAULT_LST "gumboot.lst"
 #define MAX_LST_SIZE 16*1024
@@ -81,6 +82,8 @@ void config_load(void) {
 	gfx_printf("configuration loaded successfully\n");
 }
 
+#define ERR_MISSING_TOKEN 0x10
+
 int process_line(char *line) {
 	//gfx_printf("first line: %s\n", last_line);
 	
@@ -106,11 +109,48 @@ int process_line(char *line) {
 			eot++;
 		else {
 			*eot = 0x0;
+			eot++;
 			break;
 		}
 	}
 	
-	gfx_printf("token found: %s\n", line);
+	// skip some more leading whitespaces
+	if (!eol_reached) {
+		while (1) {
+			if (!*eot) {
+				break;
+			}
+			if ((*eot == ' ') || (*eot == '\t'))
+				eot++;
+			else
+				break;
+		}
+	}
+	
+	if (0 == strcmp(line, "timeout")) {
+		if (eol_reached) {
+			return ERR_MISSING_TOKEN;
+		}
+		
+		// parse next token
+		gfx_printf("token for %s is: '%s'\n", line, eot);
+	} else if (0 == strcmp(line, "default")) {
+		if (eol_reached) {
+			return ERR_MISSING_TOKEN;
+		}
+		
+		// parse next token
+		gfx_printf("token for %s is: '%s'\n", line, eot);
+	} else if (0 == strcmp(line, "title")) {
+		if (eol_reached) {
+			return ERR_MISSING_TOKEN;
+		}
+		
+		// parse next token
+		gfx_printf("token for %s is: '%s'\n", line, eot);
+	} else {
+		gfx_printf("unknown token: %s\n", line);
+	}
 	
 //	if (eol_reached)
 //		return 0;
