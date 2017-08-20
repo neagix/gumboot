@@ -135,8 +135,6 @@ void config_load(void) {
 		config_default = 0;
 		return;
 	}
-	
-	gfx_printf("configuration loaded successfully\n");
 }
 
 int isspace(char c) {

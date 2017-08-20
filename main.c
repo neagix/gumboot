@@ -81,6 +81,8 @@ int main(void)
 	
 	menu_draw(config_timeout);
 	
+	menu_draw_entries();
+	
 /*
 	DIR dirs;
 	FILINFO Fno;

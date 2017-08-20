@@ -30,7 +30,12 @@ static int y_add = 0;
 // current absolute cursor position
 static int console_pos = 0;
 
-u32 *font_yuv[255];
+u32 *font_yuv_normal[255],
+	*font_yuv_highlight[255],
+	*font_yuv_helptext[255],
+	*font_yuv_heading[255];
+
+u32 **selected_font_yuv = NULL;
 
 u32 *get_xfb(void) {
 	return xfb;
@@ -142,7 +147,7 @@ void gfx_print_at(int x, int y, const char *str) {
 			continue;
 		}	
 
-		d_char.yuv_data = font_yuv[ (int)str[i] ];
+		d_char.yuv_data = selected_font_yuv[ (int)str[i] ];
 		gfx_draw_rect(&d_char);
 		d_char.x += CONSOLE_CHAR_WIDTH;
 	}
@@ -161,7 +166,7 @@ void gfx_printch_at(int x, int y, char c) {
 	d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
 	d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 
-	d_char.yuv_data = font_yuv[ (int)c ];
+	d_char.yuv_data = selected_font_yuv[ (int)c ];
 	gfx_draw_rect(&d_char);
 }
 
@@ -203,7 +208,7 @@ void gfx_print(const char *str, size_t len) {
 		d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
 		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 		
-		d_char.yuv_data = font_yuv[(int) str[i]];
+		d_char.yuv_data = selected_font_yuv[(int) str[i]];
 		gfx_draw_rect(&d_char);
 	}
 }
@@ -243,7 +248,7 @@ int gfx_printf_at(int x, int y, const char *fmt, ...)
 }
 
 
-void font_to_yuv(void) {
+void font_to_yuv(u32 *font_yuv[255], u8 fill_r, u8 fill_g, u8 fill_b, u8 back_r, u8 back_g, u8 back_b) {
 	int i, x, y;
 	u8 lr,lg,lb, rr,rg,rb;
 
@@ -253,15 +258,15 @@ void font_to_yuv(void) {
 		for (y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
 			for (x = 0; x < CONSOLE_CHAR_WIDTH; x+=2) {
 				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (CONSOLE_CHAR_WIDTH-1-x)) & 0x01) == 1) {
-					lr = 255; lg = 255; lb = 255;
+					lr = fill_r; lg = fill_g; lb = fill_b;
 				} else {
-					lr = 0; lg = 0; lb = 0;
+					lr = back_r; lg = back_g; lb = back_b;
 				}
 
 				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (CONSOLE_CHAR_WIDTH-1-(x+1))) & 0x01) == 1) {
-					rr = 255; rg = 255; rb = 255;
+					rr = fill_r; rg = fill_g; rb = fill_b;
 				} else {
-					rr = 0; rg = 0; rb = 0;
+					rr = back_r; rg = back_g; rb = back_b;
 				}
 
 				font_yuv[i][(y<<2)+(x>>1)] = make_yuv(lr, lg, lb, rr, rg, rb);
@@ -270,13 +275,19 @@ void font_to_yuv(void) {
 	}
 }
 
+void init_fonts() {
+	font_to_yuv(font_yuv_normal, 255, 255, 255, 0, 0, 0);
+	font_to_yuv(font_yuv_highlight, 0, 0, 0, 255, 255, 255);
+	selected_font_yuv = font_yuv_normal;
+}
+
 void init_fb(int vmode) {
 	int i;
 	u32 *fb;
 	u32 fill_col = make_yuv(0,0,0, 0,0,0);
-
-	font_to_yuv();
-
+	
+	init_fonts();
+	
 	switch(vmode) {
 	case VIDEO_640X480_NTSCi_YUV16:
 	case VIDEO_640X480_PAL60_YUV16:
@@ -298,4 +309,3 @@ void init_fb(int vmode) {
 		fb++;
 	}
 }
-
