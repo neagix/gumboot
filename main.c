@@ -52,8 +52,6 @@ int main(void)
 		return 1; /* never reached */
 	}
 	
-	config_load();
-	
 	init_font(config_color_normal, font_yuv_normal);
 	init_font(config_color_highlight, font_yuv_highlight);
 	init_font(config_color_helptext, font_yuv_helptext);
@@ -82,6 +80,8 @@ int main(void)
 		powerpc_hang();
 		return 1; /* never reached */
 	}
+	
+	config_load();    
     
 	menu_draw(config_timeout);
    
@@ -102,7 +102,7 @@ int main(void)
 
 	res = f_opendir(&dirs, path);
 	if (res != FR_OK) {
-		gfx_printf("failed to open directory: %d\n", res);
+		log_printf("failed to open directory: %d\n", res);
 	} else {
 		while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {
 			if (Fno.fattrib & AM_DIR) {
@@ -117,8 +117,10 @@ int main(void)
 	u64 start_time = mftb_usec();
 	int last_time_elapsed = 0;
 
+	u16 btn;
 	while (1) {
-		u16 btn;
+normal_loop:
+		;
 		do {
 			if (config_timeout) {
 				// update timeout as needed
@@ -132,7 +134,7 @@ int main(void)
 						menu_clear_timeout();
 						
 						menu_activate();
-						goto out_menu_loop;
+						goto normal_loop;
 					} else {
 						menu_update_timeout(left);
 					}
@@ -147,7 +149,6 @@ int main(void)
 				config_timeout = 0;
 				menu_clear_timeout();
 			}
-			
 		} while (!btn);
 		
 		if (btn & PAD_BUTTON_A) {
@@ -158,7 +159,7 @@ int main(void)
 			menu_up();
 		}
 	}
-out_menu_loop:
+
 	powerpc_hang();
 
 	return 0;

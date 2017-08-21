@@ -21,6 +21,7 @@ int strcmp(const char *, const char *);
 int strncmp(const char *, const char *, size_t);
 size_t strlcpy(char *, const char *, size_t);
 size_t strlcat(char *, const char *, size_t);
+char *strcat(char *, const char *);
 char *strchr(const char *, char);
 char *strchr2(const char *, char, char);
 size_t strspn(const char *, const char *);

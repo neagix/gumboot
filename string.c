@@ -106,6 +106,15 @@ size_t strlcpy(char *dest, const char *src, size_t maxlen)
 	return needed-1;
 }
 
+char *strcat(char *dest, const char *src) {
+	int l1 = strlen(dest),
+		l2 = strlen(src);
+	char *result = malloc(l1+l2+1);
+	memcpy(result, dest, l1);
+	memcpy(result+l1, src, l2+1);
+	return result;
+}
+
 size_t strlcat(char *dest, const char *src, size_t maxlen)
 {
 	size_t used;

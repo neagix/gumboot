@@ -2,6 +2,9 @@
 #include "menu.h"
 #include "string.h"
 #include "powerpc.h"
+#include "powerpc_elf.h"
+#include "log.h"
+#include "time.h"
 
 int menu_selection = 0;
 
@@ -125,8 +128,67 @@ void menu_activate(void) {
 	
 	if (sel->reboot) {
 		powerpc_reset();
+		return;
 	}
 	if (sel->poweroff) {
 		powerpc_poweroff();
+		return;
 	}
+	
+	u8 part_no = 0xFF;
+	char *root = NULL;
+	
+	// root setup
+	if (sel->find_args) {
+		//TODO: find it!
+	} else if (sel->browse) {
+		//TODO: directory browse, use root if any otherwise first partition
+		
+		return;
+	} else if (sel->root) {
+		root = sel->root;
+		part_no = sel->root_part_no;
+	} else {
+		// just a save default action
+		if (!sel->save_default) {
+			log_printf("BUG: invalid menu entry\n");
+			return;
+		}
+		//TODO: save the default
+		
+		return;
+	}
+	
+	// at this point root must have been setup
+	// and we are going to boot a kernel
+	int err = config_open_fs(part_no);
+	if (err) {
+		log_printf("could not open partition %d: %d\n", part_no, err);
+		return;
+	}
+
+	char *kernel_fn;
+	if (strlen(sel->root))
+		// root has always trailing slash, kernel has always no leading slash
+		kernel_fn = strcat(sel->root, sel->kernel);
+	else {
+		kernel_fn = sel->kernel;
+	}
+	
+	log_printf("booting in 3s: '%s'\n", kernel_fn);
+	sleep(3);
+	
+	// sanity check
+	err = is_valid_elf(kernel_fn);
+	if (err) {
+		log_printf("not a valid ELF: %s: %d\n", kernel_fn, err);
+		return;
+	}
+	
+	err = powerpc_boot_file(kernel_fn);
+	if (err) {
+		log_printf("could not boot kernel %s: %d\n", kernel_fn, err);
+		return;
+	}
+	
 }

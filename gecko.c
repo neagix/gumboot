@@ -36,7 +36,7 @@ Copyright (C) 2009		Andre Heider "dhewg" <dhewg@wiibrew.org>
 #define		EXI2_CR					(EXI2_REG_BASE+0x00c)
 #define		EXI2_DATA				(EXI2_REG_BASE+0x010)
 
-static int gecko_console_enabled = 0;
+int gecko_console_enabled = 0;
 
 static u32 _gecko_command(u32 command) {
 	u32 i;
@@ -138,7 +138,7 @@ static int gecko_recvbuffer(void *buffer, u32 size) {
 }
 #endif
 
-static int gecko_sendbuffer(const void *buffer, u32 size) {
+int gecko_sendbuffer(const void *buffer, u32 size) {
 	u32 left = size;
 	char *ptr = (char*)buffer;
 

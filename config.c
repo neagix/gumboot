@@ -5,7 +5,7 @@
 #include "string.h"
 #include "atoi.h"
 #include "menu.h"
-#include "gecko.h"
+#include "log.h"
 
 #define DEFAULT_LST "gumboot.lst"
 #define MAX_LST_SIZE 16*1024
@@ -20,6 +20,9 @@
 #define ERR_TOO_MANY_STANZAS	0x80
 #define ERR_INVALID_COLOR		0x90
 #define ERR_TOO_MANY_COLORS		0xA0
+#define ERR_DOUBLE_DEFINITION	0xB0
+#define ERR_NO_ROOT				0xC0
+#define ERR_INVALID_ROOT		0xD0
 
 // all configuration options
 int config_timeout = 0,
@@ -44,42 +47,57 @@ int process_line(char *line);
 int complete_stanza();
 char *tokenize(char *line);
 
+static u8 open_part_no = 0xFF;
+static FATFS fatfs;
+
+int config_open_fs(u8 part_no) {
+	if (part_no == open_part_no)
+		return FR_OK;
+
+	FRESULT res = f_mount(part_no, &fatfs);
+	if (res != FR_OK) {
+		return (int)res;
+	}
+	open_part_no = part_no;
+	return FR_OK;
+}
+
 void config_load(void) {
 	FRESULT res;
-	FATFS fatfs;
 	FIL fd;
 	FILINFO stat;
 	u32 read;
-	
-	res = f_mount(0, &fatfs);
-	if (res != FR_OK) {
-		gecko_printf("failed to mount volume: %d\n", res);
+
+	int err = config_open_fs(0);
+	if (err) {
+		log_printf("failed to mount volume: %d\n", err);
 		return;
 	}
-	
+
 	res = f_stat(DEFAULT_LST, &stat);
 	if (res != FR_OK) {
-		gecko_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
+		log_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
 		return;
 	}
 
 	res = f_open(&fd, DEFAULT_LST, FA_READ);
 	if (res != FR_OK) {
-		gecko_printf("failed to open %s: %d\n", DEFAULT_LST, res);
+		log_printf("failed to open %s: %d\n", DEFAULT_LST, res);
 		return;
 	}
 	
 	int fsize = stat.fsize;
 	if (fsize > MAX_LST_SIZE) {
 		fsize = MAX_LST_SIZE;
-		gecko_printf("truncating %s to %d bytes\n", DEFAULT_LST, fsize);
+		log_printf("truncating %s to %d bytes\n", DEFAULT_LST, fsize);
 	}
 	char *cfg_data = malloc(fsize);
 	
 	res = f_read(&fd, cfg_data, fsize, &read);
 	if (res != FR_OK) {
-		gecko_printf("failed to read %s: %d\n", DEFAULT_LST, res);
+		log_printf("failed to read %s: %d\n", DEFAULT_LST, res);
 		free(cfg_data);
+		f_close(&fd);
 		return;
 	}
 	// terminate string
@@ -97,9 +115,10 @@ void config_load(void) {
 		
 		int err = process_line(last_line);
 		if (err) {
-			gecko_printf("error processing line %d: %d\n", line_no, err);
+			log_printf("error processing line %d: %d\n", line_no, err);
 			// in case of error, abort
 			free(cfg_data);
+			f_close(&fd);
 			return;
 		}
 		
@@ -113,21 +132,21 @@ void config_load(void) {
 		last_line = start;
 	}
 	free(cfg_data);
-	
+	f_close(&fd);
 
 	if (wip_stanza) {
 		int err = complete_stanza();
 		if (err)
-			gecko_printf("invalid last menu entry: %d\n", err);
+			log_printf("invalid last menu entry: %d\n", err);
 	}
 	
 	if (config_entries_count == 0) {
-		gecko_printf("no config entries defined\n");
+		log_printf("no config entries defined\n");
 		return;
 	}
 	
 	if (config_default >= config_entries_count) {
-		gecko_printf("invalid default selected\n");
+		log_printf("invalid default selected\n");
 		config_timeout = 0;
 		config_default = 0;
 		return;
@@ -179,7 +198,7 @@ int parse_default(char *s) {
 int complete_stanza() {
 	if (!wip_stanza->title)
 		return ERR_MISSING_TITLE;
-		
+
 	int actions = 0;
 	if (wip_stanza->kernel)
 		actions++;
@@ -187,14 +206,20 @@ int complete_stanza() {
 		actions++;
 	if (wip_stanza->poweroff)
 		actions++;
+	if (wip_stanza->browse)
+		actions++;
 	if (actions > 1) {
-		gecko_printf("completing stanza with %d actions: %p %d %d\n", actions, wip_stanza->kernel, wip_stanza->reboot, wip_stanza->poweroff);
-		
 		return ERR_TOO_MANY_ACTIONS;
 	}
 	
 	if (!actions && !wip_stanza->save_default)
 		return ERR_NOTHING_TO_DO;
+
+	if (wip_stanza->kernel && (!wip_stanza->root && !wip_stanza->find_args))
+		return ERR_NO_ROOT;
+
+	if (wip_stanza->root && wip_stanza->find_args)
+		return ERR_DOUBLE_DEFINITION;
 	
 	// all good, keep track of this stanza
 	config_entries_count++;
@@ -266,6 +291,10 @@ int parse_boot() {
 int parse_reboot() {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
+
+	if (wip_stanza->reboot)
+		return ERR_DOUBLE_DEFINITION;
+
 	wip_stanza->reboot = 1;
 
 	return 0;
@@ -273,6 +302,10 @@ int parse_reboot() {
 int parse_poweroff() {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
+
+	if (wip_stanza->poweroff)
+		return ERR_DOUBLE_DEFINITION;
+
 	wip_stanza->poweroff = 1;
 
 	return 0;
@@ -281,6 +314,9 @@ int parse_poweroff() {
 int parse_savedefault(char *s) {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
+	
+	if (wip_stanza->save_default)
+		return ERR_DOUBLE_DEFINITION;
 	
 	if (*s) {
 		size_t parsed;
@@ -299,7 +335,15 @@ int parse_savedefault(char *s) {
 int parse_kernel(char *s) {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
-		
+
+	if (wip_stanza->kernel)
+		return ERR_DOUBLE_DEFINITION;
+	
+	if (*s == '/')
+		s++;
+	if (!*s)
+		return ERR_MISSING_TOKEN;
+	
 	wip_stanza->kernel = strdup(s);
 	return 0;
 }
@@ -307,16 +351,45 @@ int parse_kernel(char *s) {
 int parse_root(char *s) {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
-		
+
+	if (wip_stanza->root)
+		return ERR_DOUBLE_DEFINITION;
+
+	if (strncmp(s, "(sd", 3)) {
+		return ERR_INVALID_ROOT;
+	}
+	// get partition number
+	s+=3;
+	if (!*s)
+		return ERR_INVALID_ROOT;
+	if (strncmp(s+1, ")/", 2))
+		return ERR_INVALID_ROOT;
+	wip_stanza->root_part_no = (u8)(*s-48);
+	s+=3;
+	if (!*s)
+		return ERR_INVALID_ROOT;
+
+	// make sure there is a trailing slash
+	char *last = s + strlen(s);
+	int restore = 0;
+	if (*last != '/') {
+		restore = 1;
+		*last = '/';
+	}
+
 	wip_stanza->root = strdup(s);
+	if (restore)
+		*last = 0x0;
 	return 0;
 }
 
 int parse_splashimage(char *s) {
+	if (config_splashimage)
+		return ERR_DOUBLE_DEFINITION;
+	
 	config_splashimage = strdup(s);
 	return 0;
 }
-
 
 rgb color_to_rgb[16]={
 		{0,0,0}, 
@@ -447,15 +520,32 @@ int parse_color(char *s) {
 }
 
 int parse_hiddenmenu() {
+	if (config_hidden_menu)
+		return ERR_DOUBLE_DEFINITION;
+
 	config_hidden_menu = 1;
 	
+	return 0;
+}
+
+int parse_browse() {
+	if (!wip_stanza)
+		return ERR_UNEXPECTED_TOKEN;
+
+	if (wip_stanza->browse)
+		return ERR_DOUBLE_DEFINITION;
+
+	wip_stanza->browse = 1;
 	return 0;
 }
 
 int parse_find(char *s) {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
-		
+
+	if (wip_stanza->find_args)
+		return ERR_DOUBLE_DEFINITION;
+
 	wip_stanza->find_args = strdup(s);
 	return 0;
 }
@@ -588,8 +678,14 @@ int process_line(char *line) {
 		}
 		
 		return parse_hiddenmenu();
+	} else if (0 == strcmp(line, "browse")) {
+		if (!eol_reached) {
+			return ERR_EXTRA_TOKEN;
+		}
+		
+		return parse_browse();
 	} else {
-		gecko_printf("unknown token: %s\n", line);
+		log_printf("unknown token: %s\n", line);
 	}
 	
 	return 0;

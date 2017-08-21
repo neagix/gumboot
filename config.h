@@ -15,7 +15,8 @@ typedef struct {
 			*root,
 			*kernel,
 			*find_args;
-	int save_default, reboot, poweroff;
+	u8 save_default, reboot, poweroff, browse;
+	u8 root_part_no;
 	int selected_default; // -1 when referencing self
 } stanza;
 
@@ -35,5 +36,7 @@ extern rgb color_default[2], color_default_invert[2];
 
 #define get_bgcolor(c) ((unsigned long)(c >> 32))
 #define get_fgcolor(c) ((unsigned long)c)
+
+int config_open_fs(u8 part_no);
 
 #endif // _CONFIG_H

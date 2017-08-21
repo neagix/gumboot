@@ -23,6 +23,7 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 
 #define ticks_to_microsecs(ticks)	((((u64)(ticks)*8)/(u64)(TB_TIMER_CLOCK/125)))
 #define microsecs_to_ticks(usec)	(((u64)(usec)*(TB_TIMER_CLOCK/125))/8)
+#define secs_to_ticks(sec)			((u64)(sec)*(TB_TIMER_CLOCK*1000))
 
 u64 mftb(void)
 {
@@ -44,6 +45,10 @@ static void __delay(u64 ticks)
 void usleep(u32 us)
 {
 	__delay(microsecs_to_ticks(us));
+}
+
+void sleep(u32 s) {
+	__delay(secs_to_ticks(s));
 }
 
 u64 mftb_usec(void) {
