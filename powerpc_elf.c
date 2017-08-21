@@ -12,8 +12,6 @@ Copyright (C) 2009			Andre Heider "dhewg" <dhewg@wiibrew.org>
 #include "types.h"
 #include "powerpc.h"
 #include "hollywood.h"
-//#include "utils.h"
-//#include "start.h"
 #include "gecko.h"
 #include "ff.h"
 #include "powerpc_elf.h"
@@ -21,6 +19,7 @@ Copyright (C) 2009			Andre Heider "dhewg" <dhewg@wiibrew.org>
 #include "malloc.h"
 #include "string.h"
 #include "mini_ipc.h"
+#include "log.h"
 
 #define PHDR_MAX 10
 
@@ -35,12 +34,12 @@ int is_valid_elf(const char *path)
 
 	fres = f_open(&fd, path, FA_READ);
 	if (fres != FR_OK)
-		return -fres;
+		return fres;
 
 	fres = f_read(&fd, &elfhdr, sizeof(elfhdr), &read);
 	if (fres != FR_OK) {
 		f_close(&fd);
-		return -fres;
+		return fres;
 	}
 
 	if (read != sizeof(elfhdr)) {
@@ -138,5 +137,8 @@ int powerpc_boot_file(const char *path) {
 		return -200;
 	}
 	
-	return ipc_powerpc_boot(mem, fsize);
+	log_printf("IPC LOAD 0x%p %d -> ", mem, fsize);
+	int err = ipc_powerpc_boot(mem, fsize);
+	log_printf("%d\n", err);
+	return err;
 }

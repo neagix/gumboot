@@ -4,7 +4,7 @@ DEFINES = -DLACKS_SYS_TYPES_H -DLACKS_ERRNO_H -DLACKS_STDLIB_H -DLACKS_STRING_H 
 LDSCRIPT = mini.ld
 LIBS = -lgcc
 
-TARGET = ppcboot.elf
+TARGET = gumboot.elf
 
 OBJS = realmode.o crt0.o main.o string.o sync.o time.o printf.o input.o \
 	exception.o exception_2200.o malloc.o gecko.o video_low.o \
@@ -17,4 +17,3 @@ upload: $(TARGET)
 	@$(WIIDEV)/bin/bootmii -p $<
 
 .PHONY: upload
-

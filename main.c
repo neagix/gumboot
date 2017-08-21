@@ -108,11 +108,7 @@ int main(void)
     menu_selection = config_default;
 	menu_draw_entries();
 
-    // update internal console position, in case log messages are spit out
-    int i;
-    for(i=4;i<config_entries_count+4+1;i++) {
-		gfx_printf("\n");
-	}
+	//TODO: set console position right below the menu
 
 /*
 	DIR dirs;

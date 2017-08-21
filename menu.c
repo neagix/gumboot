@@ -175,9 +175,6 @@ void menu_activate(void) {
 		kernel_fn = sel->kernel;
 	}
 	
-	log_printf("booting in 30s: '%s'\n", kernel_fn);
-	sleep(30);
-	
 	// sanity check
 	err = is_valid_elf(kernel_fn);
 	if (err) {
@@ -185,10 +182,14 @@ void menu_activate(void) {
 		return;
 	}
 	
+	// clear screen for ease of the eyes
+	rgb black = {0,0,0};
+	clear_fb(black);
+	
 	err = powerpc_boot_file(kernel_fn);
 	if (err) {
+		//TODO: redraw menu
 		log_printf("could not boot kernel %s: %d\n", kernel_fn, err);
 		return;
 	}
-	
 }

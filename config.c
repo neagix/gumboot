@@ -7,7 +7,7 @@
 #include "menu.h"
 #include "log.h"
 
-#define DEFAULT_LST "gumboot.lst"
+#define DEFAULT_LST "gumboot/gumboot.lst"
 #define MAX_LST_SIZE 16*1024
 
 #define ERR_MISSING_TOKEN 		0x10
