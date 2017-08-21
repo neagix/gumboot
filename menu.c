@@ -50,15 +50,17 @@ const char *menu_title = "Gumboot menu v0.1";
 
 #define BOX_H (CONSOLE_LINES-4-HELP_LINES)
 
+static int help_drawn = 0;
+
 void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     // draw help text
     selected_font_yuv = font_yuv_helptext;
-    gfx_print_at(2, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
-												"Long-press (2s) power or press eject to boot.");
+    gfx_print_at(1, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
+												"Long-press reset (1s) or press eject to boot.");
 
 	// draw timeout text
 	if (seconds != 0)
-		gfx_printf_at(2, BOX_H+3+3, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
+		gfx_printf_at(1, BOX_H+3+3, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
 
 	selected_font_yuv = font_yuv_heading;
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
@@ -74,27 +76,37 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
 
 void menu_draw_entries(void) {
 	int i;
-	u32 **prev = NULL;
+	u32 **prev = selected_font_yuv;
+
 	for(i=0;i<config_entries_count;i++) {
 		rgb c;
 		if (i == menu_selection && (selected_font_yuv != font_yuv_highlight)) {
-			prev = selected_font_yuv;
+			if (help_drawn || config_entries[i].help_text) {
+				// clear help area
+				selected_font_yuv = font_yuv_helptext;
+				gfx_clear(0, BOX_H+3, CONSOLE_COLUMNS, HELP_LINES, config_color_helptext[1]);
+			}
+			
+			if (config_entries[i].help_text) {
+				help_drawn = 1;
+				
+				selected_font_yuv = font_yuv_helptext;
+				gfx_print_at(1, BOX_H+3, config_entries[i].help_text);
+			}
+
 			selected_font_yuv = font_yuv_highlight;
 			c = config_color_highlight[1];
 		} else {
 			c = config_color_normal[1];
 		}
 		gfx_print_at(1, 4+i, config_entries[i].title);
-
-		// make a whole bar of highlighted selection
+		
+		// make a whole bar of highlighted selection / background
 		int l = strlen(config_entries[i].title);
 		gfx_clear(1 + l, 4+i, CONSOLE_COLUMNS-l-2, 1, c);
-
-		if (prev) {
-			selected_font_yuv = prev;
-			prev = NULL;
-		}
 	}
+
+	selected_font_yuv = prev;
 }
 
 void menu_update_timeout(int seconds) {
