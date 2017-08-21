@@ -226,7 +226,7 @@ int gfx_printf(const char *fmt, ...)
 	int i;
 
 	va_start(args, fmt);
-	i = vsnprintf(pf_buffer, sizeof(pf_buffer), fmt, args);
+	i = vsnprintf(pf_buffer, sizeof(pf_buffer)-1, fmt, args);
 	va_end(args);
 
 	if (i > 0) {
@@ -242,7 +242,7 @@ int gfx_printf_at(int x, int y, const char *fmt, ...)
 	int i;
 
 	va_start(args, fmt);
-	i = vsnprintf(pf_buffer, sizeof(pf_buffer), fmt, args);
+	i = vsnprintf(pf_buffer, sizeof(pf_buffer)-1, fmt, args);
 	va_end(args);
 
 	if (i > 0) {

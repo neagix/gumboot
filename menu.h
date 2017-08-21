@@ -4,6 +4,7 @@
 
 #include "console.h"
 #include "config.h"
+#include "types.h"
 
 #define HELP_LINES 5
 
@@ -11,7 +12,7 @@
 #define DISP_DOWN	0x19
 
 void draw_box_at(int x, int y, int w, int h);
-void menu_draw(int seconds);
+void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor);
 void menu_update_timeout(int seconds);
 void menu_clear_timeout(void);
 void menu_draw_entries(void);

@@ -50,7 +50,7 @@ int log_printf(const char *fmt, ...) {
 	int i;
 	
 	va_start(args, fmt);
-	i = vsnprintf(buffer, sizeof(buffer), fmt, args);
+	i = vsnprintf(buffer, sizeof(buffer)-1, fmt, args);
 	va_end(args);
 	
 	return log_print(buffer, i);

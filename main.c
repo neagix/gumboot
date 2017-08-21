@@ -80,9 +80,9 @@ int main(void)
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
 	u16 mini_version_minor = version & 0xFFFF;
-	log_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
 
 	if (version < MINIMUM_MINI_VERSION) {
+		log_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
 		log_printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
@@ -111,7 +111,7 @@ int main(void)
 			goto quit;
 	}
     
-	menu_draw(config_timeout);
+	menu_draw(config_timeout, mini_version_major, mini_version_minor);
 	menu_draw_entries();
 
 	//TODO: set console position right below the menu

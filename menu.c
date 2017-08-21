@@ -50,7 +50,7 @@ const char *menu_title = "Gumboot menu v0.1";
 
 #define BOX_H (CONSOLE_LINES-4-HELP_LINES)
 
-void menu_draw(int seconds) {
+void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     // draw help text
     selected_font_yuv = font_yuv_helptext;
     gfx_print_at(2, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
@@ -62,6 +62,11 @@ void menu_draw(int seconds) {
 
 	selected_font_yuv = font_yuv_heading;
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
+    
+    // print MINI version
+    char buffer[100];
+    int l = snprintf(buffer, sizeof(buffer)-1, "Mini version: %d.%0d", mini_version_major, mini_version_minor);
+    gfx_print_at(CONSOLE_COLUMNS-l-1, 2, buffer);
    
     selected_font_yuv = font_yuv_normal;
     draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
