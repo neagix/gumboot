@@ -54,12 +54,6 @@ int main(void)
 	
 	config_load();
 	
-	// initialise normal/highlight combinations,
-	// in case there are errors to display
-/*	font_to_yuv(font_yuv_normal, 255, 255, 255, 0, 0, 0);
-	font_to_yuv(font_yuv_highlight, 0, 0, 0, 255, 255, 255);
-	selected_font_yuv = font_yuv_normal; */	
-	
 	init_font(config_color_normal, font_yuv_normal);
 	init_font(config_color_highlight, font_yuv_highlight);
 	init_font(config_color_helptext, font_yuv_helptext);
@@ -90,13 +84,17 @@ int main(void)
 	}
     
 	menu_draw(config_timeout);
-    // update internal console position
-    //gfx_printf("\n\n\n\n");
-    
+   
     menu_selection = config_default;
-	
+
 	menu_draw_entries();
-	
+
+    // update internal console position
+    int i;
+    for(i=4;i<config_entries_count+4;i++) {
+		gfx_printf("\n");
+	}
+
 /*
 	DIR dirs;
 	FILINFO Fno;
@@ -115,10 +113,10 @@ int main(void)
 		}
 	}
 	gfx_printf("last res: %d\n", res); */
-	
+
 	u64 start_time = mftb_usec();
 	int last_time_elapsed = 0;
-	
+
 	while (1) {
 		u16 btn;
 		do {
@@ -152,15 +150,12 @@ int main(void)
 			
 		} while (!btn);
 		
-		if (btn & GPIO_POWER_LP) {
+		if (btn & PAD_BUTTON_A) {
 			menu_activate();
-		} else if (btn & GPIO_POWER) {
+		} else if (btn & PAD_BUTTON_DOWN) {
 			menu_down();
-		} else if (btn & GPIO_RESET) {
+		} else if (btn & PAD_BUTTON_UP) {
 			menu_up();
-		} else if (btn & GPIO_EJECT) {
-			menu_activate();
-			break;
 		}
 	}
 out_menu_loop:

@@ -16,6 +16,7 @@ Copyright (C) 2009		bLAStY <blasty@bootmii.org>
 #include "powerpc.h"
 #include "input.h"
 #include "string.h"
+#include "console.h"
 
 #define PADREG(x) (0xCD006400 + (x)*4)
 
@@ -88,7 +89,7 @@ u16 pad_read(GC_Pad *pad, int chan) {
 	return btns;
 }
 
-#define LONG_PRESS_USEC 2000000 // 2 seconds
+#define LONG_PRESS_USEC 1500000 // 1.5 seconds
 
 #define	RST_DOWN	!((read32(0x0C003000) >> 16) & 1)
 
@@ -117,25 +118,13 @@ u16 gpio_read(void) {
 		if (irq_flag & 1) {
 			res |= GPIO_POWER;
 			
-			press_start = mftb_usec();
-
 			while(read32(0x0d8000c8) & 1);
-			write32(0x0d8000d0, 1);
-
-			if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
-				res |= GPIO_POWER_LP;
-			}
+				write32(0x0d8000d0, 1);
 		} else if (irq_flag & 0x40) {
 			res |= GPIO_EJECT;
 
-			press_start = mftb_usec();
-
 			while(read32(0x0d8000c8) & 0x40);
 			write32(0x0d8000d0, 0x40);
-
-			if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
-				res |= GPIO_POWER_LP;
-			}
 		}
 
 		write32(0x0d800030, 1<<10); // ack GPIO irq
