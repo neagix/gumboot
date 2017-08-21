@@ -60,7 +60,7 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
 
 	// draw timeout text
 	if (seconds != 0)
-		gfx_printf_at(1, BOX_H+3+3, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
+		gfx_printf_at(1, BOX_H+3+4, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
 
 	selected_font_yuv = font_yuv_heading;
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
@@ -84,7 +84,8 @@ void menu_draw_entries(void) {
 			if (help_drawn || config_entries[i].help_text) {
 				// clear help area
 				selected_font_yuv = font_yuv_helptext;
-				gfx_clear(0, BOX_H+3, CONSOLE_COLUMNS, HELP_LINES, config_color_helptext[1]);
+				// do not clear the timeout line
+				gfx_clear(0, BOX_H+3, CONSOLE_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
 			}
 			
 			if (config_entries[i].help_text) {
@@ -97,6 +98,7 @@ void menu_draw_entries(void) {
 			selected_font_yuv = font_yuv_highlight;
 			c = config_color_highlight[1];
 		} else {
+			selected_font_yuv = font_yuv_normal;
 			c = config_color_normal[1];
 		}
 		gfx_print_at(1, 4+i, config_entries[i].title);
@@ -115,10 +117,9 @@ void menu_update_timeout(int seconds) {
 		prev = selected_font_yuv;
 		selected_font_yuv = font_yuv_helptext;
 	}
-	gfx_printf_at(2 + strlen(timeout_prompt), BOX_H+3+3, "%*d", 2, seconds);
-	if (prev) {
+	gfx_printf_at(1 + strlen(timeout_prompt), BOX_H+3+4, "%*d", 2, seconds);
+	if (prev)
 		selected_font_yuv = prev;
-	}
 }
 
 void menu_clear_timeout(void) {
