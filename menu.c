@@ -168,15 +168,15 @@ void menu_activate(void) {
 	}
 
 	char *kernel_fn;
-	if (strlen(sel->root))
+	if (strlen(root))
 		// root has always trailing slash, kernel has always no leading slash
-		kernel_fn = strcat(sel->root, sel->kernel);
+		kernel_fn = strcat(root, sel->kernel);
 	else {
 		kernel_fn = sel->kernel;
 	}
 	
-	log_printf("booting in 3s: '%s'\n", kernel_fn);
-	sleep(3);
+	log_printf("booting in 30s: '%s'\n", kernel_fn);
+	sleep(30);
 	
 	// sanity check
 	err = is_valid_elf(kernel_fn);

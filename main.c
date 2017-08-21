@@ -28,12 +28,12 @@ Copyright (C) 2017              neagix
 #include "console.h"
 #include "menu.h"
 #include "config.h"
+#include "log.h"
 
 #define MINIMUM_MINI_VERSION 0x00010001
 
 int main(void)
 {
-	int vmode = -1;
 	exception_init();
 	dsp_reset();
 
@@ -42,56 +42,75 @@ int main(void)
 
 	ipc_initialize();
 	ipc_slowping();
-
+	
 	gecko_init();
+
+	// initialise backbuffer for our precious log messages
+	if (log_init_bb()) {
+		gecko_printf("could not allocate log backbuffer\n");
+		powerpc_hang();
+		return -1;
+	}
+
+	int config_load_err = config_load();
+	// error will be checked later on
+	
+    input_init();
+	init_fb(config_vmode);
+
+	VIDEO_Init(config_vmode);
+	VIDEO_SetFrameBuffer(get_xfb());
+
 	// is this a gamecube?
 	if (read32(0x0d800190) & 2) {
-		gecko_printf("GameCube compatibility mode detected...\n");
+		// from now, console can be used
+		gfx_console_init = 1;
 
-		powerpc_hang();
-		return 1; /* never reached */
+		log_printf("GameCube compatibility mode detected...\n");
+	} else {	
+		// Wii mode
+		VISetupEncoder();
+		// from now, console can be used
+		gfx_console_init = 1;
 	}
-	
-	init_font(config_color_normal, font_yuv_normal);
-	init_font(config_color_highlight, font_yuv_highlight);
-	init_font(config_color_helptext, font_yuv_helptext);
-	init_font(config_color_heading, font_yuv_heading);
-	
-	selected_font_yuv = font_yuv_normal;
-
-    input_init();
-	init_fb(vmode, config_color_normal[1]);
-
-	VIDEO_Init(vmode);
-	VIDEO_SetFrameBuffer(get_xfb());
-	
-	// Wii mode
-	VISetupEncoder();
+	// flush log lines from the backbuffer - if any
+	log_flush_bb();
+	log_free_bb();
 
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
 	u16 mini_version_minor = version & 0xFFFF;
-	gecko_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
+	log_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
 
 	if (version < MINIMUM_MINI_VERSION) {
-		gecko_printf("Sorry, this version of MINI (armboot.bin)\n"
+		log_printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
 		powerpc_hang();
 		return 1; /* never reached */
 	}
-	
-	config_load();    
+
+	// allow setting of normal color and repaint of screen only if there were no errors displayed
+	if (!config_load_err) {
+		if (rgbcmp(config_color_normal, config_default)) {
+			free_font(font_yuv_normal);
+			init_font(config_color_normal, font_yuv_normal);
+			
+			// repaint all screen with the new background
+			clear_fb(config_color_normal[1]);
+		}
+	}
+	init_font(config_color_highlight, font_yuv_highlight);
+	init_font(config_color_helptext, font_yuv_helptext);
+	init_font(config_color_heading, font_yuv_heading);
     
 	menu_draw(config_timeout);
-   
     menu_selection = config_default;
-
 	menu_draw_entries();
 
-    // update internal console position
+    // update internal console position, in case log messages are spit out
     int i;
-    for(i=4;i<config_entries_count+4;i++) {
+    for(i=4;i<config_entries_count+4+1;i++) {
 		gfx_printf("\n");
 	}
 

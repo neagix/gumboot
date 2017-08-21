@@ -22,9 +22,8 @@
 
 #include <stdarg.h>
 
-int vsprintf(char *buf, const char *fmt, va_list args);
 int vsnprintf(char *str, size_t size, const char *format, va_list args);
-int sprintf(char *buffer, const char *fmt, ...);
+int snprintf(char *buffer, size_t size, const char *fmt, ...);
 
 #endif
 

@@ -26,6 +26,8 @@ typedef struct {
         u8 has_alpha;
 } gfx_rect;
 
+int gfx_console_init = 0;
+
 static u32 *xfb = NULL;
 static int y_add = 0;
 // current absolute cursor position
@@ -34,7 +36,9 @@ static int console_pos = 0;
 u32 *font_yuv_normal[255],
 	*font_yuv_highlight[255],
 	*font_yuv_helptext[255],
-	*font_yuv_heading[255];
+	*font_yuv_heading[255],
+	// used only to print log entries
+	*font_yuv_error[255];
 
 u32 **selected_font_yuv = NULL;
 
@@ -288,10 +292,12 @@ void init_font(rgb c[2], u32 *font_yuv[255]) {
 	font_to_yuv(font_yuv, c[0].r, c[0].g, c[0].b, c[1].r, c[1].g, c[1].b);
 }
 
-void init_fb(int vmode, rgb fill_rgb) {
-	int i;
-	u32 *fb;
-	u32 fill_yuv = make_yuv(fill_rgb.r, fill_rgb.g, fill_rgb.b,fill_rgb.r, fill_rgb.g, fill_rgb.b);
+void init_fb(int vmode) {
+	// default fonts setup before configuration is loaded
+	// and used to display configuration load errors / other log errors
+	font_to_yuv(font_yuv_error, 255, 0, 0, 0, 0, 0);
+	font_to_yuv(font_yuv_normal, 255, 255, 255, 0, 0, 0);
+	selected_font_yuv = font_yuv_normal;
 	
 	switch(vmode) {
 	case VIDEO_640X480_NTSCi_YUV16:
@@ -306,6 +312,16 @@ void init_fb(int vmode, rgb fill_rgb) {
 	}
 
 	xfb = memalign(32, RESOLUTION_W * (RESOLUTION_H + (y_add*2)) * 2);
+	
+	rgb black = {0,0,0};
+	clear_fb(black);
+}
+
+void clear_fb(rgb fill_rgb) {
+	int i;
+	u32 *fb;
+
+	u32 fill_yuv = make_yuv(fill_rgb.r, fill_rgb.g, fill_rgb.b,fill_rgb.r, fill_rgb.g, fill_rgb.b);
 
 	fb  = xfb;
 	for (i = 0; i < (RESOLUTION_H + (y_add*2)) * 2 * (RESOLUTION_W >> 1); i++) {

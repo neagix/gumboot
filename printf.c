@@ -780,18 +780,13 @@ convert(UINTMAX_T value, char *buf, size_t size, int base, int caps)
 	return (int)pos;
 }
 
-int vsprintf(char *buf, const char *fmt, va_list args)
-{
-	return vsnprintf(buf, INT_MAX, fmt, args);
-}
-
-int sprintf(char *buffer, const char *fmt, ...)
+int snprintf(char *buffer, size_t size, const char *fmt, ...)
 {
 	va_list args;
 	int i;
 
 	va_start(args, fmt);
-	i = vsprintf(buffer, fmt,args);
+	i = vsnprintf(buffer, size, fmt, args);
 	va_end(args);
 	return i;
 }

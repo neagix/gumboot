@@ -210,7 +210,7 @@ int gecko_printf(const char *fmt, ...) {
 	int i;
 
 	va_start(args, fmt);
-	i = vsprintf(buffer, fmt, args);
+	i = vsnprintf(buffer, sizeof(buffer), fmt, args);
 	va_end(args);
 
 	return gecko_sendbuffer(buffer, i);

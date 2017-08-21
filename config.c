@@ -31,6 +31,9 @@ int config_timeout = 0,
 	config_entries_count = 0;
 char *config_splashimage = NULL;
 
+//TODO: add support for this setting
+int config_vmode = -1;
+
 rgb color_default[2] = {{0xAA, 0xAA, 0xAA}, {0,0,0}};
 rgb color_default_invert[2] = {{0,0,0}, {0xAA, 0xAA, 0xAA}};
 
@@ -62,7 +65,7 @@ int config_open_fs(u8 part_no) {
 	return FR_OK;
 }
 
-void config_load(void) {
+int config_load(void) {
 	FRESULT res;
 	FIL fd;
 	FILINFO stat;
@@ -71,19 +74,19 @@ void config_load(void) {
 	int err = config_open_fs(0);
 	if (err) {
 		log_printf("failed to mount volume: %d\n", err);
-		return;
+		return err;
 	}
 
 	res = f_stat(DEFAULT_LST, &stat);
 	if (res != FR_OK) {
 		log_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
-		return;
+		return res;
 	}
 
 	res = f_open(&fd, DEFAULT_LST, FA_READ);
 	if (res != FR_OK) {
 		log_printf("failed to open %s: %d\n", DEFAULT_LST, res);
-		return;
+		return res;
 	}
 	
 	int fsize = stat.fsize;
@@ -98,7 +101,7 @@ void config_load(void) {
 		log_printf("failed to read %s: %d\n", DEFAULT_LST, res);
 		free(cfg_data);
 		f_close(&fd);
-		return;
+		return res;
 	}
 	// terminate string
 	cfg_data[read] = 0;
@@ -119,7 +122,7 @@ void config_load(void) {
 			// in case of error, abort
 			free(cfg_data);
 			f_close(&fd);
-			return;
+			return err;
 		}
 		
 		if (start == cfg_data + read) {
@@ -136,21 +139,25 @@ void config_load(void) {
 
 	if (wip_stanza) {
 		int err = complete_stanza();
-		if (err)
+		if (err) {
 			log_printf("invalid last menu entry: %d\n", err);
+			return err;
+		}
 	}
 	
 	if (config_entries_count == 0) {
 		log_printf("no config entries defined\n");
-		return;
+		return -1;
 	}
 	
 	if (config_default >= config_entries_count) {
 		log_printf("invalid default selected\n");
 		config_timeout = 0;
 		config_default = 0;
-		return;
+		return -2;
 	}
+	
+	return 0;
 }
 
 int isspace(char c) {
@@ -360,26 +367,33 @@ int parse_root(char *s) {
 	}
 	// get partition number
 	s+=3;
-	if (!*s)
+	if (strlen(s) < 2)
 		return ERR_INVALID_ROOT;
-	if (strncmp(s+1, ")/", 2))
+	// check string after the number
+	if (s[1] != ')')
 		return ERR_INVALID_ROOT;
-	wip_stanza->root_part_no = (u8)(*s-48);
-	s+=3;
-	if (!*s)
+	u8 n = (u8)(*s-48);
+	if (n > 9) {
 		return ERR_INVALID_ROOT;
-
-	// make sure there is a trailing slash
-	char *last = s + strlen(s);
-	int restore = 0;
-	if (*last != '/') {
-		restore = 1;
-		*last = '/';
 	}
+	wip_stanza->root_part_no = n;
+	
+	// skip number and parenthesis
+	s++; s++;
+	
+	if (!*s) {
+		// only partition provided
+		wip_stanza->root = "/";
+		return 0;
+	}
+	
+	// make sure there is a trailing slash
+	char *last = s + strlen(s) - 1;
+	if (*last != '/') {
+		wip_stanza->root = strcat(s, "/");
+	} else
+		wip_stanza->root = strdup(s);
 
-	wip_stanza->root = strdup(s);
-	if (restore)
-		*last = 0x0;
 	return 0;
 }
 

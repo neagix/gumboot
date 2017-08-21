@@ -20,9 +20,9 @@ typedef struct {
 	int selected_default; // -1 when referencing self
 } stanza;
 
-void config_load(void);
+int config_load(void);
 
-extern int config_timeout, config_default, config_entries_count;
+extern int config_timeout, config_default, config_entries_count, config_vmode;
 extern stanza config_entries[MAX_CONFIG_ENTRIES];
 
 #define rgbcmp(a,b) memcmp(&a, &b, sizeof(a))
