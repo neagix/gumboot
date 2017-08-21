@@ -26,6 +26,7 @@ void gfx_print_at(int x, int y, const char *str);
 void gfx_clear(int x, int y, int w, int h, rgb c);
 u32 *get_xfb(void);
 void clear_fb(rgb fill_rgbc);
+void console_clear(void);
 
 extern unsigned char console_font_8x16[];
 

@@ -14,6 +14,7 @@ typedef struct {
 			*help_text,
 			*root,
 			*kernel,
+			*kernel_args,
 			*find_args;
 	u8 save_default, reboot, poweroff, browse;
 	u8 root_part_no;

@@ -330,3 +330,8 @@ void clear_fb(rgb fill_rgb) {
 		fb++;
 	}
 }
+
+void console_clear(void) {
+	console_pos = 0;
+	clear_fb(config_color_normal[1]);
+}

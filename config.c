@@ -351,6 +351,16 @@ int parse_kernel(char *s) {
 	if (!*s)
 		return ERR_MISSING_TOKEN;
 	
+	// find arguments (if any)
+	char *pos = strchr(s, ' ');
+	if (pos) {
+		*pos = 0x0;
+		pos++;
+		wip_stanza->kernel_args = strdup(pos);
+	} else {
+		wip_stanza->kernel_args = "";
+	}
+	
 	wip_stanza->kernel = strdup(s);
 	return 0;
 }
@@ -373,20 +383,25 @@ int parse_root(char *s) {
 	if (s[1] != ')')
 		return ERR_INVALID_ROOT;
 	u8 n = (u8)(*s-48);
-	if (n > 9) {
+	if (n > 9)
 		return ERR_INVALID_ROOT;
-	}
+
 	wip_stanza->root_part_no = n;
 	
 	// skip number and parenthesis
 	s++; s++;
 	
-	if (!*s) {
+	if (!*s || (s[0] == '/' && !s[1])) {
 		// only partition provided
-		wip_stanza->root = "/";
+		wip_stanza->root = "";
 		return 0;
 	}
-	
+
+	// remove leading slash
+	if (*s != '/')
+		return ERR_INVALID_ROOT;
+	s++;
+
 	// make sure there is a trailing slash
 	char *last = s + strlen(s) - 1;
 	if (*last != '/') {

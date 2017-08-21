@@ -104,8 +104,61 @@ int is_valid_elf(const char *path)
 	return 0;
 }
 
+static char *memstr(char *mem, unsigned int fsize, const char *s) {
+	unsigned int i;
+	int l = strlen(s);
+	int match = 0;
+	for(i=0;i<fsize;i++) {
+		if (mem[i] == s[match]) {
+			match++;
+			if (match == l)
+				break;
+		} else {
+			match = 0;
+		}
+	}
+	
+	// not found?
+	if (match != l)
+		return NULL;
+
+	return mem+i;
+}
+
+const char 	*bootargs_end_marker = "mark.end=1",
+			*bootargs_start_marker = "mark.start=1";
+
+static int edit_bootargs(char *mem, unsigned int fsize, const char *args) {
+	int l = strlen(args);
+	if (!l)
+		return 0;
+
+	// find a match for start marker
+	char *start = memstr(mem, fsize, bootargs_start_marker);
+	if (!start)
+		return -1;
+
+	// find a match for end marker
+	char *end = memstr(start, fsize-(start-mem), bootargs_end_marker);
+	if (!end)
+		return -2;
+	end += strlen(bootargs_end_marker);
+	int span = (end-start);
+	if (l > span)
+		return -3;
+	memcpy(start, args, l);
+	
+	// blank rest of bootargs
+	int i;
+	for(i=l;i<span;i++) {
+		start[i] = ' ';
+	}
+
+	return 0;
+}
+
 // will boot via IPC call to MINI
-int powerpc_boot_file(const char *path) {
+int powerpc_boot_file(const char *path, const char *args) {
 	FRESULT res;
 	FILINFO stat;
 	FIL fd;
@@ -137,8 +190,11 @@ int powerpc_boot_file(const char *path) {
 		return -200;
 	}
 	
-	log_printf("IPC LOAD 0x%p %d -> ", mem, fsize);
-	int err = ipc_powerpc_boot(mem, fsize);
-	log_printf("%d\n", err);
-	return err;
+	int err = edit_bootargs(mem, fsize, args);
+	if (err) {
+		log_printf("could not edit bootargs: %d\n", err);
+		return err;
+	}
+	
+	return ipc_powerpc_boot(mem, fsize);
 }

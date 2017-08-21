@@ -181,12 +181,13 @@ void menu_activate(void) {
 		log_printf("not a valid ELF: %s: %d\n", kernel_fn, err);
 		return;
 	}
-	
+
 	// clear screen for ease of the eyes
-	rgb black = {0,0,0};
-	clear_fb(black);
-	
-	err = powerpc_boot_file(kernel_fn);
+	selected_font_yuv = font_yuv_normal;
+	console_clear();
+	gfx_printf("Booting (sd%d)/%s...", part_no, kernel_fn);
+
+	err = powerpc_boot_file(kernel_fn, sel->kernel_args);
 	if (err) {
 		//TODO: redraw menu
 		log_printf("could not boot kernel %s: %d\n", kernel_fn, err);
