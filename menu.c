@@ -179,7 +179,11 @@ int menu_activate(void) {
 	// clear screen for ease of the eyes
 	selected_font_yuv = font_yuv_normal;
 	console_clear();
-	gfx_printf("Booting (sd%d)/%s...", part_no, kernel_fn);
+	
+	if (strlen(sel->kernel_args))
+		gfx_printf("Booting (sd%d)/%s... [%s]", part_no, kernel_fn, sel->kernel_args);
+	else
+		gfx_printf("Booting (sd%d)/%s...", part_no, kernel_fn);
 
 	err = powerpc_boot_file(kernel_fn, sel->kernel_args);
 	if (err) {
