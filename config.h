@@ -16,14 +16,13 @@ typedef struct {
 			*kernel,
 			*kernel_args,
 			*find_args;
-	u8 save_default, reboot, poweroff, browse;
+	u8 reboot, poweroff, browse;
 	u8 root_part_no;
-	int selected_default; // -1 when referencing self
 } stanza;
 
 int config_load(void);
 
-extern int config_timeout, config_default, config_entries_count, config_vmode;
+extern int config_timeout, config_default, config_entries_count, config_vmode, config_nomenu;
 extern stanza config_entries[MAX_CONFIG_ENTRIES];
 
 #define rgbcmp(a,b) memcmp(&a, &b, sizeof(a))

@@ -104,8 +104,14 @@ int main(void)
 	init_font(config_color_helptext, font_yuv_helptext);
 	init_font(config_color_heading, font_yuv_heading);
     
-	menu_draw(config_timeout);
     menu_selection = config_default;
+    
+    if (config_nomenu) {
+		if (!menu_activate())
+			goto quit;
+	}
+    
+	menu_draw(config_timeout);
 	menu_draw_entries();
 
 	//TODO: set console position right below the menu
@@ -148,7 +154,8 @@ normal_loop:
 						config_timeout = 0;
 						menu_clear_timeout();
 						
-						menu_activate();
+						if (!menu_activate())
+							goto quit;
 						goto normal_loop;
 					} else {
 						menu_update_timeout(left);
@@ -167,14 +174,15 @@ normal_loop:
 		} while (!btn);
 		
 		if (btn & PAD_BUTTON_A) {
-			menu_activate();
+			if (!menu_activate())
+				goto quit;
 		} else if (btn & PAD_BUTTON_DOWN) {
 			menu_down();
 		} else if (btn & PAD_BUTTON_UP) {
 			menu_up();
 		}
 	}
-
+quit:
 	powerpc_hang();
 
 	return 0;

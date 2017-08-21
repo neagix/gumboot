@@ -18,7 +18,7 @@ void menu_draw_entries(void);
 
 void menu_up(void);
 void menu_down(void);
-void menu_activate(void);
+int menu_activate(void);
 
 extern int menu_selection;
 

@@ -123,16 +123,16 @@ void menu_up(void) {
 	menu_draw_entries();
 }
 
-void menu_activate(void) {
+int menu_activate(void) {
 	stanza *sel = &config_entries[menu_selection];
 	
 	if (sel->reboot) {
 		powerpc_reset();
-		return;
+		return 0;
 	}
 	if (sel->poweroff) {
 		powerpc_poweroff();
-		return;
+		return 0;
 	}
 	
 	u8 part_no = 0xFF;
@@ -144,19 +144,13 @@ void menu_activate(void) {
 	} else if (sel->browse) {
 		//TODO: directory browse, use root if any otherwise first partition
 		
-		return;
+		return 0;
 	} else if (sel->root) {
 		root = sel->root;
 		part_no = sel->root_part_no;
 	} else {
-		// just a save default action
-		if (!sel->save_default) {
-			log_printf("BUG: invalid menu entry\n");
-			return;
-		}
-		//TODO: save the default
-		
-		return;
+		log_printf("BUG: invalid menu entry\n");
+		return -1;
 	}
 	
 	// at this point root must have been setup
@@ -164,7 +158,7 @@ void menu_activate(void) {
 	int err = config_open_fs(part_no);
 	if (err) {
 		log_printf("could not open partition %d: %d\n", part_no, err);
-		return;
+		return err;
 	}
 
 	char *kernel_fn;
@@ -179,7 +173,7 @@ void menu_activate(void) {
 	err = is_valid_elf(kernel_fn);
 	if (err) {
 		log_printf("not a valid ELF: %s: %d\n", kernel_fn, err);
-		return;
+		return err;
 	}
 
 	// clear screen for ease of the eyes
@@ -191,6 +185,8 @@ void menu_activate(void) {
 	if (err) {
 		//TODO: redraw menu
 		log_printf("could not boot kernel %s: %d\n", kernel_fn, err);
-		return;
+		return err;
 	}
+	
+	return 0;
 }

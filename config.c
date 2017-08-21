@@ -27,7 +27,7 @@
 // all configuration options
 int config_timeout = 0,
 	config_default = 0,
-	config_hidden_menu = 0,
+	config_nomenu = 0,
 	config_entries_count = 0;
 char *config_splashimage = NULL;
 
@@ -157,6 +157,12 @@ int config_load(void) {
 		return -2;
 	}
 	
+	if (config_nomenu && config_timeout) {
+		log_printf("cannot use nomenu with a timeout\n");
+		config_nomenu = 0;
+		return -2;
+	}
+	
 	return 0;
 }
 
@@ -219,7 +225,7 @@ int complete_stanza() {
 		return ERR_TOO_MANY_ACTIONS;
 	}
 	
-	if (!actions && !wip_stanza->save_default)
+	if (!actions)
 		return ERR_NOTHING_TO_DO;
 
 	if (wip_stanza->kernel && (!wip_stanza->root && !wip_stanza->find_args))
@@ -314,27 +320,6 @@ int parse_poweroff() {
 		return ERR_DOUBLE_DEFINITION;
 
 	wip_stanza->poweroff = 1;
-
-	return 0;
-}
-
-int parse_savedefault(char *s) {
-	if (!wip_stanza)
-		return ERR_UNEXPECTED_TOKEN;
-	
-	if (wip_stanza->save_default)
-		return ERR_DOUBLE_DEFINITION;
-	
-	if (*s) {
-		size_t parsed;
-		int val = atoi(s, 10, &parsed);
-		if (!parsed || (parsed != strlen(s)))
-			return ERR_INVALID_NUMBER;
-		wip_stanza->selected_default = val;
-	} else {
-		wip_stanza->save_default = 1;
-		wip_stanza->selected_default = -1; /* self */
-	}
 
 	return 0;
 }
@@ -548,11 +533,11 @@ int parse_color(char *s) {
 	return 0;
 }
 
-int parse_hiddenmenu() {
-	if (config_hidden_menu)
+int parse_nomenu() {
+	if (config_nomenu)
 		return ERR_DOUBLE_DEFINITION;
 
-	config_hidden_menu = 1;
+	config_nomenu = 1;
 	
 	return 0;
 }
@@ -650,9 +635,6 @@ int process_line(char *line) {
 		}
 		
 		return parse_title(eot);
-	} else if (0 == strcmp(line, "savedefault")) {
-		// extra argument is optional
-		return parse_savedefault(eot);
 	} else if (0 == strcmp(line, "splashimage")) {
 		if (eol_reached) {
 			return ERR_MISSING_TOKEN;
@@ -701,12 +683,12 @@ int process_line(char *line) {
 		}
 		
 		return parse_poweroff();
-	} else if (0 == strcmp(line, "hiddenmenu")) {
+	} else if ((0 == strcmp(line, "hiddenmenu")) || (0 == strcmp(line, "nomenu"))) {
 		if (!eol_reached) {
 			return ERR_EXTRA_TOKEN;
 		}
 		
-		return parse_hiddenmenu();
+		return parse_nomenu();
 	} else if (0 == strcmp(line, "browse")) {
 		if (!eol_reached) {
 			return ERR_EXTRA_TOKEN;
