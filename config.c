@@ -6,6 +6,7 @@
 #include "atoi.h"
 #include "menu.h"
 #include "log.h"
+#include "video_low.h"
 
 #define DEFAULT_LST "gumboot/gumboot.lst"
 #define MAX_LST_SIZE 16*1024
@@ -23,6 +24,7 @@
 #define ERR_DOUBLE_DEFINITION	0xB0
 #define ERR_NO_ROOT				0xC0
 #define ERR_INVALID_ROOT		0xD0
+#define ERR_INVALID_VIDEO_MODE	0xE0
 
 // all configuration options
 int config_timeout = 0,
@@ -553,6 +555,27 @@ int parse_browse() {
 	return 0;
 }
 
+int parse_video(char *s) {
+	if (wip_stanza)
+		return ERR_UNEXPECTED_TOKEN;
+
+	if (config_vmode != -1)
+		return ERR_DOUBLE_DEFINITION;
+
+	if (!strcmp(s, "PROGRESSIVE"))
+		config_vmode = VIDEO_640X480_NTSCp_YUV16;
+	else if (!strcmp(s, "NTSC"))
+		config_vmode = VIDEO_640X480_NTSCi_YUV16;
+	else if (!strcmp(s, "PAL50"))
+		config_vmode = VIDEO_640X480_PAL50_YUV16;
+	else if (!strcmp(s, "PAL60"))
+		config_vmode = VIDEO_640X480_PAL60_YUV16;
+	else
+		return ERR_INVALID_VIDEO_MODE;
+
+	return 0;
+}
+
 int parse_find(char *s) {
 	if (!wip_stanza)
 		return ERR_UNEXPECTED_TOKEN;
@@ -612,85 +635,88 @@ int process_line(char *line) {
 	if (*line == '#')
 		return 0;
 		
-	char *eot = tokenize(line);
-	int eol_reached = (eot == NULL);
-	if (eol_reached)
-		eot = "";
+	char *token = tokenize(line);
 	
 	if (0 == strcmp(line, "timeout")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_timeout(eot);
+		return parse_timeout(token);
 	} else if (0 == strcmp(line, "default")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_default(eot);
+		return parse_default(token);
 	} else if (0 == strcmp(line, "title")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_title(eot);
+		return parse_title(token);
 	} else if (0 == strcmp(line, "splashimage")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_splashimage(eot);
+		return parse_splashimage(token);
 	} else if (0 == strcmp(line, "color")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_color(eot);
+		return parse_color(token);
+	} else if (0 == strcmp(line, "video")) {
+		if (token == NULL) {
+			return ERR_MISSING_TOKEN;
+		}
+		
+		return parse_video(token);
 	} else if (0 == strcmp(line, "kernel")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_kernel(eot);
+		return parse_kernel(token);
 	} else if (0 == strcmp(line, "root")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_root(eot);
+		return parse_root(token);
 	} else if (0 == strcmp(line, "find")) {
-		if (eol_reached) {
+		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
-		return parse_find(eot);
+		return parse_find(token);
 	} else if (0 == strcmp(line, "reboot")) {
-		if (!eol_reached) {
+		if (token) {
 			return ERR_EXTRA_TOKEN;
 		}
 		
 		return parse_reboot();
 	} else if (0 == strcmp(line, "boot")) {
-		if (!eol_reached) {
+		if (token) {
 			return ERR_EXTRA_TOKEN;
 		}
 		
 		return parse_boot();
 	} else if ((0 == strcmp(line, "poweroff")) || (0 == strcmp(line, "halt"))) {
-		if (!eol_reached) {
+		if (token) {
 			return ERR_EXTRA_TOKEN;
 		}
 		
 		return parse_poweroff();
 	} else if ((0 == strcmp(line, "hiddenmenu")) || (0 == strcmp(line, "nomenu"))) {
-		if (!eol_reached) {
+		if (token) {
 			return ERR_EXTRA_TOKEN;
 		}
 		
 		return parse_nomenu();
 	} else if (0 == strcmp(line, "browse")) {
-		if (!eol_reached) {
+		if (token) {
 			return ERR_EXTRA_TOKEN;
 		}
 		

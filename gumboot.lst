@@ -4,7 +4,7 @@
 
 # Video mode, possible settings:
 # NTSC, PAL50, PAL60, PROGRESSIVE
-#video PROGRESSIVE
+video PAL60
 
 splashimage (sd0)/gumboot/splash.ppm
 
