@@ -29,11 +29,6 @@ typedef volatile signed short vs16;
 typedef volatile signed int vs32;
 typedef volatile signed long long vs64;
 
-typedef unsigned int size_t;
-typedef signed int ssize_t;
-
-#define NULL ((void *)0)
-
 /* These types must be 16-bit, 32-bit or larger integer */
 typedef int				INT;
 typedef unsigned int	UINT;

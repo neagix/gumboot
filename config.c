@@ -1,14 +1,23 @@
 
 #include "config.h"
 #include "ff.h"
-#include "malloc.h"
-#include "string.h"
-#include "atoi.h"
-#include "menu.h"
-#include "log.h"
 #include "video_low.h"
 
-#define DEFAULT_LST "gumboot/gumboot.lst"
+#ifdef GUMBOOT
+#include "malloc.h"
+#include "string.h"
+//#include "menu.h"
+#include "log.h"
+#else
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "lstrender/log_compat.h"
+
+#include "atoi.h"
+#endif
+
 #define MAX_LST_SIZE 16*1024
 
 #define ERR_MISSING_TOKEN 		0x10
@@ -33,7 +42,6 @@ int config_timeout = 0,
 	config_entries_count = 0;
 char *config_splashimage = NULL;
 
-//TODO: add support for this setting
 int config_vmode = -1;
 
 rgb color_default[2] = {{0xAA, 0xAA, 0xAA}, {0,0,0}};
@@ -52,43 +60,21 @@ int process_line(char *line);
 int complete_stanza();
 char *tokenize(char *line);
 
-static u8 open_part_no = 0xFF;
-static FATFS fatfs;
-
-int config_open_fs(u8 part_no) {
-	if (part_no == open_part_no)
-		return FR_OK;
-
-	FRESULT res = f_mount(part_no, &fatfs);
-	if (res != FR_OK) {
-		return (int)res;
-	}
-	open_part_no = part_no;
-	return FR_OK;
-}
-
-int config_load(void) {
+char *config_load(const char *fname, u32 *read) {
 	FRESULT res;
 	FIL fd;
 	FILINFO stat;
-	u32 read;
 
-	int err = config_open_fs(0);
-	if (err) {
-		log_printf("failed to mount volume: %d\n", err);
-		return err;
-	}
-
-	res = f_stat(DEFAULT_LST, &stat);
+	res = f_stat(fname, &stat);
 	if (res != FR_OK) {
 		log_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
-		return res;
+		return NULL;
 	}
 
 	res = f_open(&fd, DEFAULT_LST, FA_READ);
 	if (res != FR_OK) {
 		log_printf("failed to open %s: %d\n", DEFAULT_LST, res);
-		return res;
+		return NULL;
 	}
 	
 	int fsize = stat.fsize;
@@ -98,16 +84,21 @@ int config_load(void) {
 	}
 	char *cfg_data = malloc(fsize);
 	
-	res = f_read(&fd, cfg_data, fsize, &read);
+	res = f_read(&fd, cfg_data, fsize, read);
 	if (res != FR_OK) {
 		log_printf("failed to read %s: %d\n", DEFAULT_LST, res);
 		free(cfg_data);
 		f_close(&fd);
-		return res;
+		return NULL;
 	}
 	// terminate string
-	cfg_data[read] = 0;
+	cfg_data[*read] = 0;
+	f_close(&fd);
 	
+	return cfg_data;
+}
+
+int config_load_from_buffer(char *cfg_data, u32 read) {
 	char *start = cfg_data, *last_line = cfg_data;
 	int line_no = 0;
 	while (1) {
@@ -123,7 +114,6 @@ int config_load(void) {
 			log_printf("error processing line %d: %d\n", line_no, err);
 			// in case of error, abort
 			free(cfg_data);
-			f_close(&fd);
 			return err;
 		}
 		
@@ -137,7 +127,6 @@ int config_load(void) {
 		last_line = start;
 	}
 	free(cfg_data);
-	f_close(&fd);
 
 	if (wip_stanza) {
 		int err = complete_stanza();
@@ -168,7 +157,7 @@ int config_load(void) {
 	return 0;
 }
 
-int isspace(char c) {
+int is_whitespace(char c) {
 	return ((c == ' ') || (c == '\t'));
 }
 
@@ -179,7 +168,7 @@ void trim_right(char *s, char *beginning) {
 			return;
 		if (*s == 0x0)
 			return;
-		if (isspace(*s)) {
+		if (is_whitespace(*s)) {
 			*s = 0x0;
 			s--;
 		} else
@@ -187,9 +176,25 @@ void trim_right(char *s, char *beginning) {
 	}
 }
 
+char * strchr2(const char *s, char c1, char c2)
+{
+	size_t i;
+	
+	for (i = 0; s[i]; i++) {
+		if (s[i] == c1) {
+			if (!s[i+1])
+				break;
+			if (s[i+1] == c2)
+				return (char *)s + i;
+		}
+	}
+
+	return NULL;
+}
+
 int parse_timeout(char *s) {
 	size_t parsed;
-	int val = atoi(s, 10, &parsed);
+	int val = atoi_base(s, 10, &parsed);
 	if (parsed != strlen(s))
 		return ERR_INVALID_NUMBER;
 	
@@ -200,7 +205,7 @@ int parse_timeout(char *s) {
 
 int parse_default(char *s) {
 	size_t parsed;
-	int val = atoi(s, 10, &parsed);
+	int val = atoi_base(s, 10, &parsed);
 	if (!parsed || (parsed != strlen(s)))
 		return ERR_INVALID_NUMBER;
 	
@@ -597,7 +602,7 @@ char *tokenize(char *line) {
 		if (!*eot) {
 			return NULL;
 		}
-		if (!isspace(*eot))
+		if (!is_whitespace(*eot))
 			eot++;
 		else {
 			*eot = 0x0;
@@ -613,7 +618,7 @@ char *tokenize(char *line) {
 				eot = NULL;
 				break;
 			}
-			if (isspace(*eot))
+			if (is_whitespace(*eot))
 				eot++;
 			else
 				/* good token */
@@ -626,7 +631,7 @@ char *tokenize(char *line) {
 
 int process_line(char *line) {
 	// skip whitespace
-	while (isspace(*line))
+	while (is_whitespace(*line))
 		line++;
 	if (!*line)
 		return 0;

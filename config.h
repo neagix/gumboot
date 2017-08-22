@@ -5,6 +5,8 @@
 
 #define MAX_CONFIG_ENTRIES 32
 
+#define DEFAULT_LST "gumboot/gumboot.lst"
+
 typedef struct {
 	u8 r, g, b;
 } rgb;
@@ -20,7 +22,8 @@ typedef struct {
 	u8 root_part_no;
 } stanza;
 
-int config_load(void);
+char *config_load(const char *fname, u32 *read);
+int config_load_from_buffer(char *cfg_data, u32 read);
 
 extern int config_timeout, config_default, config_entries_count, config_vmode, config_nomenu;
 extern stanza config_entries[MAX_CONFIG_ENTRIES];

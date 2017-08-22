@@ -1,7 +1,7 @@
 
 #include "atoi.h"
 
-int atoi(register char *s, register unsigned int base, size_t *parsed) {
+int atoi_base(register char *s, register unsigned int base, size_t *parsed) {
     register int result = 0;
     register unsigned int digit;
 

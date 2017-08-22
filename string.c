@@ -133,22 +133,6 @@ char * strchr(const char *s, char c)
 	return NULL;
 }
 
-char * strchr2(const char *s, char c1, char c2)
-{
-	size_t i;
-	
-	for (i = 0; s[i]; i++) {
-		if (s[i] == c1) {
-			if (!s[i+1])
-				break;
-			if (s[i+1] == c2)
-				return (char *)s + i;
-		}
-	}
-
-	return NULL;
-}
-
 size_t strspn(const char *s1, const char *s2)
 {
 	size_t len = 0;

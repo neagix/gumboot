@@ -27,6 +27,7 @@ Copyright (C) 2017              neagix
 #include "input.h"
 #include "console.h"
 #include "menu.h"
+#include "filesystem.h"
 #include "config.h"
 #include "log.h"
 
@@ -51,9 +52,14 @@ int main(void)
 		powerpc_hang();
 		return -1;
 	}
-
-	int config_load_err = config_load();
-	// error will be checked later on
+	
+	int err = fs_open(0);
+	if (!err) {
+		err =  config_load_err = config_load();
+		// error will be checked later on
+	} else {
+		log_printf("failed to mount volume: %d\n", err);
+	}
 	
     input_init();
 	init_fb(config_vmode);

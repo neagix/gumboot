@@ -1,4 +1,4 @@
-OBJS = lodepng.o lstrender.o
+OBJS = lodepng.o lstrender.o ../config.o ../atoi.o
 
 TARGET = lstrender
 
@@ -11,4 +11,4 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(DEFINES) -Wp,-MMD,-MQ,-MP -c $< -o $@
 
 clean:
-	rm -f *.o ../lodepng/*.o
+	rm -f *.o

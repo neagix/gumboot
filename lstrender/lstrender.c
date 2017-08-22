@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #include "lodepng.h"
+
+#include "../config.h"
  
 /* The image argument has width * height RGBA pixels or width * height * 4 bytes */
 void encodeOneStep(const char* filename, const unsigned char* image, unsigned width, unsigned height)
@@ -16,18 +18,26 @@ void encodeOneStep(const char* filename, const unsigned char* image, unsigned wi
  
 int main(int argc, char **argv)
 {
-	FILE *fp;
 	if (argc != 3) {
 		fprintf(stderr, "Usage: lstrender gumboot.lst preview.png\n");
 		return -1;
 	}
-	fp = fopen(argv[1], "r");
-	if( fp == NULL ) {
-		perror("error opening file.\n");
-		return -2;
-	}
 	
-	//TODO: read file in memory, load configuration via shared code
+	// load configuration file into memory
+
+	FILE *f = fopen(argv[1], "rb");
+	fseek(f, 0, SEEK_END);
+	long fsize = ftell(f);
+	fseek(f, 0, SEEK_SET);  //same as rewind(f);
+
+	char *config_data = malloc(fsize + 1);
+	fread(config_data, fsize, 1, f);
+	fclose(f);
+
+	config_data[fsize] = 0;	
+	
+	int err = config_load_from_buffer(config_data);
+	free(config_data);
 	
 	unsigned width = 512, height = 512;
 	unsigned char* image = malloc(width * height * 4);
@@ -45,6 +55,6 @@ int main(int argc, char **argv)
 
 	free(image);	
 	
-	fclose(fp);
+
 	return 0;
 }
