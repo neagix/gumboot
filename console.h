@@ -15,6 +15,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #include "types.h"
 #include "types_compat.h"
 #include "config.h"
+#include "console_defs.h"
 
 int gfx_printf(const char *fmt, ...);
 int gfx_printf_at(int x, int y, const char *fmt, ...);
@@ -37,20 +38,6 @@ extern u32 *font_yuv_normal[255],
 	*font_yuv_helptext[255],
 	*font_yuv_heading[255],
 	*font_yuv_error[255];
-
-#define CONSOLE_CHAR_WIDTH 8
-#define CONSOLE_CHAR_HEIGHT 16
-#define CONSOLE_ROW_HEIGHT CONSOLE_CHAR_HEIGHT
-
-#define RESOLUTION_W 640
-#define RESOLUTION_H 480
-
-#define CONSOLE_Y_OFFSET (CONSOLE_CHAR_HEIGHT-2)
-#define CONSOLE_X_OFFSET  0
-
-#define CONSOLE_WIDTH RESOLUTION_W
-#define CONSOLE_LINES ((RESOLUTION_H-CONSOLE_Y_OFFSET)/CONSOLE_ROW_HEIGHT - 1)
-#define CONSOLE_COLUMNS (CONSOLE_WIDTH/CONSOLE_CHAR_WIDTH)
 
 extern int gfx_console_init;
 

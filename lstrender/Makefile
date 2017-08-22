@@ -1,4 +1,4 @@
-OBJS = lodepng.o lstrender.o ../config.o ../atoi.o
+OBJS = lodepng.o lstrender.o ../config.o ../atoi.o ../menu_render.o
 
 TARGET = lstrender
 

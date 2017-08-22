@@ -5,6 +5,7 @@
 #include "lodepng.h"
 
 #include "../config.h"
+#include "../menu_render.h"
  
 /* The image argument has width * height RGBA pixels or width * height * 4 bytes */
 void encodeOneStep(const char* filename, const unsigned char* image, unsigned width, unsigned height)
@@ -46,6 +47,9 @@ int main(int argc, char **argv)
 	for(int i =0;i<config_entries_count;i++) {
 		printf("%d: %s\n", i, config_entries[i].title);
 	}
+	
+	menu_draw(config_timeout, 0, 0);
+	menu_draw_entries();
 	
 	unsigned width = 512, height = 512;
 	unsigned char* image = malloc(width * height * 4);
