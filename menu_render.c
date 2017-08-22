@@ -1,8 +1,6 @@
 
 #include "menu_render.h"
 
-#define HELP_LINES 5
-
 #define DISP_UP		0x18
 #define DISP_DOWN	0x19
 

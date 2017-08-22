@@ -27,6 +27,7 @@ Copyright (C) 2017              neagix
 #include "input.h"
 #include "console.h"
 #include "menu.h"
+#include "menu_render.h"
 #include "filesystem.h"
 #include "config.h"
 #include "log.h"
