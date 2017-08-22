@@ -97,10 +97,10 @@ void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
 	}
 }
 
-void gfx_draw_char(int dx, int dy, char c) {
+void gfx_draw_char(int dx, int dy, unsigned char c) {
         u32 y;
         u32 *fb = xfb;
-        u32 *yuv_data = selected_font_yuv[ (int)c ];
+        u32 *yuv_data = selected_font_yuv[ c ];
 
         fb += ((dy + y_add) * (RESOLUTION_W >> 1));
         fb += (dx >> 1);
