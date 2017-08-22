@@ -27,6 +27,10 @@ int main(int argc, char **argv)
 	// load configuration file into memory
 
 	FILE *f = fopen(argv[1], "rb");
+	if (!f) {
+		fprintf(stderr, "ERROR: could not open '%s'\n", argv[1]);
+		return -2;
+	}
 	fseek(f, 0, SEEK_END);
 	long fsize = ftell(f);
 	fseek(f, 0, SEEK_SET);  //same as rewind(f);
@@ -50,7 +54,9 @@ int main(int argc, char **argv)
 	
 	unsigned width = RESOLUTION_W, height = RESOLUTION_H;
 	
-	vfb = malloc(width * height * 4);
+	vfb_stride = width * 4;
+	vfb = malloc(vfb_stride * height);
+	
 	unsigned x, y;
 	for(y = 0; y < height; y++) {
 		for(x = 0; x < width; x++) {

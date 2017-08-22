@@ -9,3 +9,4 @@ int gfx_printf_at(int x, int y, const char *fmt, ...);
 void select_font(int font);
 
 extern unsigned char *vfb;
+extern unsigned vfb_stride;

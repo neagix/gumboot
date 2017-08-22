@@ -3,6 +3,7 @@
 #include "../console_defs.h"
 
 unsigned char *vfb;
+unsigned vfb_stride;
 
 rgb color_error[2] = {{255, 0, 0}, {0, 0, 0}};
 
@@ -32,8 +33,24 @@ void select_font(int font) {
 void gfx_printch_at(int x, int y, char c) {
 }
 
-void gfx_clear(int x, int y, int w, int h, rgb c) {
-	
+static void memset32(u32 *dst, u32 setval, u32 count) {
+	while(count--) {
+		*dst = setval;
+
+		dst++;
+	}
+}
+
+void gfx_clear(int offset_x, int offset_y, int w, int h, rgb c) {
+	u32 *fb = (u32 *)vfb;
+
+	fb += (offset_y * CONSOLE_CHAR_HEIGHT) * (vfb_stride/4);
+	fb += offset_x * CONSOLE_CHAR_WIDTH;
+
+	for(int y = 0; y < h; y++) {
+		memset32(fb, c.as_u32, w * CONSOLE_CHAR_WIDTH);
+		fb += vfb_stride/4;
+	}
 }
 
 void gfx_print_at(int x, int y, const char *str) {
