@@ -37,7 +37,7 @@ extern unsigned char *console_font_8x16;
 
 static void memcpy_font(u32 *dst, unsigned char font_row, rgb *fg, rgb *bg) {
 	for (u32 x = 0; x < CONSOLE_CHAR_WIDTH; x++) {
-		if (((font_row >> (CONSOLE_CHAR_WIDTH-1-x)) & 0x01) == 1) {
+		if ((font_row >> (CONSOLE_CHAR_WIDTH-1-x)) & 0x01) {
 			dst[x] = fg->as_u32;
 		} else {
 			dst[x] = bg->as_u32;
@@ -67,13 +67,16 @@ void gfx_draw_char(int dx, int dy, char c) {
 			fg = &config_color_highlight[0];
 			bg = &config_color_highlight[1];
 			break;
+		default:
+			// PANIC!
+			return;
 	}
 
 	fb += dy * vfb_stride/4;
 	fb += dx;
-        
-    for(y = 0; y < d_rect->height; y++) {
-		memcpy_font(fb, console_font_8x16[d_rect->width * y], fg, bg);
+
+    for(y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
+		memcpy_font(fb, console_font_8x16[c*CONSOLE_CHAR_HEIGHT + y], fg, bg);
 		fb += vfb_stride/4;
 	}
 }

@@ -34,13 +34,6 @@ void gfx_print_at(int x, int y, const char *str) {
 	}
 }
 
-void gfx_printch_at(int x, int y, char c) {
-	int dx = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
-	int dy = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
-
-	gfx_draw_char(dx, dy, c);
-}
-
 int gfx_printf_at(int x, int y, const char *fmt, ...)
 {
 	va_list args;
