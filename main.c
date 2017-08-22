@@ -19,7 +19,7 @@ Copyright (C) 2017              neagix
 #include "gecko.h"
 #include "mini_ipc.h"
 #include "nandfs.h"
-#include "fat.h"
+//#include "fat.h"
 #include "malloc.h"
 #include "diskio.h"
 #include "printf.h"
@@ -53,16 +53,15 @@ int main(void)
 		return -1;
 	}
 	
-	int err = fs_open(0);
-	if (!err) {
-		char *cfg_data = config_load(DEFAULT_LST);
+	int config_load_err = fs_open(0);
+	if (!config_load_err) {
+		u32 read;
+		char *cfg_data = config_load(DEFAULT_LST, &read);
 		if (cfg_data) {
-			err = config_load_from_buffer(cfg_data);
+			config_load_err = config_load_from_buffer(cfg_data, read);
 			// error will be checked later on
 			free(cfg_data);
 		}
-	} else {
-		log_printf("failed to mount volume: %d\n", err);
 	}
 	
     input_init();

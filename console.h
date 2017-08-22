@@ -13,6 +13,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #define __CONSOLE_H__
 
 #include "types.h"
+#include "types_compat.h"
 #include "config.h"
 
 int gfx_printf(const char *fmt, ...);

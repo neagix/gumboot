@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-//#include <stddef.h>   /* for size_t */
+#include <stddef.h>   /* for size_t */
 
 #if !ONLY_MSPACES
 

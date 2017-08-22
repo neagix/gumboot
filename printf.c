@@ -93,7 +93,8 @@
  * 	2.5 printf(3S) man page.
  */
 
-#include "types.h"
+//#include "types.h"
+#include "types_compat.h"
 
 #include <limits.h>
 #include <stdarg.h>

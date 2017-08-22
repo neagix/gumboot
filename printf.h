@@ -21,9 +21,9 @@
 #define __VSPRINTF_H__
 
 #include <stdarg.h>
+#include "types_compat.h"
 
 int vsnprintf(char *str, size_t size, const char *format, va_list args);
 int snprintf(char *buffer, size_t size, const char *fmt, ...);
 
 #endif
-

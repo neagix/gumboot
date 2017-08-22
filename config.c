@@ -2,6 +2,7 @@
 #include "config.h"
 #include "ff.h"
 #include "video_low.h"
+#include "atoi.h"
 
 #ifdef GUMBOOT
 #include "malloc.h"
@@ -17,7 +18,6 @@
 
 #include "lstrender/log_compat.h"
 
-#include "atoi.h"
 #endif
 
 #define ERR_MISSING_TOKEN 		0x10
@@ -64,16 +64,21 @@ char *tokenize(char *line);
 char *config_load(const char *fname, u32 *read) {
 	FRESULT res;
 	FIL fd;
+	FILINFO stat;
 
-	res = f_open(&fd, fname, FA_READ);
+	res = f_stat(DEFAULT_LST, &stat);
 	if (res != FR_OK) {
-		log_printf("failed to open %s: %d\n", fname, res);
+		log_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
 		return NULL;
 	}
-	f_seek(&fd, 0, SEEK_END);
-	int fsize = f_tell(&fd);
-	f_seek(&fd, 0, SEEK_SET);  //same as rewind(f);
+
+	res = f_open(&fd, DEFAULT_LST, FA_READ);
+	if (res != FR_OK) {
+		log_printf("failed to open %s: %d\n", DEFAULT_LST, res);
+		return NULL;
+	}
 	
+	int fsize = stat.fsize;
 	if (fsize > MAX_LST_SIZE) {
 		fsize = MAX_LST_SIZE;
 		log_printf("truncating %s to %d bytes\n", fname, fsize);

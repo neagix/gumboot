@@ -5,6 +5,7 @@
 #include "powerpc_elf.h"
 #include "log.h"
 #include "time.h"
+#include "filesystem.h"
 
 int menu_selection = 0;
 
@@ -173,7 +174,7 @@ int menu_activate(void) {
 	
 	// at this point root must have been setup
 	// and we are going to boot a kernel
-	int err = config_open_fs(part_no);
+	int err = fs_open(part_no);
 	if (err) {
 		log_printf("could not open partition %d: %d\n", part_no, err);
 		return err;
