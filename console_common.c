@@ -1,6 +1,5 @@
 
 #include "console_common.h"
-#include "console_defs.h"
 
 #ifdef GUMBOOT
 #include "string.h"

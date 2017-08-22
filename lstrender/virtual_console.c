@@ -1,6 +1,6 @@
 
 #include "virtual_console.h"
-#include "../console_defs.h"
+#include "../console_common.h"
 
 unsigned char *vfb;
 unsigned vfb_stride;
@@ -32,8 +32,6 @@ void gfx_clear(int offset_x, int offset_y, int w, int h, rgb c) {
 		fb += vfb_stride/4;
 	}
 }
-
-extern unsigned char *console_font_8x16;
 
 static void memcpy_font(u32 *dst, unsigned char font_row, rgb *fg, rgb *bg) {
 	for (u32 x = 0; x < CONSOLE_CHAR_WIDTH; x++) {
@@ -76,7 +74,8 @@ void gfx_draw_char(int dx, int dy, char c) {
 	fb += dx;
 
     for(y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
-		memcpy_font(fb, console_font_8x16[c*CONSOLE_CHAR_HEIGHT + y], fg, bg);
+		unsigned char font_row = console_font_8x16[c*CONSOLE_CHAR_HEIGHT + y];
+		memcpy_font(fb, font_row, fg, bg);
 		fb += vfb_stride/4;
 	}
 }

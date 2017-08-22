@@ -10,7 +10,7 @@
 #include "string.h"
 #include "printf.h"
 #else
-#include "console_defs.h"
+#include "console_common.h"
 #include <string.h>
 #include <stdio.h>
 

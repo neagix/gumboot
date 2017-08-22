@@ -29,8 +29,6 @@ void console_clear(void);
 
 void select_font(int font);
 
-extern unsigned char console_font_8x16[];
-
 extern u32 **selected_font_yuv;
 extern u32 *font_yuv_normal[255],
 	*font_yuv_highlight[255],
