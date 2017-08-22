@@ -335,3 +335,23 @@ void console_clear(void) {
 	console_pos = 0;
 	clear_fb(config_color_normal[1]);
 }
+
+void select_font(int font) {
+	switch (font) {
+		case FONT_HEADING:
+			selected_font_yuv = font_yuv_heading;
+			break;
+		case FONT_NORMAL:
+			selected_font_yuv = font_yuv_normal;
+			break;
+		case FONT_HELPTEXT:
+			selected_font_yuv = font_yuv_helptext;
+			break;
+		case FONT_HIGHLIGHT:
+			selected_font_yuv = font_yuv_highlight;
+			break;
+		case FONT_ERROR:
+			selected_font_yuv = font_yuv_error;
+			break;
+	}
+}

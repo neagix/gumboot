@@ -12,6 +12,9 @@
 #else
 #include "console_defs.h"
 #include <string.h>
+#include <stdio.h>
+
+#include "lstrender/virtual_console.h"
 #endif
 
 #define HELP_LINES 5

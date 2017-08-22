@@ -50,7 +50,7 @@ static int help_drawn = 0;
 
 void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     // draw help text
-    selected_font_yuv = font_yuv_helptext;
+    select_font(FONT_HELPTEXT);
     gfx_print_at(1, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
 												"Long-press reset (1s) or press eject to boot.");
 
@@ -58,7 +58,7 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
 	if (seconds != 0)
 		gfx_printf_at(1, BOX_H+3+4, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
 
-	selected_font_yuv = font_yuv_heading;
+	select_font(FONT_HEADING);
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
     
     // print MINI version
@@ -66,20 +66,19 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     int l = snprintf(buffer, sizeof(buffer)-1, "Mini version: %d.%0d", mini_version_major, mini_version_minor);
     gfx_print_at(CONSOLE_COLUMNS-l-1, 2, buffer);
    
-    selected_font_yuv = font_yuv_normal;
+    select_font(FONT_NORMAL);
     draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
 }
 
 void menu_draw_entries(void) {
 	int i;
-	u32 **prev = selected_font_yuv;
 
 	for(i=0;i<config_entries_count;i++) {
 		rgb c;
-		if (i == menu_selection && (selected_font_yuv != font_yuv_highlight)) {
+		if (i == menu_selection) {
 			if (help_drawn || config_entries[i].help_text) {
 				// clear help area
-				selected_font_yuv = font_yuv_helptext;
+				select_font(FONT_HELPTEXT);
 				// do not clear the timeout line
 				gfx_clear(0, BOX_H+3, CONSOLE_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
 			}
@@ -87,14 +86,14 @@ void menu_draw_entries(void) {
 			if (config_entries[i].help_text) {
 				help_drawn = 1;
 				
-				selected_font_yuv = font_yuv_helptext;
+				select_font(FONT_HELPTEXT);
 				gfx_print_at(1, BOX_H+3, config_entries[i].help_text);
 			}
 
-			selected_font_yuv = font_yuv_highlight;
+			select_font(FONT_HIGHLIGHT);
 			c = config_color_highlight[1];
 		} else {
-			selected_font_yuv = font_yuv_normal;
+			select_font(FONT_NORMAL);
 			c = config_color_normal[1];
 		}
 		gfx_print_at(1, 4+i, config_entries[i].title);
@@ -103,6 +102,4 @@ void menu_draw_entries(void) {
 		int l = strlen(config_entries[i].title);
 		gfx_clear(1 + l, 4+i, CONSOLE_COLUMNS-l-2, 1, c);
 	}
-
-	selected_font_yuv = prev;
 }

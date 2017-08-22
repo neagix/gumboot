@@ -30,6 +30,8 @@ u32 *get_xfb(void);
 void clear_fb(rgb fill_rgbc);
 void console_clear(void);
 
+void select_font(int font);
+
 extern unsigned char console_font_8x16[];
 
 extern u32 **selected_font_yuv;
