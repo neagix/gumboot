@@ -55,8 +55,12 @@ int main(void)
 	
 	int err = fs_open(0);
 	if (!err) {
-		err =  config_load_err = config_load();
-		// error will be checked later on
+		char *cfg_data = config_load(DEFAULT_LST);
+		if (cfg_data) {
+			err = config_load_from_buffer(cfg_data);
+			// error will be checked later on
+			free(cfg_data);
+		}
 	} else {
 		log_printf("failed to mount volume: %d\n", err);
 	}

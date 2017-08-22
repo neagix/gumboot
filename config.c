@@ -13,7 +13,6 @@
 
 #else
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "lstrender/log_compat.h"
@@ -111,7 +110,6 @@ int config_load_from_buffer(char *cfg_data, u32 read) {
 		if (err) {
 			log_printf("error processing line %d: %d\n", line_no, err);
 			// in case of error, abort
-			free(cfg_data);
 			return err;
 		}
 		
@@ -124,7 +122,6 @@ int config_load_from_buffer(char *cfg_data, u32 read) {
 		start++;
 		last_line = start;
 	}
-	free(cfg_data);
 
 	if (wip_stanza) {
 		int err = complete_stanza();
