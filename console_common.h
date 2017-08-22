@@ -13,8 +13,7 @@ extern char pf_buffer[4096];
 typedef struct {
         u32 x, y;
         u32 width, height;
-        //u32 *yuv_data;
-        u8 has_alpha;
+//        u8 has_alpha;
 } gfx_rect;
 
 #endif // __CONSOLE_COMMON_H

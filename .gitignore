@@ -1,2 +1,4 @@
 *.o
 .deps/
+gumboot.elf
+gumboot.elf.map

@@ -2,11 +2,16 @@
 #include "console_common.h"
 #include "console_defs.h"
 
+extern void gfx_draw_rect(gfx_rect *n, char c);
+
 #ifdef GUMBOOT
 #include "string.h"
 #include "printf.h"
 
-extern void gfx_draw_rect(gfx_rect *n, char c);
+#else
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 #endif
 
 char pf_buffer[4096];
