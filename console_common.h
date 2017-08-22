@@ -1,4 +1,7 @@
 
+#ifndef __CONSOLE_COMMON_H
+#define __CONSOLE_COMMON_H
+
 #include "types.h"
 
 int gfx_printf_at(int x, int y, const char *fmt, ...);
@@ -13,3 +16,5 @@ typedef struct {
         //u32 *yuv_data;
         u8 has_alpha;
 } gfx_rect;
+
+#endif // __CONSOLE_COMMON_H
