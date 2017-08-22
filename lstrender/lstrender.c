@@ -36,8 +36,16 @@ int main(int argc, char **argv)
 
 	config_data[fsize] = 0;	
 	
-	int err = config_load_from_buffer(config_data);
+	int err = config_load_from_buffer(config_data, fsize);
 	free(config_data);
+	if (err) {
+		fprintf(stderr, "ERROR: %d\n", err);
+		return -1;
+	}
+	
+	for(int i =0;i<config_entries_count;i++) {
+		printf("%d: %s\n", i, config_entries[i].title);
+	}
 	
 	unsigned width = 512, height = 512;
 	unsigned char* image = malloc(width * height * 4);
@@ -54,7 +62,6 @@ int main(int argc, char **argv)
 	encodeOneStep("test.png", image, width, height);
 
 	free(image);	
-	
 
 	return 0;
 }

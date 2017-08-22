@@ -8,6 +8,9 @@
 #include "string.h"
 //#include "menu.h"
 #include "log.h"
+
+#define MAX_LST_SIZE 16*1024
+
 #else
 #include <stddef.h>
 #include <stdlib.h>
@@ -17,8 +20,6 @@
 
 #include "atoi.h"
 #endif
-
-#define MAX_LST_SIZE 16*1024
 
 #define ERR_MISSING_TOKEN 		0x10
 #define ERR_INVALID_NUMBER		0x20
@@ -60,33 +61,29 @@ int process_line(char *line);
 int complete_stanza();
 char *tokenize(char *line);
 
+#ifdef	GUMBOOT
 char *config_load(const char *fname, u32 *read) {
 	FRESULT res;
 	FIL fd;
-	FILINFO stat;
 
-	res = f_stat(fname, &stat);
+	res = f_open(&fd, fname, FA_READ);
 	if (res != FR_OK) {
-		log_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
+		log_printf("failed to open %s: %d\n", fname, res);
 		return NULL;
 	}
-
-	res = f_open(&fd, DEFAULT_LST, FA_READ);
-	if (res != FR_OK) {
-		log_printf("failed to open %s: %d\n", DEFAULT_LST, res);
-		return NULL;
-	}
+	f_seek(&fd, 0, SEEK_END);
+	int fsize = f_tell(&fd);
+	f_seek(&fd, 0, SEEK_SET);  //same as rewind(f);
 	
-	int fsize = stat.fsize;
 	if (fsize > MAX_LST_SIZE) {
 		fsize = MAX_LST_SIZE;
-		log_printf("truncating %s to %d bytes\n", DEFAULT_LST, fsize);
+		log_printf("truncating %s to %d bytes\n", fname, fsize);
 	}
 	char *cfg_data = malloc(fsize);
 	
 	res = f_read(&fd, cfg_data, fsize, read);
 	if (res != FR_OK) {
-		log_printf("failed to read %s: %d\n", DEFAULT_LST, res);
+		log_printf("failed to read %s: %d\n", fname, res);
 		free(cfg_data);
 		f_close(&fd);
 		return NULL;
@@ -97,6 +94,7 @@ char *config_load(const char *fname, u32 *read) {
 	
 	return cfg_data;
 }
+#endif
 
 int config_load_from_buffer(char *cfg_data, u32 read) {
 	char *start = cfg_data, *last_line = cfg_data;

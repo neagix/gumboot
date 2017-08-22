@@ -8,7 +8,7 @@ $(TARGET): $(OBJS)
 
 %.o: %.c
 	@echo "  COMPILE   $<"
-	$(CC) $(CFLAGS) $(DEFINES) -Wp,-MMD,-MQ,-MP -c $< -o $@
+	$(CC) $(CFLAGS) $(DEFINES) -c $< -o $@
 
 clean:
-	rm -f *.o
+	rm -f *.o ../*.o
