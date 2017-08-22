@@ -97,19 +97,16 @@ void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
 	}
 }
 
-void gfx_draw_rect(gfx_rect *n, char c) {
+void gfx_draw_char(int dx, int dy, char c) {
         u32 y;
-        gfx_rect *d_rect;
         u32 *fb = xfb;
         u32 *yuv_data = selected_font_yuv[ (int)c ];
 
-        d_rect = n;
+        fb += ((dy + y_add) * (RESOLUTION_W >> 1));
+        fb += (dx >> 1);
 
-        fb += ((d_rect->y + y_add) * (RESOLUTION_W >> 1));
-        fb += (d_rect->x >> 1);
-
-        for(y = 0; y < d_rect->height; y++) {
-                memcpy32(fb, yuv_data + ((d_rect->width >> 1) * y), d_rect->width >> 1);
+        for(y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
+                memcpy32(fb, yuv_data + ((CONSOLE_CHAR_WIDTH >> 1) * y), CONSOLE_CHAR_WIDTH >> 1);
                 fb += (RESOLUTION_W >> 1);
         }
 }
@@ -137,11 +134,7 @@ void gfx_clear(int x, int y, int w, int h, rgb c) {
 
 void gfx_print(const char *str, size_t len) {
 	unsigned int i;
-	gfx_rect d_char;
-	
-	d_char.width  = CONSOLE_CHAR_WIDTH;
-	d_char.height = CONSOLE_CHAR_HEIGHT;
-	
+		
 	for (i = 0; i < len; i++) {
 		// special case: a newline forces to reposition on next line
 		if (str[i] == '\n') {
@@ -170,10 +163,10 @@ void gfx_print(const char *str, size_t len) {
 			continue;
 		}
 
-		d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
-		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
+		int dx = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
+		int dy = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 		
-		gfx_draw_rect(&d_char, str[i]);
+		gfx_draw_char(dx, dy, str[i]);
 	}
 }
 

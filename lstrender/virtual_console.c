@@ -35,8 +35,8 @@ void gfx_clear(int offset_x, int offset_y, int w, int h, rgb c) {
 
 extern unsigned char *console_font_8x16;
 
-static void memcpy_font(u32 *dst, unsigned char font_row, u32 w, rgb *fg, rgb *bg) {
-	for (u32 x = 0; x < w; x++) {
+static void memcpy_font(u32 *dst, unsigned char font_row, rgb *fg, rgb *bg) {
+	for (u32 x = 0; x < CONSOLE_CHAR_WIDTH; x++) {
 		if (((font_row >> (CONSOLE_CHAR_WIDTH-1-x)) & 0x01) == 1) {
 			dst[x] = fg->as_u32;
 		} else {
@@ -45,7 +45,7 @@ static void memcpy_font(u32 *dst, unsigned char font_row, u32 w, rgb *fg, rgb *b
 	}
 }
 
-void gfx_draw_rect(gfx_rect *d_rect, char c) {
+void gfx_draw_char(int dx, int dy, char c) {
     u32 y;
     u32 *fb = (u32 *)vfb;
     rgb *fg, *bg;
@@ -69,11 +69,11 @@ void gfx_draw_rect(gfx_rect *d_rect, char c) {
 			break;
 	}
 
-	fb += d_rect->y * vfb_stride/4;
-	fb += d_rect->x;
+	fb += dy * vfb_stride/4;
+	fb += dx;
         
     for(y = 0; y < d_rect->height; y++) {
-		memcpy_font(fb, console_font_8x16[d_rect->width * y], d_rect->width, fg, bg);
+		memcpy_font(fb, console_font_8x16[d_rect->width * y], fg, bg);
 		fb += vfb_stride/4;
 	}
 }

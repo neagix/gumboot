@@ -2,8 +2,6 @@
 #include "console_common.h"
 #include "console_defs.h"
 
-extern void gfx_draw_rect(gfx_rect *n, char c);
-
 #ifdef GUMBOOT
 #include "string.h"
 #include "printf.h"
@@ -18,36 +16,29 @@ char pf_buffer[4096];
 
 void gfx_print_at(int x, int y, const char *str) {
 	unsigned int i;
-	gfx_rect d_char;
 
 	int orig_x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
-	d_char.x = orig_x;
+	int dx = orig_x;
 
 	for (i = 0; i < strlen(str); i++) {
-		d_char.width  = CONSOLE_CHAR_WIDTH;
-		d_char.height = CONSOLE_CHAR_HEIGHT;
-		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
+		int dy = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 
 		if (str[i] == '\n') {
 			y++;
-			d_char.x = orig_x;
+			dx = orig_x;
 			continue;
 		}	
 
-		gfx_draw_rect(&d_char, str[i]);
-		d_char.x += CONSOLE_CHAR_WIDTH;
+		gfx_draw_char(dx, dy, str[i]);
+		dx += CONSOLE_CHAR_WIDTH;
 	}
 }
 
 void gfx_printch_at(int x, int y, char c) {
-	gfx_rect d_char;
+	int dx = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
+	int dy = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 
-	d_char.width  = CONSOLE_CHAR_WIDTH;
-	d_char.height = CONSOLE_CHAR_HEIGHT;
-	d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
-	d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
-
-	gfx_draw_rect(&d_char, c);
+	gfx_draw_char(dx, dy, c);
 }
 
 int gfx_printf_at(int x, int y, const char *fmt, ...)

@@ -9,11 +9,6 @@ void gfx_printch_at(int x, int y, char c);
 void gfx_print_at(int x, int y, const char *str);
 
 extern char pf_buffer[4096];
-
-typedef struct {
-        u32 x, y;
-        u32 width, height;
-//        u8 has_alpha;
-} gfx_rect;
+extern void gfx_draw_char(int x, int y, char c);
 
 #endif // __CONSOLE_COMMON_H
