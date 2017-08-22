@@ -7,8 +7,11 @@
 
 #define DEFAULT_LST "gumboot/gumboot.lst"
 
-typedef struct {
-	u8 r, g, b;
+typedef union {
+		struct {
+			u8 r, g, b, a;
+		} as_rgba;
+		u32 as_u32;
 } rgb;
 
 typedef struct {
@@ -28,7 +31,7 @@ int config_load_from_buffer(char *cfg_data, u32 read);
 extern int config_timeout, config_default, config_entries_count, config_vmode, config_nomenu;
 extern stanza config_entries[MAX_CONFIG_ENTRIES];
 
-#define rgbcmp(a,b) memcmp(&a, &b, sizeof(a))
+#define rgbcmp(a,b) (a[0].as_u32 == b[0].as_u32) && (a[1].as_u32 == b[1].as_u32)
 
 extern rgb config_color_normal[2],
 	config_color_highlight[2],

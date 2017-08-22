@@ -102,7 +102,7 @@ int main(void)
 
 	// allow setting of normal color and repaint of screen only if there were no errors displayed
 	if (!config_load_err) {
-		if (rgbcmp(config_color_normal, config_default)) {
+		if (rgbcmp(config_color_normal, color_default)) {
 			free_font(font_yuv_normal);
 			init_font(config_color_normal, font_yuv_normal);
 			

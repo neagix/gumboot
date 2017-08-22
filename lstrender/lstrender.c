@@ -48,9 +48,6 @@ int main(int argc, char **argv)
 		printf("%d: %s\n", i, config_entries[i].title);
 	}
 	
-	menu_draw(config_timeout, 0, 0);
-	menu_draw_entries();
-	
 	unsigned width = RESOLUTION_W, height = RESOLUTION_H;
 	
 	vfb = malloc(width * height * 4);
@@ -63,6 +60,9 @@ int main(int argc, char **argv)
 			vfb[4 * width * y + 4 * x + 3] = 255;
 		}
 	}
+	
+	menu_draw(config_timeout, 0, 0);
+	menu_draw_entries();
 
 	encodeOneStep(argv[2], vfb, width, height);
 

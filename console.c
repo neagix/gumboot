@@ -160,7 +160,7 @@ void gfx_print_at(int x, int y, const char *str) {
 
 void gfx_clear(int x, int y, int w, int h, rgb c) {
 	fill_rect(CONSOLE_X_OFFSET + x*CONSOLE_CHAR_WIDTH, CONSOLE_Y_OFFSET+ y * CONSOLE_ROW_HEIGHT,
-		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, c.r, c.g, c.b);
+		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, c.as_rgba.r, c.as_rgba.g, c.as_rgba.b);
 }
 
 void gfx_printch_at(int x, int y, char c) {
@@ -289,7 +289,7 @@ void font_to_yuv(u32 *font_yuv[255], u8 fill_r, u8 fill_g, u8 fill_b, u8 back_r,
 
 void init_font(rgb c[2], u32 *font_yuv[255]) {
 	// re-initialise color
-	font_to_yuv(font_yuv, c[0].r, c[0].g, c[0].b, c[1].r, c[1].g, c[1].b);
+	font_to_yuv(font_yuv, c[0].as_rgba.r, c[0].as_rgba.g, c[0].as_rgba.b, c[1].as_rgba.r, c[1].as_rgba.g, c[1].as_rgba.b);
 }
 
 void init_fb(int vmode) {
@@ -313,7 +313,7 @@ void init_fb(int vmode) {
 
 	xfb = memalign(32, RESOLUTION_W * (RESOLUTION_H + (y_add*2)) * 2);
 	
-	rgb black = {0,0,0};
+	rgb black = {.as_u32 = 0};
 	clear_fb(black);
 }
 
@@ -321,7 +321,7 @@ void clear_fb(rgb fill_rgb) {
 	int i;
 	u32 *fb;
 
-	u32 fill_yuv = make_yuv(fill_rgb.r, fill_rgb.g, fill_rgb.b,fill_rgb.r, fill_rgb.g, fill_rgb.b);
+	u32 fill_yuv = make_yuv(fill_rgb.as_rgba.r, fill_rgb.as_rgba.g, fill_rgb.as_rgba.b,fill_rgb.as_rgba.r, fill_rgb.as_rgba.g, fill_rgb.as_rgba.b);
 
 	fb  = xfb;
 	for (i = 0; i < (RESOLUTION_H + (y_add*2)) * 2 * (RESOLUTION_W >> 1); i++) {
