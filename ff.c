@@ -610,6 +610,7 @@ FRESULT dir_next (	/* FR_OK:Succeeded, FR_NO_FILE:End of table, FR_DENIED:EOT an
 					}
 					dj->fs->winsect -= c;						/* Rewind window address */
 #else
+					if (streach) {}
 					return FR_NO_FILE;			/* Report EOT */
 #endif
 				}
@@ -1396,6 +1397,8 @@ FRESULT auto_mount (	/* FR_OK(0): successful, !=0: any error occured */
 #if !_FS_READONLY
 			if (chk_wp && (stat & STA_PROTECT))	/* Check write protection if needed */
 				return FR_WRITE_PROTECTED;
+#else
+			if (chk_wp) {}
 #endif
 			return FR_OK;					/* The file system object is valid */
 		}
