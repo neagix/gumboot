@@ -18,13 +18,10 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #include "console_defs.h"
 
 int gfx_printf(const char *fmt, ...);
-int gfx_printf_at(int x, int y, const char *fmt, ...);
 void init_fb(int vmode);
 void free_font(u32 *font_yuv[255]);
 void init_font(rgb c[2], u32 *font_yuv[255]);
 void gfx_print(const char *str, size_t len);
-void gfx_printch_at(int x, int y, char c);
-void gfx_print_at(int x, int y, const char *str);
 void gfx_clear(int x, int y, int w, int h, rgb c);
 u32 *get_xfb(void);
 void clear_fb(rgb fill_rgbc);

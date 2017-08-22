@@ -19,12 +19,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 
 #include <stdarg.h>
 
-typedef struct {
-        u32 x, y;
-        u32 width, height;
-        u32 *yuv_data;
-        u8 has_alpha;
-} gfx_rect;
+#include "console_common.h"
 
 int gfx_console_init = 0;
 
@@ -102,10 +97,11 @@ void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
 	}
 }
 
-void gfx_draw_rect(gfx_rect *n) {
+void gfx_draw_rect(gfx_rect *n, char c) {
         u32 y;
         gfx_rect *d_rect;
         u32 *fb = xfb;
+        u32 *yuv_data = selected_font_yuv[ (int)c ];
 
         d_rect = n;
 
@@ -113,7 +109,7 @@ void gfx_draw_rect(gfx_rect *n) {
         fb += (d_rect->x >> 1);
 
         for(y = 0; y < d_rect->height; y++) {
-                memcpy32(fb, d_rect->yuv_data + ((d_rect->width >> 1) * y), d_rect->width >> 1);
+                memcpy32(fb, yuv_data + ((d_rect->width >> 1) * y), d_rect->width >> 1);
                 fb += (RESOLUTION_W >> 1);
         }
 }
@@ -134,45 +130,9 @@ void scroll(void) {
 		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, 0, 0, 0);
 }
 
-void gfx_print_at(int x, int y, const char *str) {
-	unsigned int i;
-	gfx_rect d_char;
-
-	int orig_x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
-	d_char.x = orig_x;
-
-	for (i = 0; i < strlen(str); i++) {
-		d_char.width  = CONSOLE_CHAR_WIDTH;
-		d_char.height = CONSOLE_CHAR_HEIGHT;
-		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
-
-		if (str[i] == '\n') {
-			y++;
-			d_char.x = orig_x;
-			continue;
-		}	
-
-		d_char.yuv_data = selected_font_yuv[ (int)str[i] ];
-		gfx_draw_rect(&d_char);
-		d_char.x += CONSOLE_CHAR_WIDTH;
-	}
-}
-
 void gfx_clear(int x, int y, int w, int h, rgb c) {
 	fill_rect(CONSOLE_X_OFFSET + x*CONSOLE_CHAR_WIDTH, CONSOLE_Y_OFFSET+ y * CONSOLE_ROW_HEIGHT,
 		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, c.as_rgba.r, c.as_rgba.g, c.as_rgba.b);
-}
-
-void gfx_printch_at(int x, int y, char c) {
-	gfx_rect d_char;
-
-	d_char.width  = CONSOLE_CHAR_WIDTH;
-	d_char.height = CONSOLE_CHAR_HEIGHT;
-	d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
-	d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
-
-	d_char.yuv_data = selected_font_yuv[ (int)c ];
-	gfx_draw_rect(&d_char);
 }
 
 void gfx_print(const char *str, size_t len) {
@@ -213,12 +173,9 @@ void gfx_print(const char *str, size_t len) {
 		d_char.x = CONSOLE_X_OFFSET + x * CONSOLE_CHAR_WIDTH;
 		d_char.y = CONSOLE_Y_OFFSET + y * CONSOLE_ROW_HEIGHT;
 		
-		d_char.yuv_data = selected_font_yuv[(int) str[i]];
-		gfx_draw_rect(&d_char);
+		gfx_draw_rect(&d_char, str[i]);
 	}
 }
-
-static char pf_buffer[4096];
 
 int gfx_printf(const char *fmt, ...)
 {
@@ -231,22 +188,6 @@ int gfx_printf(const char *fmt, ...)
 
 	if (i > 0) {
 		gfx_print(pf_buffer, i);
-	}
-
-	return i;
-}
-
-int gfx_printf_at(int x, int y, const char *fmt, ...)
-{
-	va_list args;
-	int i;
-
-	va_start(args, fmt);
-	i = vsnprintf(pf_buffer, sizeof(pf_buffer)-1, fmt, args);
-	va_end(args);
-
-	if (i > 0) {
-		gfx_print_at(x, y, pf_buffer);
 	}
 
 	return i;

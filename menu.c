@@ -7,6 +7,7 @@
 #include "time.h"
 #include "filesystem.h"
 #include "menu_render.h"
+#include "console_common.h"
 
 void menu_update_timeout(int seconds) {
 	u32 **prev = NULL;

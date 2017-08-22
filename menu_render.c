@@ -1,5 +1,6 @@
 
 #include "menu_render.h"
+#include "console_common.h"
 
 #define DISP_UP		0x18
 #define DISP_DOWN	0x19
