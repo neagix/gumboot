@@ -15,6 +15,7 @@
 #else
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "lstrender/log_compat.h"
 
