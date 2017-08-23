@@ -113,21 +113,10 @@ int menu_activate(void) {
 		return err;
 	}
 	
-	// clear screen for ease of the eyes
-	select_font(FONT_NORMAL);
-	console_clear();
-	
-	if (strlen(sel->kernel_args))
-		gfx_printf("Booting (sd0,%d)/%s... [%s]", part_no, kernel_fn, sel->kernel_args);
-	else
-		gfx_printf("Booting (sd0,%d)/%s...", part_no, kernel_fn);
-
-	// DEBUG
-	return -1;
-
-	err = powerpc_boot_file(kernel_fn, sel->kernel_args);
+	err = powerpc_boot_file(part_no, kernel_fn, sel->kernel_args);
 	if (err) {
 		//TODO: redraw menu on return?
+		log_printf("MINI boot failed: %d\n", err);
 		return err;
 	}
 	

@@ -128,7 +128,7 @@ static char *memstr(char *mem, unsigned int fsize, const char *s) {
 const char 	*bootargs_end_marker = "mark.end=1",
 			*bootargs_start_marker = "mark.start=1";
 
-static int edit_bootargs(char *mem, unsigned int fsize, const char *args) {
+static int edit_bootargs(char *mem, unsigned int fsize, const char *args, char *default_args) {
 	int l = strlen(args);
 	if (!l)
 		return 0;
@@ -142,6 +142,12 @@ static int edit_bootargs(char *mem, unsigned int fsize, const char *args) {
 	char *end = memstr(start, fsize-(start-mem), bootargs_end_marker);
 	if (!end)
 		return -2;
+	
+	// copy default args
+	int offset = strlen(bootargs_start_marker);
+	memcpy(default_args, start+offset, end-start-offset);
+	default_args[end-start-offset] = 0x0;
+		
 	end += strlen(bootargs_end_marker);
 	int span = (end-start);
 	if (l > span)
@@ -158,7 +164,7 @@ static int edit_bootargs(char *mem, unsigned int fsize, const char *args) {
 }
 
 // will boot via IPC call to MINI
-int powerpc_boot_file(const char *path, const char *args) {
+int powerpc_boot_file(u8 part_no, const char *path, const char *args) {
 	FRESULT res;
 	FILINFO stat;
 	FIL fd;
@@ -197,11 +203,21 @@ int powerpc_boot_file(const char *path, const char *args) {
 		return -200;
 	}
 	
-	int err = edit_bootargs(mem, fsize, args);
+	char default_args[1024];
+	int err = edit_bootargs(mem, fsize, args, default_args);
 	if (err) {
 		log_printf("could not edit bootargs: %d\n", err);
 		return err;
 	}
+
+	if (!strlen(args))
+		args = default_args;
+	
+	// if everything went fine, proceed to clearing screen
+	// and display information about the booting kernel
+	select_font(FONT_HEADING);
+	//console_clear();	
+	gfx_printf_at(0, 2, "Booting (sd0,%d)/%s... [%s]", part_no, path, args);
 	
 	return ipc_powerpc_boot(mem, fsize);
 }
