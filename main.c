@@ -128,8 +128,12 @@ int main(void)
 			goto quit;
 	}
     
-	menu_draw(config_timeout, mini_version_major, mini_version_minor);
-	menu_draw_entries();
+	menu_draw_head_and_box(mini_version_major, mini_version_minor);
+	
+	menu_draw_timeout(config_timeout);
+	
+	// check whether to draw help area or not
+	menu_draw_entries_and_help();
 
     // put all the backbuffer log lines below the menu entries
     console_move(0, HEAD_LINES + 1 + config_entries_count);
@@ -153,12 +157,9 @@ normal_loop:
 					last_time_elapsed = new_time_elapsed;
 					int left = config_timeout-last_time_elapsed;
 					if (left <= 0) {
-						config_timeout = 0;
-						menu_clear_timeout();
-						
-						if (!menu_activate())
-							goto quit;
-						goto normal_loop;
+						// pretend there was an activation keypress
+						btn = PAD_BUTTON_A;
+						goto parse_input;
 					} else {
 						menu_update_timeout(left);
 					}
@@ -167,7 +168,8 @@ normal_loop:
 			
 			usleep(INPUT_WAIT_CYCLE_DELAY);
 			btn = input_read();
-			
+
+parse_input:
 			// disable timeout sequence
 			if ((btn != 0) && (last_time_elapsed > 1)) {
 				config_timeout = 0;

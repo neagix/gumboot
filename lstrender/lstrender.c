@@ -75,11 +75,15 @@ int main(int argc, char **argv)
 	
 	printf("columns = %d, lines = %d\n", CONSOLE_COLUMNS, CONSOLE_LINES);
 
-	menu_selection = config_default;
-	menu_init();
-
-	menu_draw(config_timeout, 1, 3);
-	menu_draw_entries();
+    menu_selection = config_default;
+    menu_init();
+    
+	menu_draw_head_and_box(1, 3);
+	
+	// check whether to draw help area or not
+	if (!menu_draw_entries_and_help()) {
+		menu_draw_default_help();
+	}
 
 	encodeOneStep(argv[2], vfb, RESOLUTION_W, RESOLUTION_H);
 

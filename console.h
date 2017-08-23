@@ -27,6 +27,7 @@ u32 *get_xfb(void);
 void clear_fb(rgb fill_rgbc);
 void console_clear(void);
 void console_move(int x, int y);
+void console_set_blinker(int status);
 
 void select_font(int font);
 

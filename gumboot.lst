@@ -26,10 +26,10 @@ timeout 30
 ## alias of 'hiddenmenu'
 #nomenu
 
-default 0
+default 1
 
 title wii-linux-ngx\nOpen default boot menu
-	root (sd0,0)/gumboot
+	root (sd0,1)/linux
 	kernel /zImage.ngx
 	## 'boot' is always implicit, but must be the last line of a menu entry
 	boot

@@ -104,12 +104,21 @@ u16 gpio_read(void) {
 		
 		press_start = mftb_usec();
 		
-		// wait for user to release the button
-		while (RST_DOWN);
+		int toggle = 0;
 		
-		if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
-			res |= GPIO_RESET_LP;
+		// wait for user to release the button
+		while (RST_DOWN) {		
+			if (res & GPIO_RESET_LP) {
+				toggle = !toggle;
+				console_set_blinker(toggle);
+			} else {
+				if (mftb_usec() - press_start >= LONG_PRESS_USEC) {
+					res |= GPIO_RESET_LP;
+				}
+			}
 		}
+		
+		console_set_blinker(0);
 	}
 
 	if (read32(0x0d800030) & (1<<10)) {

@@ -47,18 +47,7 @@ const char	*timeout_prompt = "The highlighted entry will be booted automatically
 			*timeout_prompt_term = " seconds.";
 const char *menu_title = "Gumboot menu v0.1";			
 
-static int help_drawn = 0;
-
-void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
-    // draw help text
-    select_font(FONT_HELPTEXT);
-    gfx_print_at(1, BOX_H+HEAD_LINES+1, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
-												"Long-press reset (1s) or press eject to boot.");
-
-	// draw timeout text
-	if (seconds != 0)
-		gfx_printf_at(1, BOX_H+HEAD_LINES+2, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
-
+void menu_draw_head_and_box(u16 mini_version_major, u16 mini_version_minor) {
 	select_font(FONT_HEADING);
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);
     
@@ -66,53 +55,80 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     char buffer[100];
     int l = snprintf(buffer, sizeof(buffer)-1, "Mini version: %d.%0d", mini_version_major, mini_version_minor);
     gfx_print_at(CONSOLE_COLUMNS-l-1, 2, buffer);
-   
-    select_font(FONT_NORMAL);
-    draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
+
+	// draw the box
+	select_font(FONT_NORMAL);
+	draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
+}
+
+#define TIMEOUT_Y BOX_H+HEAD_LINES+HELP_LINES-1
+
+void menu_draw_default_help() {
+    // draw help text
+    select_font(FONT_HELPTEXT);
+    gfx_print_at(1, BOX_H+HEAD_LINES, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
+												"Long-press reset (1s) or press eject to boot.");
 }
 
 void menu_update_timeout(int seconds) {
 	select_font(FONT_HELPTEXT);
-	gfx_printf_at(1 + strlen(timeout_prompt), BOX_H+HEAD_LINES+2, "%*d", 2, seconds);
+	gfx_printf_at(1 + strlen(timeout_prompt), TIMEOUT_Y, "%*d", 2, seconds);
 }
 
 void menu_clear_timeout(void) {
-	select_font(FONT_HELPTEXT);
-	gfx_clear(1, BOX_H+HEAD_LINES+2, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
+	gfx_clear(1, TIMEOUT_Y, strlen(timeout_prompt) + 3 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
 }
 
-void menu_draw_entries(void) {
+// called first time, draws the whole message
+void menu_draw_timeout(int seconds) {
+	menu_clear_timeout();
+	// draw timeout text
+	if (config_timeout) {
+		select_font(FONT_HELPTEXT);
+		gfx_printf_at(1, TIMEOUT_Y, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
+	}
+}
+
+static void menu_draw_help(void) {
+	// clear help area
+	// do not clear the timeout line
+	gfx_clear(0, BOX_H+HEAD_LINES, CONSOLE_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
+
+	if (!config_entries_count) {
+		menu_draw_default_help();
+		return;
+	}
+
+	stanza *sel = &config_entries[menu_selection];
+	if (!sel->help_text) {
+		menu_draw_default_help();
+		return;
+	}
+
+	select_font(FONT_HELPTEXT);
+	gfx_print_at(1, BOX_H+HEAD_LINES, sel->help_text);
+}
+
+void menu_draw_entries_and_help(void) {
 	int i;
 
 	for(i=0;i<config_entries_count;i++) {
 		rgb c;
 		if (i == menu_selection) {
-			if (help_drawn || config_entries[i].help_text) {
-				// clear help area
-				select_font(FONT_HELPTEXT);
-				// do not clear the timeout line
-				gfx_clear(0, BOX_H+3, CONSOLE_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
-			}
-			
-			if (config_entries[i].help_text) {
-				help_drawn = 1;
-				
-				select_font(FONT_HELPTEXT);
-				gfx_print_at(1, BOX_H+3, config_entries[i].help_text);
-			}
-
 			select_font(FONT_HIGHLIGHT);
 			c = config_color_highlight[1];
 		} else {
 			select_font(FONT_NORMAL);
 			c = config_color_normal[1];
 		}
-		gfx_print_at(1, 4+i, config_entries[i].title);
+		gfx_print_at(1, HEAD_LINES+1+i, config_entries[i].title);
 		
 		// make a whole bar of highlighted selection / background
 		int l = strlen(config_entries[i].title);
-		gfx_clear(1 + l, 4+i, CONSOLE_COLUMNS-l-2, 1, c);
+		gfx_clear(1 + l, HEAD_LINES+1+i, CONSOLE_COLUMNS-l-2, 1, c);
 	}
+	
+	menu_draw_help();
 }
 
 void menu_init(void) {

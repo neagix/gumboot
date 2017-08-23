@@ -24,12 +24,13 @@
 extern int menu_selection;
 
 void draw_box_at(int x, int y, int w, int h);
-void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor);
-void menu_draw_entries(void);
+void menu_draw_head_and_box(u16 mini_version_major, u16 mini_version_minor);
+void menu_draw_entries_and_help(void);
 void menu_init(void);
 
 void menu_update_timeout(int seconds);
 void menu_clear_timeout(void);
+void menu_draw_timeout(int seconds);
 
 extern const char	*timeout_prompt, *timeout_prompt_term;
 

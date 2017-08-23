@@ -13,7 +13,7 @@ void menu_down(void) {
 	menu_selection++;
 	if (menu_selection == config_entries_count)
 		menu_selection = 0;
-	menu_draw_entries();
+	menu_draw_entries_and_help();
 }
 
 void menu_up(void) {
@@ -21,7 +21,7 @@ void menu_up(void) {
 		menu_selection = config_entries_count-1;
 	else
 		menu_selection--;
-	menu_draw_entries();
+	menu_draw_entries_and_help();
 }
 
 int menu_browse(stanza *sel) {
@@ -109,7 +109,7 @@ int menu_activate(void) {
 	// sanity check
 	int err = is_valid_elf(kernel_fn);
 	if (err) {
-		log_printf("not a valid ELF: %s: %d\n", kernel_fn, err);
+		// error message printed by function
 		return err;
 	}
 	

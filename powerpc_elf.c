@@ -33,53 +33,67 @@ int is_valid_elf(const char *path)
 	FRESULT fres;
 
 	fres = f_open(&fd, path, FA_READ);
-	if (fres != FR_OK)
+	if (fres != FR_OK) {
+		log_printf("could not open ELF %s: %d\n", path, fres);
 		return fres;
+	}
 
 	fres = f_read(&fd, &elfhdr, sizeof(elfhdr), &read);
 	if (fres != FR_OK) {
+		log_printf("could not read ELF %s: %d\n", path, fres);
 		f_close(&fd);
 		return fres;
 	}
 
 	if (read != sizeof(elfhdr)) {
+		log_printf("expected %d bytes read, but got %d\n", path, sizeof(elfhdr), read);
+
 		f_close(&fd);
 		return -100;
 	}
 
 	if (memcmp("\x7F" "ELF\x01\x02\x01\x00\x00",elfhdr.e_ident,9)) {
+		log_printf("Invalid ELF header! 0x%02x 0x%02x 0x%02x 0x%02x\n",elfhdr.e_ident[0], elfhdr.e_ident[1], elfhdr.e_ident[2], elfhdr.e_ident[3]);
+
 		f_close(&fd);
-		gecko_printf("Invalid ELF header! 0x%02x 0x%02x 0x%02x 0x%02x\n",elfhdr.e_ident[0], elfhdr.e_ident[1], elfhdr.e_ident[2], elfhdr.e_ident[3]);
 		return -101;
 	}
 
 	// entry point not checked here
 
 	if (elfhdr.e_phoff == 0 || elfhdr.e_phnum == 0) {
+		log_printf("ELF has no program headers!\n");
+
 		f_close(&fd);
-		gecko_printf("ELF has no program headers!\n");
 		return -103;
 	}
 
 	if (elfhdr.e_phnum > PHDR_MAX) {
+		log_printf("ELF has too many (%d) program headers!\n", elfhdr.e_phnum);
+
 		f_close(&fd);
-		gecko_printf("ELF has too many (%d) program headers!\n", elfhdr.e_phnum);
 		return -104;
 	}
 
 	fres = f_lseek(&fd, elfhdr.e_phoff);
 	if (fres != FR_OK) {
+		log_printf("could not seek in ELF %s: %d\n", path, fres);
+
 		f_close(&fd);
 		return -fres;
 	}
 
 	fres = f_read(&fd, phdrs, sizeof(phdrs[0])*elfhdr.e_phnum, &read);
 	if (fres != FR_OK) {
+		log_printf("could not read headers from ELF %s: %d\n", path, fres);
+
 		f_close(&fd);
 		return -fres;
 	}
 
 	if (read != sizeof(phdrs[0])*elfhdr.e_phnum) {
+		log_printf("expected %d bytes read from headers, but got %d\n", path, sizeof(phdrs[0])*elfhdr.e_phnum, read);
+
 		f_close(&fd);
 		return -105;
 	}
@@ -96,6 +110,8 @@ int is_valid_elf(const char *path)
 		phdr++;
 	}
 	if (!found) {
+		log_printf("no PT_LOAD header found in ELF %s: %d\n", path, fres);
+
 		f_close(&fd);
 		return -200;
 	}
@@ -218,13 +234,13 @@ int powerpc_boot_file(u8 part_no, const char *path, const char *args) {
 		args = default_args;
 	
 	// this will be shown for really little time, unless boot via MINI IPC fails
-	gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1);
+	gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1, config_color_highlight[1]);
 	gfx_printf_at(0, 2, "Booting (sd0,%d)/%s... [%s]", part_no, path, args);
 	
 	err = ipc_powerpc_boot(mem, fsize);
 	if (err) {
 		// in case of error, clear the 'Booting' message
-		gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1);
+		gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1, config_color_highlight[1]);
 	}
 	return err;
 }

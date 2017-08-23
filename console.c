@@ -332,3 +332,12 @@ void init_font(int font) {
 void console_move(int x, int y) {
 	console_pos = y * CONSOLE_COLUMNS + x;
 }
+
+// toggle a block sign on the top-right corner of the console screen
+void console_set_blinker(int status) {
+	select_font(FONT_HEADING);
+	if (status)
+		gfx_printch_at(CONSOLE_COLUMNS-1, 0, 254);
+	else
+		gfx_printch_at(CONSOLE_COLUMNS-1, 0, ' ');
+}
