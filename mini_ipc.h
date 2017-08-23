@@ -14,6 +14,8 @@ Copyright (C) 2008, 2009	Sven Peter <svenpeter@gmail.com>
 #ifndef __MINI_IPC_H__
 #define __MINI_IPC_H__
 
+#include "types.h"
+
 #define SDHC_ENOCARD    -0x1001
 #define SDHC_ESTRANGE   -0x1002
 #define SDHC_EOVERFLOW  -0x1003

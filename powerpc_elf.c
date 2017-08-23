@@ -13,7 +13,7 @@ Copyright (C) 2009			Andre Heider "dhewg" <dhewg@wiibrew.org>
 #include "powerpc.h"
 #include "hollywood.h"
 #include "gecko.h"
-#include "ff.h"
+#include "fatfs/ff.h"
 #include "powerpc_elf.h"
 #include "elf.h"
 #include "malloc.h"

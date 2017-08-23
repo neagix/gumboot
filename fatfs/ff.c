@@ -3102,7 +3102,7 @@ FRESULT find_volume (	/* FR_OK(0): successful, !=0: any error occurred */
 		}
 		i = LD2PT(vol);					/* Partition number: 0:auto, 1-4:forced */
 		if (i != 0) i--;
-		do {							/* Find an FAT volume */
+		do {							/* Find a FAT volume */
 			bsect = br[i];
 			fmt = bsect ? check_fs(fs, bsect) : 3;	/* Check the partition */
 		} while (LD2PT(vol) == 0 && fmt >= 2 && ++i < 4);

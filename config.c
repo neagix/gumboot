@@ -1,6 +1,6 @@
 
 #include "config.h"
-#include "ff.h"
+#include "fatfs/ff.h"
 #include "video_low.h"
 #include "atoi.h"
 

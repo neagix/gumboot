@@ -19,10 +19,9 @@ Copyright (C) 2017              neagix
 #include "gecko.h"
 #include "mini_ipc.h"
 #include "nandfs.h"
-#include "ff.h"
-//#include "fat.h"
+#include "fatfs/ff.h"
 #include "malloc.h"
-#include "diskio.h"
+#include "fatfs/diskio.h"
 #include "printf.h"
 #include "video_low.h"
 #include "input.h"
@@ -56,7 +55,7 @@ int main(void)
 	
 	int config_load_err;
 	FATFS fatfs;
-	FRESULT res = f_mount(0, &fatfs);
+	FRESULT res = f_mount(&fatfs, "0:", 1);
 	if (res != FR_OK) {
 		config_load_err = (int)res;
 	} else {

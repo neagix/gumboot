@@ -5,7 +5,7 @@
 #include "powerpc_elf.h"
 #include "log.h"
 #include "time.h"
-#include "ff.h"
+#include "fatfs/ff.h"
 #include "menu_render.h"
 #include "console_common.h"
 
@@ -43,7 +43,11 @@ int menu_browse(stanza *sel) {
 	DIR dirs;
 	FILINFO Fno;
 	FATFS fatfs;
-	FRESULT res = f_mount(sel->root_part_no, &fatfs);
+	char target[3];
+	target[0] = sel->root_part_no + '0';
+	target[1] = ':';
+	target[2] = 0x0;
+	FRESULT res = f_mount(&fatfs, target, 1);
 
 	if (res != FR_OK) {
 		log_printf("could not open partition %d: %d\n", sel->root_part_no, res);
@@ -99,7 +103,12 @@ int menu_activate(void) {
 	// at this point root must have been setup
 	// and we are going to boot a kernel
 	FATFS fatfs;
-	FRESULT res = f_mount(part_no, &fatfs);
+	char target[3];
+	target[0] = part_no + '0';
+	target[1] = ':';
+	target[2] = 0x0;
+	FRESULT res = f_mount(&fatfs, target, 1);
+
 	if (res != FR_OK) {
 		log_printf("could not open partition %d: %d\n", part_no, res);
 		return (int)res;
