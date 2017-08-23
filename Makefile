@@ -22,6 +22,7 @@ mklogo/mklogo:
 	make -C mklogo
 
 logo.c: logo.png mklogo/mklogo
+	@echo "  GENERATE   $@"
 	mklogo/mklogo logo.png > logo.c
 
 upload: $(TARGET)

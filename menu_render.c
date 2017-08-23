@@ -158,10 +158,11 @@ void menu_init(raster *splash) {
 	gumboot_logo.height = gumboot_logo_height;
 	gumboot_logo.pixels = &gumboot_logo_pixels[0];
 	
-	if (menu_splash) {
+	// splashscreen is rendered by the background-drawing routines
+/*	if (menu_splash) {
 		// blit the pixel data, centered on screen
 		console_blit((RESOLUTION_W-menu_splash->width)/2, (RESOLUTION_H-menu_splash->height)/2, *menu_splash, config_color_normal[1]);
 		sleep(4);
-	}
+	}*/
 }
 
