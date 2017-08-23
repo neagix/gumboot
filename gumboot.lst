@@ -6,7 +6,7 @@
 # NTSC, PAL50, PAL60, PROGRESSIVE
 video PAL60
 
-splashimage (sd0)/gumboot/splash.png
+splashimage (sd0,0)/gumboot/gumboot.png
 
 #color NORMAL HIGHLIGHT HELPTEXT HEADING
 #color red/blue green/black white/blue white/blue

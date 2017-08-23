@@ -31,6 +31,7 @@ Copyright (C) 2017              neagix
 #include "config.h"
 #include "log.h"
 #include "utils.h"
+#include "lodepng/lodepng.h"
 
 // used by FatFS
 PARTITION VolToPart[FF_VOLUMES] = {
@@ -41,8 +42,6 @@ PARTITION VolToPart[FF_VOLUMES] = {
 };
 
 #define MINIMUM_MINI_VERSION 0x00010001
-
-static rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
 
 int main(void)
 {
@@ -64,9 +63,12 @@ int main(void)
 		return -1;
 	}
 	
+	int has_fs = 0;
 	FATFS fatfs;
 	FRESULT res = f_mount(&fatfs, "0:", 1);
 	if (res == FR_OK) {
+		has_fs = 1;
+
 		u32 read;
 		char *cfg_data = (char*)load_file(DEFAULT_LST, MAX_LST_SIZE, &read);
 		if (cfg_data) {
@@ -87,23 +89,8 @@ int main(void)
 	
     input_init();
 	init_fb(config_vmode);
+	clear_fb(black);
 	
-	if (config_splashimage) {
-		u32 read;
-		void *png = load_file(config_splashimage, 3*1024*1024, &read);
-		if (png) {
-			int err = console_render_splash(png);
-			free(png);
-			if (err)
-				goto no_splash;
-		} else
-			goto no_splash;
-	} else {
-no_splash:
-		// no splash image, paint it black
-		clear_fb(black);
-	}
-
 	VIDEO_Init(config_vmode);
 	VIDEO_SetFrameBuffer(get_xfb());
 
@@ -141,6 +128,19 @@ no_splash:
 		return 1; /* never reached */
 	}
 
+	int has_splash = 0;
+	if (has_fs && config_splashimage) {
+		u32 read;
+		void *png = load_file(config_splashimage, MAX_SPLASH_SIZE, &read);
+		if (png) {
+			int err = console_render_splash(png, read);
+			free(png);
+			if (!err)
+				has_splash = 1;
+			sleep(3);
+		}		
+	}
+
 	init_font(FONT_ERROR);
 	init_font(FONT_NORMAL);
 	init_font(FONT_HIGHLIGHT);
@@ -163,7 +163,7 @@ no_splash:
 	menu_draw_entries_and_help();
 
     // put all the backbuffer log lines below the menu entries
-    console_move(0, HEAD_LINES + 1 + config_entries_count);
+    console_move(0, HEAD_LINES + 1 + config_entries_count + 1);
 	// flush log lines from the backbuffer - if any
 	log_flush_bb();
 	log_free_bb();
@@ -217,3 +217,18 @@ quit:
 	return 0;
 }
 
+int console_render_splash(void *png, size_t pngsize) {
+	unsigned char* image;
+	unsigned width, height;
+
+	int err = lodepng_decode32(&image, &width, &height, png, pngsize);
+	if (err) {
+		log_printf("error %u: %s\n", err, lodepng_error_text(err));
+		return err;
+	}
+	
+	console_blit(RESOLUTION_W-width, 0, image, width, height);
+	
+	free(image);
+	return 0;
+}

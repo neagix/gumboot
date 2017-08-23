@@ -113,6 +113,9 @@ int menu_activate(void) {
 		return err;
 	}
 	
+	//TODO: shutdown video to see if kernel 2.6 recovers
+	//VIDEO_Shutdown();
+	
 	err = powerpc_boot_file(part_no, kernel_fn, sel->kernel_args);
 	if (err) {
 		log_printf("MINI boot failed: %d\n", err);

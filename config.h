@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+#define MAX_SPLASH_SIZE 3*1024*1024
 #define MAX_CONFIG_ENTRIES 32
 #define MAX_LST_SIZE 16*1024
 #define DEFAULT_LST "gumboot/gumboot.lst"

@@ -33,5 +33,7 @@ void select_font(int font);
 
 extern int gfx_console_init;
 
+extern rgb black;
+
 #endif
 

@@ -33,6 +33,7 @@
 #define ERR_INVALID_VIDEO_MODE	0xE0
 #define ERR_UNKNOWN_TOKEN		0xF0
 #define ERR_INVISIBLE_FONT		0xF1
+#define ERR_INVALID_SPLASH		0xF2
 
 // all configuration options
 int config_timeout = 0,
@@ -108,6 +109,8 @@ const char *config_strerr(int err) {
 			return "unknown token";
 		case ERR_INVISIBLE_FONT		:
 			return "font would be invisible";
+		case ERR_INVALID_SPLASH:
+			return "invalid splash screen path";
 	}
 	return "???";
 }
@@ -421,8 +424,12 @@ int parse_root(char *s) {
 int parse_splashimage(char *s) {
 	if (config_splashimage)
 		return ERR_DOUBLE_DEFINITION;
+
+	// can only read splash images from first disk, first partition
+	if (strncmp("(sd0,0)/", s, 8))
+		return ERR_INVALID_SPLASH;
 	
-	config_splashimage = strdup(s);
+	config_splashimage = strdup(s+8);
 	return 0;
 }
 

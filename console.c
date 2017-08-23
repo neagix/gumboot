@@ -28,6 +28,8 @@ static int y_add = 0;
 // current absolute cursor position
 static int console_pos = 0;
 
+rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
+
 u32 *font_yuv_normal[255],
 	*font_yuv_highlight[255],
 	*font_yuv_helptext[255],
@@ -67,16 +69,16 @@ u32 pal_idx(int i, u8 *pal, u8 *gfx) {
 	return (pal[pidx+0] << 16) | (pal[pidx+1] << 8) | (pal[pidx+2]);
 }
 
-int make_yuv(u8 r1, u8 g1, u8 b1, u8 r2, u8 g2, u8 b2) {
+int make_yuv(rgb c1, rgb c2) {
   int y1, cb1, cr1, y2, cb2, cr2, cb, cr;
  
-  y1 = (299 * r1 + 587 * g1 + 114 * b1) / 1000;
-  cb1 = (-16874 * r1 - 33126 * g1 + 50000 * b1 + 12800000) / 100000;
-  cr1 = (50000 * r1 - 41869 * g1 - 8131 * b1 + 12800000) / 100000;
+  y1 = (299 * c1.as_rgba.r + 587 * c1.as_rgba.g  + 114 * c1.as_rgba.b) / 1000;
+  cb1 = (-16874 * c1.as_rgba.r  - 33126 * c1.as_rgba.g + 50000 * c1.as_rgba.b + 12800000) / 100000;
+  cr1 = (50000 * c1.as_rgba.r  - 41869 * c1.as_rgba.g - 8131 * c1.as_rgba.b + 12800000) / 100000;
  
-  y2 = (299 * r2 + 587 * g2 + 114 * b2) / 1000;
-  cb2 = (-16874 * r2 - 33126 * g2 + 50000 * b2 + 12800000) / 100000;
-  cr2 = (50000 * r2 - 41869 * g2 - 8131 * b2 + 12800000) / 100000;
+  y2 = (299 * c2.as_rgba.r  + 587 * c2.as_rgba.g + 114 * c2.as_rgba.b) / 1000;
+  cb2 = (-16874 * c2.as_rgba.r  - 33126 * c2.as_rgba.g + 50000 * c2.as_rgba.b + 12800000) / 100000;
+  cr2 = (50000 * c2.as_rgba.r  - 41869 * c2.as_rgba.g - 8131 * c2.as_rgba.b + 12800000) / 100000;
  
   cb = (cb1 + cb2) >> 1;
   cr = (cr1 + cr2) >> 1;
@@ -84,9 +86,9 @@ int make_yuv(u8 r1, u8 g1, u8 b1, u8 r2, u8 g2, u8 b2) {
   return ((y1 << 24) | (cb << 16) | (y2 << 8) | cr);
 }
 
-void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
+void fill_rect(int x, int y, int w, int h, rgb rgbcol) {
 	u32 *fb = xfb;
-	u32 col = make_yuv(r,g,b, r,g,b);
+	u32 col = make_yuv(rgbcol, rgbcol);
 
 	fb += ((y + y_add) * (RESOLUTION_W >> 1));
 	fb += (x >> 1);
@@ -98,17 +100,17 @@ void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
 }
 
 void gfx_draw_char(int dx, int dy, unsigned char c) {
-        u32 y;
-        u32 *fb = xfb;
-        u32 *yuv_data = selected_font_yuv[ c ];
+   u32 y;
+   u32 *fb = xfb;
+   u32 *yuv_data = selected_font_yuv[ c ];
 
-        fb += ((dy + y_add) * (RESOLUTION_W >> 1));
-        fb += (dx >> 1);
+   fb += ((dy + y_add) * (RESOLUTION_W >> 1));
+   fb += (dx >> 1);
 
-        for(y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
-                memcpy32(fb, yuv_data + ((CONSOLE_CHAR_WIDTH >> 1) * y), CONSOLE_CHAR_WIDTH >> 1);
-                fb += (RESOLUTION_W >> 1);
-        }
+   for(y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
+		memcpy32(fb, yuv_data + ((CONSOLE_CHAR_WIDTH >> 1) * y), CONSOLE_CHAR_WIDTH >> 1);
+		fb += (RESOLUTION_W >> 1);
+	}
 }
 
 void scroll(void) {
@@ -124,12 +126,12 @@ void scroll(void) {
 	}
 	
 	fill_rect(CONSOLE_X_OFFSET, CONSOLE_Y_OFFSET+(CONSOLE_LINES-1)*CONSOLE_ROW_HEIGHT,
-		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, 0, 0, 0);
+		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, black);
 }
 
 void gfx_clear(int x, int y, int w, int h, rgb c) {
 	fill_rect(CONSOLE_X_OFFSET + x*CONSOLE_CHAR_WIDTH, CONSOLE_Y_OFFSET+ y * CONSOLE_ROW_HEIGHT,
-		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, c.as_rgba.r, c.as_rgba.g, c.as_rgba.b);
+		w*CONSOLE_CHAR_WIDTH, h * CONSOLE_ROW_HEIGHT, c);
 }
 
 void gfx_print(const char *str, size_t len) {
@@ -194,28 +196,28 @@ void internal_free_font(u32 *font_yuv[255]) {
 	}
 }
 
-void font_to_yuv(u32 *font_yuv[255], u8 fill_r, u8 fill_g, u8 fill_b, u8 back_r, u8 back_g, u8 back_b) {
+void font_to_yuv(u32 *font_yuv[255], rgb fg, rgb bg) {
 	int i, x, y;
-	u8 lr,lg,lb, rr,rg,rb;
 
 	for (i = 0; i < 255; i++) {
 		font_yuv[i] = (u32*)malloc(8*CONSOLE_CHAR_HEIGHT*2);
 
 		for (y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
 			for (x = 0; x < CONSOLE_CHAR_WIDTH; x+=2) {
+				rgb left, right;
 				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (CONSOLE_CHAR_WIDTH-1-x)) & 0x01) == 1) {
-					lr = fill_r; lg = fill_g; lb = fill_b;
+					left = fg;
 				} else {
-					lr = back_r; lg = back_g; lb = back_b;
+					left = bg;
 				}
 
 				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (CONSOLE_CHAR_WIDTH-1-(x+1))) & 0x01) == 1) {
-					rr = fill_r; rg = fill_g; rb = fill_b;
+					right = fg;
 				} else {
-					rr = back_r; rg = back_g; rb = back_b;
+					right = bg;
 				}
 
-				font_yuv[i][(y<<2)+(x>>1)] = make_yuv(lr, lg, lb, rr, rg, rb);
+				font_yuv[i][(y<<2)+(x>>1)] = make_yuv(left, right);
 			}
 		}
 	}
@@ -245,7 +247,7 @@ void free_font(int font) {
 
 static void internal_init_font(rgb c[2], u32 *font_yuv[255]) {
 	// re-initialise color
-	font_to_yuv(font_yuv, c[0].as_rgba.r, c[0].as_rgba.g, c[0].as_rgba.b, c[1].as_rgba.r, c[1].as_rgba.g, c[1].as_rgba.b);
+	font_to_yuv(font_yuv, c[0], c[1]);
 }
 
 void init_fb(int vmode) {
@@ -272,7 +274,7 @@ void clear_fb(rgb fill_rgb) {
 	int i;
 	u32 *fb;
 
-	u32 fill_yuv = make_yuv(fill_rgb.as_rgba.r, fill_rgb.as_rgba.g, fill_rgb.as_rgba.b,fill_rgb.as_rgba.r, fill_rgb.as_rgba.g, fill_rgb.as_rgba.b);
+	u32 fill_yuv = make_yuv(fill_rgb, fill_rgb);
 
 	fb  = xfb;
 	for (i = 0; i < (RESOLUTION_H + (y_add*2)) * 2 * (RESOLUTION_W >> 1); i++) {
@@ -340,4 +342,27 @@ void console_set_blinker(int status) {
 		gfx_printch_at(CONSOLE_COLUMNS-1, 0, 254);
 	else
 		gfx_printch_at(CONSOLE_COLUMNS-1, 0, ' ');
+}
+
+void console_blit(int dx, int dy, void *mem, u32 width, u32 height) {
+	u32 x, y;
+	u32 *fb = xfb;
+	u32 *pixel_data = (u32 *)mem;
+
+	fb += ((dy + y_add) * (RESOLUTION_W >> 1));
+	fb += (dx >> 1);
+
+	for (x = 0; x < width; x+=2) {
+		for(y = 0; y < height; y++) {
+			// convert two pixels from source into one destination pixels
+//			rgb left  = {.as_u32 = pixel_data[x     + y * width]};
+//			rgb right = {.as_u32 = pixel_data[x + 1 + y * width]};
+			rgb left = color_error[0];
+			rgb right = color_error[0];
+			
+			fb[x >> 1] = make_yuv(left, right);
+
+			fb += (RESOLUTION_W >> 1);
+		}
+	}
 }
