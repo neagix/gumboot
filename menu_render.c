@@ -152,7 +152,8 @@ void menu_draw_entries_and_help(void) {
 	}
 	
 	// render the logo
-	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+1) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1]);
+	u32 yuv_row[GUMBOOT_LOGO_WIDTH/2];
+	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+1) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1], &yuv_row[0]);
 	
 	menu_draw_help();
 }

@@ -340,7 +340,7 @@ void console_set_blinker(int status) {
 		gfx_printch_at(CONSOLE_COLUMNS-1, 0, ' ');
 }
 
-void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
+void console_blit(int dx, int dy, raster rst, rgb solid_bg, u32 *yuv_row) {
 	u32 x, y;
 	u32 *fb = xfb;
 	u32 *pixel_data = (u32 *)rst.pixels;
@@ -350,7 +350,6 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 	
 	// allocate a buffer that will be used for the RGB->YUV conversion
 	u32 row_len = rst.width >> 1;
-	u32 *yuv_row = (u32 *)malloc(row_len);
 
 	for(y = 0; y < rst.height; y++) {
 		for (x = 0; x < rst.width; x+=2) {
@@ -367,6 +366,4 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 		memcpy32(fb, yuv_row, row_len);
 		fb += (RESOLUTION_W >> 1);
 	}
-	
-	free(yuv_row);
 }
