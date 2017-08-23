@@ -8,7 +8,7 @@
 #define DEFAULT_LST "gumboot/gumboot.lst"
 
 typedef union {
-		struct {
+		struct __attribute__((__packed__)) {
 			u8 r, g, b, a;
 		} as_rgba;
 		u32 as_u32;

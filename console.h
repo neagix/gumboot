@@ -15,7 +15,7 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 #include "types.h"
 #include "types_compat.h"
 #include "config.h"
-#include "console_defs.h"
+#include "console_common.h"
 
 int gfx_printf(const char *fmt, ...);
 void init_fb(int vmode);

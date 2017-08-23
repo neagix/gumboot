@@ -10,8 +10,8 @@ splashimage (sd0)/gumboot/splash.ppm
 
 #color NORMAL HIGHLIGHT HELPTEXT HEADING
 #color red/blue green/black white/blue white/blue
-#color blue/green green/black white/magenta white/magenta
-color blue/green green/black white/blue
+color blue/green green/black white/magenta white/magenta
+#color blue/green green/black white/blue
 
 ## timeout 0 means show the menu and do not enable any countdown
 timeout 30

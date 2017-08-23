@@ -19,6 +19,12 @@ void encodeOneStep(const char* filename, const unsigned char* image, unsigned wi
  
 int main(int argc, char **argv)
 {
+	// sanity check
+	if (sizeof(rgb) != 4) {
+		fprintf(stderr, "BUG: rgba is not 4 bytes\n");
+		return -1;
+	}
+	
 	if (argc != 3) {
 		fprintf(stderr, "Usage: lstrender gumboot.lst preview.png\n");
 		return -1;
@@ -56,8 +62,8 @@ int main(int argc, char **argv)
 	
 	vfb_stride = width * 4;
 	vfb = malloc(vfb_stride * height);
-	
-	unsigned x, y;
+
+/*	unsigned x, y;
 	for(y = 0; y < height; y++) {
 		for(x = 0; x < width; x++) {
 			vfb[4 * width * y + 4 * x + 0] = 255 * !(x & y);
@@ -65,12 +71,17 @@ int main(int argc, char **argv)
 			vfb[4 * width * y + 4 * x + 2] = x | y;
 			vfb[4 * width * y + 4 * x + 3] = 255;
 		}
-	}
+	}*/
 	
-	menu_draw(config_timeout, 0, 0);
+	printf("columns = %d, lines = %d\n", CONSOLE_COLUMNS, CONSOLE_LINES);
+
+	gfx_clear(0, 0, CONSOLE_COLUMNS, CONSOLE_LINES, config_color_normal[1]);
+
+	menu_selection = config_default;
+	menu_draw(config_timeout, 1, 3);
 	menu_draw_entries();
 
-	encodeOneStep(argv[2], vfb, width, height);
+	encodeOneStep(argv[2], vfb, RESOLUTION_W, RESOLUTION_H);
 
 	free(vfb);	
 
