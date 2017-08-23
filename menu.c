@@ -176,9 +176,7 @@ int menu_activate(void) {
 	char *root = NULL;
 
 	// root setup
-	if (sel->find_args) {
-		//TODO: find it!
-	} else if (sel->browse) {
+	if (sel->browse) {
 		old_menu_selection = menu_selection;
 
 		// directory browse, uses 'root' to set starting partition and directory

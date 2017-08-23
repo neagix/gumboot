@@ -20,8 +20,7 @@ typedef struct {
 			*help_text,
 			*root,
 			*kernel,
-			*kernel_args,
-			*find_args;
+			*kernel_args;
 	u8 reboot, poweroff, browse;
 	// FatFS does not support extended partitions
 	// physical drive is always 0 because only one SD is supported

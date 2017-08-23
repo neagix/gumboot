@@ -250,12 +250,9 @@ int complete_stanza() {
 	if (!actions)
 		return ERR_NOTHING_TO_DO;
 
-	if (wip_stanza->kernel && (!wip_stanza->root && !wip_stanza->find_args))
+	if (wip_stanza->kernel && !wip_stanza->root)
 		return ERR_NO_ROOT;
 
-	if (wip_stanza->root && wip_stanza->find_args)
-		return ERR_DOUBLE_DEFINITION;
-	
 	// all good, keep track of this stanza
 	config_entries_count++;
 	wip_stanza = NULL;
@@ -630,17 +627,6 @@ int parse_video(char *s) {
 	return 0;
 }
 
-int parse_find(char *s) {
-	if (!wip_stanza)
-		return ERR_UNEXPECTED_TOKEN;
-
-	if (wip_stanza->find_args)
-		return ERR_DOUBLE_DEFINITION;
-
-	wip_stanza->find_args = strdup(s);
-	return 0;
-}
-
 // tokenize will set 0x0 at first whitespace in 's',
 // and return the address of the next token (skipping whitespaces)
 // or NULL if no other token is available
@@ -739,12 +725,6 @@ int process_line(char *line) {
 		}
 		
 		return parse_root(token);
-	} else if (0 == strcmp(line, "find")) {
-		if (token == NULL) {
-			return ERR_MISSING_TOKEN;
-		}
-		
-		return parse_find(token);
 	} else if (0 == strcmp(line, "reboot")) {
 		if (token) {
 			return ERR_EXTRA_TOKEN;
