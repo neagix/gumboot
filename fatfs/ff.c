@@ -3126,7 +3126,7 @@ FRESULT find_volume (	/* FR_OK(0): successful, !=0: any error occurred */
 		}
 
 		maxlba = ld_qword(fs->win + BPB_TotSecEx) + bsect;	/* Last LBA + 1 of the volume */
-		if (maxlba >= 0x100000000) return FR_NO_FILESYSTEM;	/* (It cannot be handled in 32-bit LBA) */
+		if (maxlba >= 0x100000000LL) return FR_NO_FILESYSTEM;	/* (It cannot be handled in 32-bit LBA) */
 
 		fs->fsize = ld_dword(fs->win + BPB_FatSzEx);	/* Number of sectors per FAT */
 
@@ -4116,7 +4116,7 @@ FRESULT f_lseek (
 	/* Normal Seek */
 	{
 #if FF_FS_EXFAT
-		if (fs->fs_type != FS_EXFAT && ofs >= 0x100000000) ofs = 0xFFFFFFFF;	/* Clip at 4 GiB - 1 if at FATxx */
+		if (fs->fs_type != FS_EXFAT && ofs >= 0x100000000LL) ofs = 0xFFFFFFFF;	/* Clip at 4 GiB - 1 if at FATxx */
 #endif
 		if (ofs > fp->obj.objsize && (FF_FS_READONLY || !(fp->flag & FA_WRITE))) {	/* In read-only mode, clip offset with the file size */
 			ofs = fp->obj.objsize;
@@ -4381,7 +4381,7 @@ FRESULT f_findfirst (
 
 
 
-#if FF_FS_MINIMIZE == 0
+#if (FF_FS_MINIMIZE != 2)
 /*-----------------------------------------------------------------------*/
 /* Get File Status                                                       */
 /*-----------------------------------------------------------------------*/
