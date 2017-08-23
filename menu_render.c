@@ -13,6 +13,7 @@ raster gumboot_logo;
 #define DISP_UP		0x18
 #define DISP_DOWN	0x19
 
+int old_menu_selection;
 int menu_selection = 0;
 
 const char	top_right_corner = 191,
@@ -102,7 +103,7 @@ static void menu_draw_help(void) {
 	// do not clear the timeout line
 	gfx_clear(0, BOX_H+HEAD_LINES, CONSOLE_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
 
-	if (!config_entries_count) {
+	if (browse_buffer || !config_entries_count) {
 		menu_draw_default_help();
 		return;
 	}
@@ -122,9 +123,15 @@ void menu_render_logo() {
 }
 
 void menu_draw_entries_and_help(void) {
+	int max;
+	if (browse_buffer) {
+		max = browse_menu_entries_count;
+	} else {
+		max = config_entries_count;
+	}
 	int i;
 
-	for(i=0;i<config_entries_count;i++) {
+	for(i=0;i<max;i++) {
 		rgb c;
 		if (i == menu_selection) {
 			select_font(FONT_HIGHLIGHT);
@@ -133,10 +140,16 @@ void menu_draw_entries_and_help(void) {
 			select_font(FONT_NORMAL);
 			c = config_color_normal[1];
 		}
-		gfx_print_at(1, HEAD_LINES+1+i, config_entries[i].title);
+		char *label;		
+		if (browse_buffer) {
+			label = browse_buffer + browse_menu_entries[i];
+		} else {
+			label = config_entries[i].title;
+		}
+		gfx_print_at(1, HEAD_LINES+1+i, label);
 		
 		// make a whole bar of highlighted selection / background
-		int l = strlen(config_entries[i].title);
+		int l = strlen(label);
 		gfx_clear(1 + l, HEAD_LINES+1+i, CONSOLE_COLUMNS-l-2, 1, c);
 	}
 	
