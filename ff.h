@@ -72,14 +72,14 @@
 /* To enable f_forward function, set _USE_FORWARD to 1 and set _FS_TINY to 1. */
 
 
-#define _DRIVES		1
+#define _DRIVES		16
 /* Number of volumes (logical drives) to be used. */
 
 
 
-#define	_MULTI_PARTITION	0
+#define	_MULTI_PARTITION	1
 /* When _MULTI_PARTITION is set to 0, each volume is bound to the same physical
-/ drive number and can mount only first primaly partition. When it is set to 1,
+/ drive number and can mount only first primary partition. When it is set to 1,
 / each volume is tied to the partitions listed in Drives[]. */
 
 
@@ -108,7 +108,7 @@
 */
 
 
-#define	_USE_LFN	0
+#define	_USE_LFN	1
 #define	_MAX_LFN	255		/* Maximum LFN length to handle (max:255) */
 /* The _USE_LFN option switches the LFN support.
 /

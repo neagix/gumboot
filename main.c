@@ -19,6 +19,7 @@ Copyright (C) 2017              neagix
 #include "gecko.h"
 #include "mini_ipc.h"
 #include "nandfs.h"
+#include "ff.h"
 //#include "fat.h"
 #include "malloc.h"
 #include "diskio.h"
@@ -28,7 +29,6 @@ Copyright (C) 2017              neagix
 #include "console.h"
 #include "menu.h"
 #include "menu_render.h"
-#include "filesystem.h"
 #include "config.h"
 #include "log.h"
 
@@ -54,8 +54,13 @@ int main(void)
 		return -1;
 	}
 	
-	int config_load_err = fs_open(0);
-	if (!config_load_err) {
+	int config_load_err;
+	FATFS fatfs;
+	FRESULT res = f_mount(0, &fatfs);
+	if (res != FR_OK) {
+		config_load_err = (int)res;
+	} else {
+		config_load_err = 0;
 		u32 read;
 		char *cfg_data = config_load(DEFAULT_LST, &read);
 		if (cfg_data) {
@@ -126,27 +131,6 @@ int main(void)
     
 	menu_draw(config_timeout, mini_version_major, mini_version_minor);
 	menu_draw_entries();
-
-	//TODO: set console position right below the menu
-
-/*
-	DIR dirs;
-	FILINFO Fno;
-	const char path[512] = "bootmii";
-
-	res = f_opendir(&dirs, path);
-	if (res != FR_OK) {
-		log_printf("failed to open directory: %d\n", res);
-	} else {
-		while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {
-			if (Fno.fattrib & AM_DIR) {
-				gfx_printf(" directory: %s\n", Fno.fname);
-			} else {
-				gfx_printf(" file: %s\n", Fno.fname);
-			}
-		}
-	}
-	gfx_printf("last res: %d\n", res); */
 
 	u64 start_time = mftb_usec();
 	int last_time_elapsed = 0;

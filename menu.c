@@ -5,7 +5,7 @@
 #include "powerpc_elf.h"
 #include "log.h"
 #include "time.h"
-#include "filesystem.h"
+#include "ff.h"
 #include "menu_render.h"
 #include "console_common.h"
 
@@ -39,6 +39,33 @@ void menu_up(void) {
 	menu_draw_entries();
 }
 
+int menu_browse(stanza *sel) {
+	DIR dirs;
+	FILINFO Fno;
+	FATFS fatfs;
+	FRESULT res = f_mount(sel->root_part_no, &fatfs);
+
+	if (res != FR_OK) {
+		log_printf("could not open partition %d: %d\n", sel->root_part_no, res);
+		return (int)res;
+	}
+
+	res = f_opendir(&dirs, sel->root);
+	if (res != FR_OK) {
+		log_printf("failed to open directory %s: %d\n", sel->root, res);
+		return (int)res;
+	}
+	while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {
+		if (Fno.fattrib & AM_DIR) {
+			gfx_printf(" directory: %s\n", Fno.fname);
+		} else {
+			gfx_printf(" file: %s\n", Fno.fname);
+		}
+	}
+	
+	return 0;
+}
+
 int menu_activate(void) {
 	stanza *sel = &config_entries[menu_selection];
 	
@@ -50,17 +77,17 @@ int menu_activate(void) {
 		powerpc_poweroff();
 		return 0;
 	}
-	
+
 	u8 part_no = 0xFF;
 	char *root = NULL;
-	
+
 	// root setup
 	if (sel->find_args) {
 		//TODO: find it!
 	} else if (sel->browse) {
-		//TODO: directory browse, use root if any otherwise first partition
-		
-		return 0;
+		// directory browse, uses 'root' to set starting partition and directory
+		// otherwise starts from first partition and root directory
+		return menu_browse(sel);
 	} else if (sel->root) {
 		root = sel->root;
 		part_no = sel->root_part_no;
@@ -71,10 +98,11 @@ int menu_activate(void) {
 	
 	// at this point root must have been setup
 	// and we are going to boot a kernel
-	int err = fs_open(part_no);
-	if (err) {
-		log_printf("could not open partition %d: %d\n", part_no, err);
-		return err;
+	FATFS fatfs;
+	FRESULT res = f_mount(part_no, &fatfs);
+	if (res != FR_OK) {
+		log_printf("could not open partition %d: %d\n", part_no, res);
+		return (int)res;
 	}
 
 	char *kernel_fn;
@@ -86,7 +114,7 @@ int menu_activate(void) {
 	}
 	
 	// sanity check
-	err = is_valid_elf(kernel_fn);
+	int err = is_valid_elf(kernel_fn);
 	if (err) {
 		log_printf("not a valid ELF: %s: %d\n", kernel_fn, err);
 		return err;
