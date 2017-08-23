@@ -13,9 +13,10 @@ splashimage (sd0,0)/gumboot/mario.png
 #color blue/green green/black white/magenta white/magenta
 #color blue/green green/black white/blue
 #color light-blue/blue light-red/red light-green/green light-magenta/magenta 
+color light-blue/white white/blue white/light-blue green/black
 
 ## colors can also be expressed in RGB format
-color rgb(255,0,0)/rgb(0,255,0) green/black white/blue
+#color rgb(255,0,0)/rgb(0,255,0) green/black white/blue
 
 ## timeout 0 means show the menu and do not enable any countdown
 timeout 30
