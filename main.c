@@ -73,8 +73,6 @@ int main(void)
 	
     input_init();
 	init_fb(config_vmode);
-	init_font(FONT_ERROR);
-	init_font(FONT_NORMAL);
 
 	rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
 	clear_fb(black);
@@ -84,45 +82,47 @@ int main(void)
 
 	// is this a gamecube?
 	if (read32(0x0d800190) & 2) {
-		// from now, console can be used
-		gfx_console_init = 1;
-
 		log_printf("GameCube compatibility mode detected...\n");
 	} else {	
 		// Wii mode
 		VISetupEncoder();
-		// from now, console can be used
-		gfx_console_init = 1;
 	}
 
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
 	u16 mini_version_minor = version & 0xFFFF;
 
+	// from now, console could be used
+	// however we assume it is not going to be used
+	// until the graphical setup has been completed,
+	// because log is still ripe with backbuffer entries
+	gfx_console_init = 1;
+
 	if (version < MINIMUM_MINI_VERSION) {
+		init_font(FONT_ERROR);
+		init_font(FONT_NORMAL);
+		// flush log lines from the backbuffer - if any
+		log_flush_bb();
+		log_free_bb();
+
 		log_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
 		log_printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
-		// flush log lines from the backbuffer - if any
-		log_flush_bb();
-		log_free_bb();
 
 		powerpc_hang();
 		return 1; /* never reached */
 	}
 
-	// allow setting of normal color and repaint of screen only if there were no errors displayed
-	if (rgbcmp(config_color_normal, color_default)) {
-		free_font(FONT_NORMAL);
-		init_font(FONT_NORMAL);
-			
-		// repaint all screen with the new background
-		clear_fb(config_color_normal[1]);
-	}
+	init_font(FONT_ERROR);
+	init_font(FONT_NORMAL);
 	init_font(FONT_HIGHLIGHT);
 	init_font(FONT_HELPTEXT);
 	init_font(FONT_HEADING);
+			
+	// repaint whole screen with the background color
+	//clear_fb(config_color_normal[1]); NOT NEEDED
+
 
     menu_selection = config_default;
     menu_init();

@@ -36,6 +36,7 @@
 #define ERR_INVALID_ROOT		0xD0
 #define ERR_INVALID_VIDEO_MODE	0xE0
 #define ERR_UNKNOWN_TOKEN		0xF0
+#define ERR_INVISIBLE_FONT		0xF1
 
 // all configuration options
 int config_timeout = 0,
@@ -157,6 +158,8 @@ const char *config_strerr(int err) {
 			return "invalid video mode";
 		case ERR_UNKNOWN_TOKEN		:
 			return "unknown token";
+		case ERR_INVISIBLE_FONT		:
+			return "font would be invisible";
 	}
 	return "???";
 }
@@ -522,7 +525,7 @@ static int atocolor_half(char *str, rgb *result) {
 		// read red component
 		ptr = strchr(str, ',');
 		if (!ptr)
-			return -1;
+			return ERR_INVALID_COLOR;
 		*ptr=0;
 		ptr++;
 		
@@ -535,7 +538,7 @@ static int atocolor_half(char *str, rgb *result) {
 		str = ptr;
 		ptr = strchr(ptr, ',');
 		if (!ptr)
-			return -1;
+			return ERR_INVALID_COLOR;
 		*ptr=0;
 		ptr++;
 
@@ -547,7 +550,7 @@ static int atocolor_half(char *str, rgb *result) {
 		str = ptr;
 		ptr = strchr(ptr, ')');
 		if (!ptr)
-			return -1;
+			return ERR_INVALID_COLOR;
 		*ptr=0;
 
 		val = atoi_base(str, 10, &parsed);
@@ -567,7 +570,7 @@ static int atocolor_half(char *str, rgb *result) {
 		  }
 	  }
 	
-	return -1;
+	return ERR_INVALID_COLOR;
 }
 
 /* Convert the color name STR into the magical number.  */
@@ -582,7 +585,7 @@ static int atocolor(char *str, rgb *result)
 
 	/* If not found, return -1.  */
 	if (! *ptr)
-		return -1;
+		return ERR_INVALID_COLOR;
 	/* Terminate the string STR.  */
 	*ptr = 0;
 	ptr++;
@@ -593,7 +596,14 @@ static int atocolor(char *str, rgb *result)
 		return err;
 
 	// detect second half
-	return atocolor_half(ptr, &result[1]);
+	err = atocolor_half(ptr, &result[1]);
+	if (err)
+		return err;
+
+	// forbid invisible combinations
+	if (result[0].as_u32 == result[1].as_u32)
+		return ERR_INVISIBLE_FONT;
+	return 0;
 }
 
 // parse colors second:
@@ -604,7 +614,7 @@ int parse_color(char *s) {
 	
 	int err = atocolor(s, (rgb *)&config_color_normal);
 	if (err)
-		return ERR_INVALID_COLOR;
+		return err;
 
 	if (!next_token)
 		return 0;
@@ -613,7 +623,7 @@ int parse_color(char *s) {
 
 	err = atocolor(s, (rgb *)&config_color_highlight);
 	if (err)
-		return ERR_INVALID_COLOR;
+		return err;
 
 	if (!next_token)
 		return 0;
@@ -622,7 +632,7 @@ int parse_color(char *s) {
 
 	err = atocolor(s, (rgb *)&config_color_helptext);
 	if (err)
-		return ERR_INVALID_COLOR;
+		return err;
 
 	if (!next_token)
 		return 0;
@@ -631,8 +641,9 @@ int parse_color(char *s) {
 
 	err = atocolor(s, (rgb *)&config_color_heading);
 	if (err)
-		return ERR_INVALID_COLOR;
+		return err;
 	
+	// no border support, sorry
 	if (next_token)
 		return ERR_TOO_MANY_COLORS;
 
