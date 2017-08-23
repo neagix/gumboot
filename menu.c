@@ -8,6 +8,7 @@
 #include "fatfs/ff.h"
 #include "menu_render.h"
 #include "console_common.h"
+#include "video_low.h"
 
 void menu_down(void) {
 	menu_selection++;
@@ -59,10 +60,12 @@ int menu_activate(void) {
 	stanza *sel = &config_entries[menu_selection];
 	
 	if (sel->reboot) {
+		VIDEO_Shutdown();
 		powerpc_reset();
 		return 0;
 	}
 	if (sel->poweroff) {
+		VIDEO_Shutdown();
 		powerpc_poweroff();
 		return 0;
 	}

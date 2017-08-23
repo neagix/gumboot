@@ -137,7 +137,7 @@ int main(void)
 			free(png);
 			if (!err)
 				has_splash = 1;
-			sleep(3);
+			sleep(10);
 		}		
 	}
 
@@ -227,7 +227,7 @@ int console_render_splash(void *png, size_t pngsize) {
 		return err;
 	}
 	
-	console_blit(RESOLUTION_W-width, 0, image, width, height);
+	console_blit(RESOLUTION_W-width, 0, image, width, height, config_color_heading[1]);
 	
 	free(image);
 	return 0;

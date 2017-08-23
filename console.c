@@ -344,7 +344,7 @@ void console_set_blinker(int status) {
 		gfx_printch_at(CONSOLE_COLUMNS-1, 0, ' ');
 }
 
-void console_blit(int dx, int dy, void *mem, u32 width, u32 height) {
+void console_blit(int dx, int dy, void *mem, u32 width, u32 height, rgb solid_bg) {
 	u32 x, y;
 	u32 *fb = xfb;
 	u32 *pixel_data = (u32 *)mem;
@@ -352,17 +352,24 @@ void console_blit(int dx, int dy, void *mem, u32 width, u32 height) {
 	fb += ((dy + y_add) * (RESOLUTION_W >> 1));
 	fb += (dx >> 1);
 
-	for (x = 0; x < width; x+=2) {
-		for(y = 0; y < height; y++) {
+	for(y = 0; y < height; y++) {
+		for (x = 0; x < width; x+=4) {
 			// convert two pixels from source into one destination pixels
 //			rgb left  = {.as_u32 = pixel_data[x     + y * width]};
 //			rgb right = {.as_u32 = pixel_data[x + 1 + y * width]};
-			rgb left = color_error[0];
-			rgb right = color_error[0];
+			rgb left = solid_bg;
+			rgb right = solid_bg;
 			
-			fb[x >> 1] = make_yuv(left, right);
+/*			left.r = (left.r & left.a) + (solid_bg.r & ^left.a);
+			left.g = (left.g & left.a) + (solid_bg.g & ^left.a);
+			left.b = (left.b & left.a) + (solid_bg.b & ^left.a);*/
+			
+			u32 *row_ofs = fb + (x >> 1);
+			row_ofs[0] = make_yuv(left, right);
+			row_ofs[1] = make_yuv(left, right);
 
-			fb += (RESOLUTION_W >> 1);
+			sync_after_write((const void *)row_ofs, 4);
 		}
+		fb += (RESOLUTION_W >> 1);
 	}
 }
