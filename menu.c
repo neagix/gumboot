@@ -130,7 +130,7 @@ int menu_activate(void) {
 
 			// find before-last slash in the current path
 			int i;
-			for(i=strlen(browse_current_path)-1;i>2;i++) {
+			for(i=strlen(browse_current_path);i>2;i--) {
 				if (browse_current_path[i] == '/') {
 					// cut here
 					browse_current_path[i] = 0;
@@ -149,7 +149,10 @@ int menu_activate(void) {
 		int l = strlen(label);
 		if (label[l-1] == '/') {
 			// append subdirectory to the current path without trailing slash
-			memcpy(browse_current_path+strlen(browse_current_path)-1, label, l);
+			int cur_len = strlen(browse_current_path);
+			browse_current_path[cur_len] = '/';
+			memcpy(browse_current_path+cur_len+1, label, l-1);
+			browse_current_path[cur_len+1+l] = 0;
 			free_browse_menu();
 			
 			return menu_browse();
