@@ -23,7 +23,7 @@ mklogo/mklogo:
 
 logo.c: logo.png mklogo/mklogo
 	@echo "  GENERATE   $@"
-	mklogo/mklogo logo.png > logo.c
+	mklogo/mklogo logo.png >logo.c 2>logo.h
 
 upload: $(TARGET)
 	@$(WIIDEV)/bin/bootmii -p $<

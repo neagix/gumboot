@@ -2,9 +2,7 @@
 #include "menu_render.h"
 #include "console_common.h"
 #include "raster.h"
-
-extern int gumboot_logo_width,
-	gumboot_logo_height;
+#include "logo.h"
 
 extern unsigned char gumboot_logo_pixels[];
 
@@ -118,10 +116,6 @@ static void menu_draw_help(void) {
 	gfx_print_at(1, BOX_H+HEAD_LINES, sel->help_text);
 }
 
-void menu_render_logo() {
-	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+2) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1]);
-}
-
 void menu_draw_entries_and_help(void) {
 	int max;
 	if (browse_buffer) {
@@ -153,7 +147,8 @@ void menu_draw_entries_and_help(void) {
 		gfx_clear(1 + l, HEAD_LINES+1+i, CONSOLE_COLUMNS-l-2, 1, c);
 	}
 	
-	menu_render_logo();
+	// render the logo
+	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+2) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1]);
 	
 	menu_draw_help();
 }
@@ -167,8 +162,8 @@ void menu_init(raster *splash) {
 	gfx_clear(0, CONSOLE_LINES-HELP_LINES, CONSOLE_COLUMNS, HELP_LINES, config_color_helptext[1]);
 	
 	// set correct pointers for the logo
-	gumboot_logo.width = gumboot_logo_width;
-	gumboot_logo.height = gumboot_logo_height;
+	gumboot_logo.width = GUMBOOT_LOGO_WIDTH;
+	gumboot_logo.height = GUMBOOT_LOGO_HEIGHT;
 	gumboot_logo.pixels = &gumboot_logo_pixels[0];
 	
 	// splashscreen is rendered by the background-drawing routines

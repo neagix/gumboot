@@ -150,7 +150,7 @@ int main(void)
 			}
 		}		
 	}	
-			
+
     menu_selection = config_default;
     menu_init(valid_splash);
     
