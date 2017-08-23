@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "config.h"
+#include "logo.h"
 
 #ifdef GUMBOOT
 #include "console.h"
@@ -20,6 +21,7 @@
 #define HELP_LINES 5
 #define HEAD_LINES 3
 #define BOX_H (CONSOLE_LINES-HEAD_LINES-HELP_LINES)
+#define LOGO_COLUMNS (GUMBOOT_LOGO_WIDTH/CONSOLE_CHAR_WIDTH + (GUMBOOT_LOGO_WIDTH % CONSOLE_CHAR_WIDTH != 0))
 
 extern int menu_selection, old_menu_selection;
 

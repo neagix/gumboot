@@ -86,7 +86,7 @@ void gfx_draw_char(int dx, int dy, unsigned char c) {
 	}
 }
 
-void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
+void console_blit(int dx, int dy, raster rst, rgb solid_bg, u32 *unused_yuv_row) {
 	u32 x, y;
 	u32 *fb = (u32 *)vfb;
 	u32 *pixel_data = (u32 *)rst.pixels;

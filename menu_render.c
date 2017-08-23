@@ -2,7 +2,6 @@
 #include "menu_render.h"
 #include "console_common.h"
 #include "raster.h"
-#include "logo.h"
 
 extern unsigned char gumboot_logo_pixels[];
 
@@ -103,7 +102,7 @@ void menu_draw_timeout(int seconds) {
 static void menu_draw_help(void) {
 	// clear help area
 	// do not clear the timeout line
-	gfx_clear(0, BOX_H+HEAD_LINES, CONSOLE_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
+	gfx_clear(0, BOX_H+HEAD_LINES, CONSOLE_COLUMNS-LOGO_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
 
 	if (browse_buffer || !config_entries_count) {
 		menu_draw_default_help();
@@ -153,7 +152,7 @@ void menu_draw_entries_and_help(void) {
 	
 	// render the logo
 	u32 yuv_row[GUMBOOT_LOGO_WIDTH/2];
-	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+1) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1], &yuv_row[0]);
+	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH*2, (HEAD_LINES+BOX_H-1) * CONSOLE_CHAR_HEIGHT - gumboot_logo.height, gumboot_logo, config_color_normal[1], &yuv_row[0]);
 	
 	menu_draw_help();
 }
