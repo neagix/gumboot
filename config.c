@@ -395,21 +395,8 @@ int parse_root(char *s) {
 		// extended partitions are not supported due to a FatFS limitation
 		return ERR_INVALID_ROOT;
 
-	wip_stanza->root_pt = n;
-	
-	// skip number and parenthesis
-	s++; s++;
-	
-	if (!*s || (s[0] == '/' && !s[1])) {
-		// only partition provided
-		wip_stanza->root = "";
-		return 0;
-	}
-
-	// remove leading slash
-	if (*s != '/')
-		return ERR_INVALID_ROOT;
-	s++;
+	// let's patch  & re-use the string
+	s[1] = ':';
 
 	// make sure there is a trailing slash
 	char *last = s + strlen(s) - 1;

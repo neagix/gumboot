@@ -65,31 +65,18 @@ void browse_append(const char *name, int is_directory) {
 }
 
 char browse_current_path[4096];
-u8 browse_current_part_no;
 
 int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
-	FATFS fatfs;
-	char target[3];
 
-	target[0] = browse_current_part_no + '0';
-	target[1] = ':';
-	target[2] = 0x0;
-	FRESULT res = f_mount(&fatfs, target, 1);
-
-	if (res != FR_OK) {
-		log_printf("could not open partition %d: %d\n", browse_current_part_no, res);
-		return (int)res;
-	}
-	
-	res = f_opendir(&dirs, browse_current_path);
+	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
 		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
 		return (int)res;
 	}
 
-	// buffer must already be free here
+	//NOTE: buffer must already be free on entry
 
 	// add first entry to go back
 	browse_buffer = malloc(3);
@@ -129,7 +116,8 @@ int menu_activate(void) {
 		if (menu_selection == 0) {
 			free_browse_menu();
 
-			if (!browse_current_path[0]) {
+			// "0:/" for example
+			if (strlen(browse_current_path)<=3) {
 				// end of line: go back
 				menu_selection = old_menu_selection;
 				menu_clear_entries();
@@ -141,7 +129,7 @@ int menu_activate(void) {
 
 			// find before-last slash in the current path
 			int i;
-			for(i=strlen(browse_current_path)-2;i>=0;i++) {
+			for(i=strlen(browse_current_path)-2;i>2;i++) {
 				if (browse_current_path[i] == '/') {
 					// cut here
 					browse_current_path[i] = 0;
@@ -150,8 +138,8 @@ int menu_activate(void) {
 				}
 			}
 			
-			// root directory
-			browse_current_path[0] = 0;
+			// truncate to root directory
+			browse_current_path[3] = 0;
 			return menu_browse();
 		}
 
@@ -195,18 +183,18 @@ int menu_activate(void) {
 		// directory browse, uses 'root' to set starting partition and directory
 		// otherwise starts from first partition and root directory
 		if (sel->root) {
-			browse_current_part_no = sel->root_pt;
-			// append subdirectory to the current path
 			memcpy(browse_current_path, sel->root, strlen(sel->root)+1);
 		} else {
-			browse_current_part_no = 0;
-			browse_current_path[0] = 0x0;
+			// use first logical drive by default
+			browse_current_path[0] = '0';
+			browse_current_path[1] = ':';
+			browse_current_path[2] = '/';
+			browse_current_path[3] = 0;
 		}
 
 		return menu_browse();
 	} else if (sel->root) {
 		root = sel->root;
-		part_no = sel->root_pt;
 	} else {
 		log_printf("BUG: invalid menu entry\n");
 		return -1;
@@ -214,24 +202,9 @@ int menu_activate(void) {
 	
 	// at this point root must have been setup
 	// and we are going to boot a kernel
-	FATFS fatfs;
-	char target[3];
-	target[0] = part_no + '0';
-	target[1] = ':';
-	target[2] = 0x0;
-	FRESULT res = f_mount(&fatfs, target, 1);
-	if (res != FR_OK) {
-		log_printf("could not open partition %d: %d\n", part_no, res);
-		return (int)res;
-	}
 
-	char *kernel_fn;
-	if (strlen(root))
-		// root has always trailing slash, kernel has always no leading slash
-		kernel_fn = strcat(root, sel->kernel);
-	else {
-		kernel_fn = sel->kernel;
-	}
+	// root has always trailing slash, kernel has always no leading slash
+	char *kernel_fn = strcat(root, sel->kernel);
 	
 	// sanity check
 	int err = is_valid_elf(kernel_fn);

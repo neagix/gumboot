@@ -25,7 +25,7 @@ typedef struct {
 	u8 reboot, poweroff, browse;
 	// FatFS does not support extended partitions
 	// physical drive is always 0 because only one SD is supported
-	u8 root_pt;
+	// 'root' will include the drive/partition number
 } stanza;
 
 char *config_load(const char *fname, u32 *read);
