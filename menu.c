@@ -115,7 +115,6 @@ int menu_activate(void) {
 	
 	err = powerpc_boot_file(part_no, kernel_fn, sel->kernel_args);
 	if (err) {
-		//TODO: redraw menu on return?
 		log_printf("MINI boot failed: %d\n", err);
 		return err;
 	}

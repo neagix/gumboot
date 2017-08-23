@@ -221,5 +221,10 @@ int powerpc_boot_file(u8 part_no, const char *path, const char *args) {
 	gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1);
 	gfx_printf_at(0, 2, "Booting (sd0,%d)/%s... [%s]", part_no, path, args);
 	
-	return ipc_powerpc_boot(mem, fsize);
+	err = ipc_powerpc_boot(mem, fsize);
+	if (err) {
+		// in case of error, clear the 'Booting' message
+		gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1);
+	}
+	return err;
 }
