@@ -48,3 +48,11 @@ int gfx_printf_at(int x, int y, const char *fmt, ...)
 
 	return i;
 }
+
+// apply alpha channel
+rgb apply_alpha(rgb pixel, rgb bg) {
+	pixel.as_rgba.r = (pixel.as_rgba.r & pixel.as_rgba.a) + (bg.as_rgba.r & ~pixel.as_rgba.a);
+	pixel.as_rgba.g = (pixel.as_rgba.g & pixel.as_rgba.a) + (bg.as_rgba.g & ~pixel.as_rgba.a);
+	pixel.as_rgba.b = (pixel.as_rgba.b & pixel.as_rgba.a) + (bg.as_rgba.b & ~pixel.as_rgba.a);
+	return pixel;
+}

@@ -95,8 +95,12 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 	fb += dx;
 
 	for(y = 0; y < rst.height; y++) {
-		//memset32(fb, 0, rst.width);
-		memcpy(fb, pixel_data + y*rst.width, rst.width*4);
+		for(x = 0;x < rst.width; x++) {
+			rgb pixel = {.as_u32 = pixel_data[x     + y * rst.width]};
+			pixel = apply_alpha(pixel, solid_bg);
+			
+			fb[x] = pixel.as_u32;
+		}
 
 		fb += vfb_stride/4;
 	}

@@ -358,14 +358,8 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 			rgb left  = {.as_u32 = pixel_data[x     + y * rst.width]};
 			rgb right = {.as_u32 = pixel_data[x + 1 + y * rst.width]};
 
-			// apply alpha channel
-			u8 left_alpha = left.as_rgba.a, right_alpha = right.as_rgba.a;
-			left.as_rgba.r = (left.as_rgba.r & left_alpha) + (solid_bg.as_rgba.r & ~left_alpha);
-			left.as_rgba.g = (left.as_rgba.g & left_alpha) + (solid_bg.as_rgba.g & ~left_alpha);
-			left.as_rgba.b = (left.as_rgba.b & left_alpha) + (solid_bg.as_rgba.b & ~left_alpha);
-			right.as_rgba.r = (right.as_rgba.r & right_alpha) + (solid_bg.as_rgba.r & ~right_alpha);
-			right.as_rgba.g = (right.as_rgba.g & right_alpha) + (solid_bg.as_rgba.g & ~right_alpha);
-			right.as_rgba.b = (right.as_rgba.b & right_alpha) + (solid_bg.as_rgba.b & ~right_alpha);
+			left = apply_alpha(left, solid_bg);
+			right = apply_alpha(right, solid_bg);
 
 			yuv_row[x >> 1] = make_yuv(left, right);
 		}

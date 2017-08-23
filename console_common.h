@@ -32,6 +32,9 @@
 #define FONT_HEADING	0x3
 #define FONT_ERROR		0x4
 
+// utility function for software alpha blending
+rgb apply_alpha(rgb pixel, rgb bg);
+
 int gfx_printf_at(int x, int y, const char *fmt, ...);
 void gfx_print_at(int x, int y, const char *str);
 
