@@ -9,15 +9,6 @@
 #include "menu_render.h"
 #include "console_common.h"
 
-void menu_update_timeout(int seconds) {
-	select_font(FONT_HELPTEXT);
-	gfx_printf_at(1 + strlen(timeout_prompt), BOX_H+3+4, "%*d", 2, seconds);
-}
-
-void menu_clear_timeout(void) {
-	gfx_clear(2, BOX_H+HEAD_LINES+2, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
-}
-
 void menu_down(void) {
 	menu_selection++;
 	if (menu_selection == config_entries_count)
@@ -102,7 +93,6 @@ int menu_activate(void) {
 	target[1] = ':';
 	target[2] = 0x0;
 	FRESULT res = f_mount(&fatfs, target, 1);
-
 	if (res != FR_OK) {
 		log_printf("could not open partition %d: %d\n", part_no, res);
 		return (int)res;
@@ -122,20 +112,22 @@ int menu_activate(void) {
 		log_printf("not a valid ELF: %s: %d\n", kernel_fn, err);
 		return err;
 	}
-
+	
 	// clear screen for ease of the eyes
 	select_font(FONT_NORMAL);
 	console_clear();
 	
 	if (strlen(sel->kernel_args))
-		gfx_printf("Booting (sd%d)/%s... [%s]", part_no, kernel_fn, sel->kernel_args);
+		gfx_printf("Booting (sd0,%d)/%s... [%s]", part_no, kernel_fn, sel->kernel_args);
 	else
-		gfx_printf("Booting (sd%d)/%s...", part_no, kernel_fn);
+		gfx_printf("Booting (sd0,%d)/%s...", part_no, kernel_fn);
+
+	// DEBUG
+	return -1;
 
 	err = powerpc_boot_file(kernel_fn, sel->kernel_args);
 	if (err) {
-		//TODO: redraw menu
-		log_printf("could not boot kernel %s: %d\n", kernel_fn, err);
+		//TODO: redraw menu on return?
 		return err;
 	}
 	

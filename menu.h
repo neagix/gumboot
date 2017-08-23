@@ -6,9 +6,6 @@
 #include "config.h"
 #include "types.h"
 
-void menu_update_timeout(int seconds);
-void menu_clear_timeout(void);
-
 void menu_up(void);
 void menu_down(void);
 int menu_activate(void);

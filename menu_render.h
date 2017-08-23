@@ -28,6 +28,9 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor);
 void menu_draw_entries(void);
 void menu_init(void);
 
+void menu_update_timeout(int seconds);
+void menu_clear_timeout(void);
+
 extern const char	*timeout_prompt, *timeout_prompt_term;
 
 #endif // _MENU_RENDER_H

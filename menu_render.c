@@ -71,6 +71,16 @@ void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     draw_box_at(0, 3, CONSOLE_COLUMNS, BOX_H);
 }
 
+void menu_update_timeout(int seconds) {
+	select_font(FONT_HELPTEXT);
+	gfx_printf_at(1 + strlen(timeout_prompt), BOX_H+HEAD_LINES+2, "%*d", 2, seconds);
+}
+
+void menu_clear_timeout(void) {
+	select_font(FONT_HELPTEXT);
+	gfx_clear(1, BOX_H+HEAD_LINES+2, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
+}
+
 void menu_draw_entries(void) {
 	int i;
 

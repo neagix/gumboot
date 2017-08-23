@@ -120,10 +120,6 @@ int main(void)
 	init_font(FONT_HELPTEXT);
 	init_font(FONT_HEADING);
 			
-	// repaint whole screen with the background color
-	//clear_fb(config_color_normal[1]); NOT NEEDED
-
-
     menu_selection = config_default;
     menu_init();
     

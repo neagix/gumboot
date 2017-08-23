@@ -165,28 +165,35 @@ int powerpc_boot_file(const char *path, const char *args) {
 
 	res = f_stat(path, &stat);
 	if (res != FR_OK) {
+		log_printf("could not stat %s: %d\n", path, res);
 		return res;
 	}
 
 	unsigned int fsize = stat.fsize;
 	char *mem = malloc(fsize);
 	if (!mem) {
+		log_printf("could not allocate %d bytes\n", fsize);
 		return -300;
 	}
 
 	res = f_open(&fd, path, FA_READ);
 	if (res != FR_OK) {
+		log_printf("could not open %s: %d\n", path, res);
 		return res;
 	}
 	
 	unsigned int read;
 	res = f_read(&fd, mem, fsize, &read);
 	if (res != FR_OK) {
+		log_printf("could not read %d bytes: %d\n", fsize, res);
+
 		free(mem);
 		f_close(&fd);
+		
 		return res;
 	}
 	if (read != fsize) {
+		log_printf("read %d bytes but %d expected\n", read, fsize);
 		return -200;
 	}
 	
