@@ -11,11 +11,6 @@
 #include "video_low.h"
 #include "malloc.h"
 
-#define MAX_BROWSE_ENTRIES CONSOLE_LINES-HELP_LINES-HEAD_LINES-2
-
-char *browse_buffer = NULL;
-int browse_menu_entries[MAX_BROWSE_ENTRIES];
-int browse_buffer_sz = 0, browse_menu_entries_count = 0;
 
 void menu_down(void) {
 	int max;
@@ -46,7 +41,7 @@ void menu_up(void) {
 
 void browse_append(const char *name, int is_directory) {
 	// stop ingurgitating menu entries
-	if (browse_menu_entries_count == MAX_BROWSE_ENTRIES)
+	if (browse_menu_entries_count == sizeof(browse_menu_entries))
 		return;
 
 	// get directory name length

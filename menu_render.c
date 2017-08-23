@@ -11,6 +11,10 @@ raster gumboot_logo;
 #define DISP_UP		0x18
 #define DISP_DOWN	0x19
 
+char *browse_buffer = NULL;
+int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
+int browse_buffer_sz = 0, browse_menu_entries_count = 0;
+
 int old_menu_selection;
 int menu_selection = 0;
 
@@ -148,7 +152,7 @@ void menu_draw_entries_and_help(void) {
 	}
 	
 	// render the logo
-	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+2) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1]);
+	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+1) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1]);
 	
 	menu_draw_help();
 }

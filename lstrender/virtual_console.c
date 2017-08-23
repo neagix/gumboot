@@ -3,6 +3,7 @@
 #include "../console_common.h"
 
 #include <stdio.h>
+#include <string.h>
 
 unsigned char *vfb;
 unsigned vfb_stride;
@@ -80,6 +81,22 @@ void gfx_draw_char(int dx, int dy, unsigned char c) {
     for(u8 y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
 		unsigned char font_row = console_font_8x16[c*CONSOLE_CHAR_HEIGHT + y];
 		memcpy_font(fb, font_row, fg, bg);
+
+		fb += vfb_stride/4;
+	}
+}
+
+void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
+	u32 x, y;
+	u32 *fb = (u32 *)vfb;
+	u32 *pixel_data = (u32 *)rst.pixels;
+
+	fb += dy * vfb_stride/4;
+	fb += dx;
+
+	for(y = 0; y < rst.height; y++) {
+		//memset32(fb, 0, rst.width);
+		memcpy(fb, pixel_data + y*rst.width, rst.width*4);
 
 		fb += vfb_stride/4;
 	}

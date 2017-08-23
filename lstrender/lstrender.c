@@ -6,6 +6,7 @@
 
 #include "../config.h"
 #include "../menu_render.h"
+#include "../raster.h"
  
 /* The image argument has width * height RGBA pixels or width * height * 4 bytes */
 void encodeOneStep(const char* filename, const unsigned char* image, unsigned width, unsigned height)
@@ -74,14 +75,18 @@ int main(int argc, char **argv)
 	}*/
 	
 	printf("columns = %d, lines = %d\n", CONSOLE_COLUMNS, CONSOLE_LINES);
+	
+	raster *valid_splash = NULL;
 
     menu_selection = config_default;
-    menu_init();
+    menu_selection = config_default;
+    menu_init(valid_splash);
 	menu_draw_head_and_box(1, 3);
 	menu_draw_timeout(config_timeout);
+	
 	// check whether to draw help area or not
 	menu_draw_entries_and_help();
-
+	
 	encodeOneStep(argv[2], vfb, RESOLUTION_W, RESOLUTION_H);
 
 	free(vfb);	
