@@ -158,6 +158,10 @@ void menu_draw_entries_and_help(void) {
 	menu_draw_help();
 }
 
+void menu_clear_entries(void) {
+	gfx_clear(1, HEAD_LINES+1, CONSOLE_COLUMNS-2, CONSOLE_LINES-HELP_LINES-HEAD_LINES-2, config_color_normal[1]);
+}
+
 raster *menu_splash;
 
 void menu_init(raster *splash) {

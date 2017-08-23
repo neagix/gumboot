@@ -64,33 +64,28 @@ void browse_append(const char *name, int is_directory) {
 	browse_menu_entries[browse_menu_entries_count++] = end_offset;
 }
 
-int menu_browse(stanza *sel) {
+char browse_current_path[4096];
+u8 browse_current_part_no;
+
+int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
 	FATFS fatfs;
-	char target[3], *root;
-	u8 part_no;
+	char target[3];
 
-	if (sel->root) {
-		part_no = sel->root_pt;
-		root = sel->root;
-	} else {
-		part_no = 0;
-		root = "";
-	}
-	target[0] = part_no + '0';
+	target[0] = browse_current_part_no + '0';
 	target[1] = ':';
 	target[2] = 0x0;
 	FRESULT res = f_mount(&fatfs, target, 1);
 
 	if (res != FR_OK) {
-		log_printf("could not open partition %d: %d\n", part_no, res);
+		log_printf("could not open partition %d: %d\n", browse_current_part_no, res);
 		return (int)res;
 	}
-
-	res = f_opendir(&dirs, root);
+	
+	res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
-		log_printf("failed to open directory '%s': %d\n", root, res);
+		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
 		return (int)res;
 	}
 
@@ -112,31 +107,66 @@ int menu_browse(stanza *sel) {
 	}
 
 	// draw the new menu
-	old_menu_selection = menu_selection;
 	menu_selection = 0;
+	menu_clear_entries();
 	menu_draw_entries_and_help();
 	
 	// return non-zero so that input loop continues
 	return 1;
 }
 
+static void free_browse_menu() {
+	// free all browse menu entries
+	free(browse_buffer);
+	browse_menu_entries_count = 0;
+	browse_buffer = NULL;
+	browse_buffer_sz = 0;
+}
+
 int menu_activate(void) {
 	if (browse_buffer) {
+		// shall we go back?
 		if (menu_selection == 0) {
-			// quick path: go back
-			menu_selection = old_menu_selection;
-			free(browse_buffer);
-			browse_menu_entries_count = 0;
-			browse_buffer = NULL;
-			browse_buffer_sz = 0;
+			free_browse_menu();
+
+			if (!browse_current_path[0]) {
+				// end of line: go back
+				menu_selection = old_menu_selection;
+				menu_clear_entries();
+				menu_draw_entries_and_help();
+
+				// return non-zero so that input loop continues
+				return 1;
+			}
+
+			// find before-last slash in the current path
+			int i;
+			for(i=strlen(browse_current_path)-2;i>=0;i++) {
+				if (browse_current_path[i] == '/') {
+					// cut here
+					browse_current_path[i] = 0;
+
+					return menu_browse();
+				}
+			}
 			
-			menu_draw_entries_and_help();
+			// root directory
+			browse_current_path[0] = 0;
+			return menu_browse();
+		}
+
+		// is the selection a subdirectory?
+		char *label = browse_buffer + browse_menu_entries[menu_selection];
+		int l = strlen(label);
+		if (label[l-1] == '/') {
+			// append subdirectory to the current path
+			memcpy(browse_current_path+strlen(browse_current_path), label, l+1);
+			free_browse_menu();
 			
-			// return non-zero so that input loop continues
-			return 1;
+			return menu_browse();
 		}
 		
-		log_printf("don't know what to do\n");
+		log_printf("selected a file\n");
 		
 		return 1;
 	}
@@ -160,9 +190,20 @@ int menu_activate(void) {
 	if (sel->find_args) {
 		//TODO: find it!
 	} else if (sel->browse) {
+		old_menu_selection = menu_selection;
+
 		// directory browse, uses 'root' to set starting partition and directory
 		// otherwise starts from first partition and root directory
-		return menu_browse(sel);
+		if (sel->root) {
+			browse_current_part_no = sel->root_pt;
+			// append subdirectory to the current path
+			memcpy(browse_current_path, sel->root, strlen(sel->root)+1);
+		} else {
+			browse_current_part_no = 0;
+			browse_current_path[0] = 0x0;
+		}
+
+		return menu_browse();
 	} else if (sel->root) {
 		root = sel->root;
 		part_no = sel->root_pt;
