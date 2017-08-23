@@ -23,10 +23,8 @@ void log_free_bb() {
 
 int log_print(const char *buffer, int i) {
 	if (gfx_console_init) {
-		u32 **prev = selected_font_yuv;
-		selected_font_yuv = font_yuv_error;
+		select_font(FONT_ERROR);
 		gfx_print(buffer, i);
-		selected_font_yuv = prev;
 	} else {
 		// accrete the back buffer
 		if (i > (MAX_BACKBUFFER_LEN-back_buffer_ptr)) {

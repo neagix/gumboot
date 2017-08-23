@@ -50,7 +50,7 @@ rgb color_default[2] = {
 	{.as_rgba = {0xAA, 0xAA, 0xAA, 0xFF}},
 	{.as_rgba = {0, 0, 0, 0xFF}}
 	};
-rgb color_default_invert[2] = {{.as_rgba = {0, 0, 0, 0xFF}}, {.as_rgba = {0xAA, 0xAA, 0xAA, 0xFF}}};
+rgb color_error[2] = {{.as_rgba = {255, 0, 0, 255}}, {.as_rgba = {0, 0, 0, 255}}};
 
 // color configuration
 rgb config_color_normal[2] = {
@@ -72,6 +72,14 @@ rgb config_color_normal[2] = {
 
 stanza config_entries[MAX_CONFIG_ENTRIES];
 static stanza *wip_stanza = NULL;
+
+// used by FatFS
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},     /* "0:" ==> Physical drive 0, 1st partition */
+    {0, 2},     /* "1:" ==> Physical drive 0, 2nd partition */
+    {0, 3},     /* "2:" ==> Physical drive 0, 3rd partition */
+    {0, 4}      /* "3:" ==> Physical drive 0, 4th partition */
+};
 
 int process_line(char *line);
 int complete_stanza();
@@ -417,21 +425,23 @@ int parse_root(char *s) {
 	if (wip_stanza->root)
 		return ERR_DOUBLE_DEFINITION;
 
-	if (strncmp(s, "(sd", 3)) {
+	// only one drive, SD, is supported
+	if (strncmp(s, "(sd0,", 5)) {
 		return ERR_INVALID_ROOT;
 	}
 	// get partition number
-	s+=3;
+	s+=5;
 	if (strlen(s) < 2)
 		return ERR_INVALID_ROOT;
 	// check string after the number
 	if (s[1] != ')')
 		return ERR_INVALID_ROOT;
 	u8 n = (u8)(*s-48);
-	if (n > 9)
+	if (n > 3)
+		// extended partitions are not supported due to a FatFS limitation
 		return ERR_INVALID_ROOT;
 
-	wip_stanza->root_part_no = n;
+	wip_stanza->root_pt = n;
 	
 	// skip number and parenthesis
 	s++; s++;

@@ -186,7 +186,7 @@ int gfx_printf(const char *fmt, ...)
 	return i;
 }
 
-void free_font(u32 *font_yuv[255]) {
+void internal_free_font(u32 *font_yuv[255]) {
 	int i;
 
 	for (i = 0; i < 255; i++) {
@@ -221,7 +221,29 @@ void font_to_yuv(u32 *font_yuv[255], u8 fill_r, u8 fill_g, u8 fill_b, u8 back_r,
 	}
 }
 
-void init_font(rgb c[2], u32 *font_yuv[255]) {
+void free_font(int font) {
+	switch (font) {
+		case FONT_HEADING:
+			internal_free_font(font_yuv_heading);
+			break;
+		case FONT_NORMAL:
+			internal_free_font(font_yuv_normal);
+			break;
+		case FONT_HELPTEXT:
+			internal_free_font(font_yuv_helptext);
+			break;
+		case FONT_HIGHLIGHT:
+			internal_free_font(font_yuv_highlight);
+			break;
+		case FONT_ERROR:
+			internal_free_font(font_yuv_error);
+			break;
+	}
+	// PANIC!
+	return;
+}
+
+static void internal_init_font(rgb c[2], u32 *font_yuv[255]) {
 	// re-initialise color
 	font_to_yuv(font_yuv, c[0].as_rgba.r, c[0].as_rgba.g, c[0].as_rgba.b, c[1].as_rgba.r, c[1].as_rgba.g, c[1].as_rgba.b);
 }
@@ -229,8 +251,6 @@ void init_font(rgb c[2], u32 *font_yuv[255]) {
 void init_fb(int vmode) {
 	// default fonts setup before configuration is loaded
 	// and used to display configuration load errors / other log errors
-	font_to_yuv(font_yuv_error, 255, 0, 0, 0, 0, 0);
-	font_to_yuv(font_yuv_normal, 255, 255, 255, 0, 0, 0);
 	selected_font_yuv = font_yuv_normal;
 	
 	switch(vmode) {
@@ -285,4 +305,30 @@ void select_font(int font) {
 			selected_font_yuv = font_yuv_error;
 			break;
 	}
+}
+
+void init_font(int font) {
+	switch (font) {
+		case FONT_HEADING:
+			internal_init_font(config_color_heading, font_yuv_heading);
+			break;
+		case FONT_NORMAL:
+			internal_init_font(config_color_normal, font_yuv_normal);
+			break;
+		case FONT_HELPTEXT:
+			internal_init_font(config_color_helptext, font_yuv_helptext);
+			break;
+		case FONT_HIGHLIGHT:
+			internal_init_font(config_color_highlight, font_yuv_highlight);
+			break;
+		case FONT_ERROR:
+			internal_init_font(color_error, font_yuv_error);
+			break;
+	}
+	// PANIC!
+	return;
+}
+
+void console_move(int x, int y) {
+	console_pos = y * CONSOLE_COLUMNS + x;
 }

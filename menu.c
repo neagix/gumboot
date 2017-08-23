@@ -10,14 +10,8 @@
 #include "console_common.h"
 
 void menu_update_timeout(int seconds) {
-	u32 **prev = NULL;
-	if (selected_font_yuv != font_yuv_helptext) {
-		prev = selected_font_yuv;
-		selected_font_yuv = font_yuv_helptext;
-	}
+	select_font(FONT_HELPTEXT);
 	gfx_printf_at(1 + strlen(timeout_prompt), BOX_H+3+4, "%*d", 2, seconds);
-	if (prev)
-		selected_font_yuv = prev;
 }
 
 void menu_clear_timeout(void) {
@@ -44,13 +38,13 @@ int menu_browse(stanza *sel) {
 	FILINFO Fno;
 	FATFS fatfs;
 	char target[3];
-	target[0] = sel->root_part_no + '0';
+	target[0] = sel->root_pt + '0';
 	target[1] = ':';
 	target[2] = 0x0;
 	FRESULT res = f_mount(&fatfs, target, 1);
 
 	if (res != FR_OK) {
-		log_printf("could not open partition %d: %d\n", sel->root_part_no, res);
+		log_printf("could not open partition %d: %d\n", sel->root_pt, res);
 		return (int)res;
 	}
 
@@ -94,7 +88,7 @@ int menu_activate(void) {
 		return menu_browse(sel);
 	} else if (sel->root) {
 		root = sel->root;
-		part_no = sel->root_part_no;
+		part_no = sel->root_pt;
 	} else {
 		log_printf("BUG: invalid menu entry\n");
 		return -1;
@@ -130,7 +124,7 @@ int menu_activate(void) {
 	}
 
 	// clear screen for ease of the eyes
-	selected_font_yuv = font_yuv_normal;
+	select_font(FONT_NORMAL);
 	console_clear();
 	
 	if (strlen(sel->kernel_args))

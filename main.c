@@ -53,24 +53,29 @@ int main(void)
 		return -1;
 	}
 	
-	int config_load_err;
 	FATFS fatfs;
 	FRESULT res = f_mount(&fatfs, "0:", 1);
-	if (res != FR_OK) {
-		config_load_err = (int)res;
-	} else {
-		config_load_err = 0;
+	if (res == FR_OK) {
 		u32 read;
 		char *cfg_data = config_load(DEFAULT_LST, &read);
 		if (cfg_data) {
-			config_load_err = config_load_from_buffer(cfg_data, read);
+			if (config_load_from_buffer(cfg_data, read)) {
+				// in case of error disable some features
+				config_timeout = 0;
+				config_nomenu = 0;
+			}
 			// error will be checked later on
 			free(cfg_data);
 		}
+	} else {
+		log_printf("could not mount first partition: %d\n", res);
 	}
 	
     input_init();
 	init_fb(config_vmode);
+	init_font(FONT_ERROR);
+	init_font(FONT_NORMAL);
+
 	rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
 	clear_fb(black);
 
@@ -89,9 +94,6 @@ int main(void)
 		// from now, console can be used
 		gfx_console_init = 1;
 	}
-	// flush log lines from the backbuffer - if any
-	log_flush_bb();
-	log_free_bb();
 
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
@@ -102,23 +104,25 @@ int main(void)
 		log_printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
+		// flush log lines from the backbuffer - if any
+		log_flush_bb();
+		log_free_bb();
+
 		powerpc_hang();
 		return 1; /* never reached */
 	}
 
 	// allow setting of normal color and repaint of screen only if there were no errors displayed
-	if (!config_load_err) {
-		if (rgbcmp(config_color_normal, color_default)) {
-			free_font(font_yuv_normal);
-			init_font(config_color_normal, font_yuv_normal);
+	if (rgbcmp(config_color_normal, color_default)) {
+		free_font(FONT_NORMAL);
+		init_font(FONT_NORMAL);
 			
-			// repaint all screen with the new background
-			clear_fb(config_color_normal[1]);
-		}
+		// repaint all screen with the new background
+		clear_fb(config_color_normal[1]);
 	}
-	init_font(config_color_highlight, font_yuv_highlight);
-	init_font(config_color_helptext, font_yuv_helptext);
-	init_font(config_color_heading, font_yuv_heading);
+	init_font(FONT_HIGHLIGHT);
+	init_font(FONT_HELPTEXT);
+	init_font(FONT_HEADING);
 
     menu_selection = config_default;
     menu_init();
@@ -130,6 +134,12 @@ int main(void)
     
 	menu_draw(config_timeout, mini_version_major, mini_version_minor);
 	menu_draw_entries();
+
+    // put all the backbuffer log lines below the menu entries
+    console_move(0, HEAD_LINES + 1 + config_entries_count);
+	// flush log lines from the backbuffer - if any
+	log_flush_bb();
+	log_free_bb();
 
 	u64 start_time = mftb_usec();
 	int last_time_elapsed = 0;

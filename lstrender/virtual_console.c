@@ -7,8 +7,6 @@
 unsigned char *vfb;
 unsigned vfb_stride;
 
-rgb color_error[2] = {{255, 0, 0, 255}, {0, 0, 0, 255}};
-
 int selected_font;
 
 void select_font(int font) {

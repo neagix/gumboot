@@ -22,7 +22,9 @@ typedef struct {
 			*kernel_args,
 			*find_args;
 	u8 reboot, poweroff, browse;
-	u8 root_part_no;
+	// FatFS does not support extended partitions
+	// physical drive is always 0 because only one SD is supported
+	u8 root_pt;
 } stanza;
 
 char *config_load(const char *fname, u32 *read);
@@ -37,8 +39,9 @@ extern rgb config_color_normal[2],
 	config_color_highlight[2],
 	config_color_helptext[2],
 	config_color_heading[2];
-	
-extern rgb color_default[2], color_default_invert[2];
+
+extern rgb color_error[2];
+extern rgb color_default[2];
 
 #define get_bgcolor(c) ((unsigned long)(c >> 32))
 #define get_fgcolor(c) ((unsigned long)c)
