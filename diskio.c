@@ -30,15 +30,10 @@ DSTATUS disk_status (
 	switch (state) {
 	case SDMMC_NO_CARD:
 		return STA_NODISK;
-
 	case SDMMC_NEW_CARD:
 		return STA_NOINIT;
-
-	default:
-		return 0;
 	}
-
-	return RES_PARERR; //TODO: check this
+	return 0;
 }
 
 
@@ -47,12 +42,10 @@ DSTATUS disk_status (
 /* Initialize a Drive                                                    */
 /*-----------------------------------------------------------------------*/
 
-DSTATUS disk_initialize (
-	BYTE pdrv				/* Physical drive number to identify the drive */
-)
+DSTATUS disk_initialize (BYTE drv)
 {
 	// only SD supported
-	if (pdrv != 0)
+	if (drv != 0)
 		return STA_NODISK;
 
 	int state = sd_get_state();
@@ -66,10 +59,11 @@ DSTATUS disk_initialize (
 			return STA_NOINIT;
 		else
 			return 0;
-	}
-	return STA_NOINIT;
-}
 
+	default:
+		return 0;
+	}
+}
 
 
 /*-----------------------------------------------------------------------*/
