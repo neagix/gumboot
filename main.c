@@ -32,6 +32,7 @@ Copyright (C) 2017              neagix
 #include "log.h"
 #include "utils.h"
 #include "lodepng/lodepng.h"
+#include "raster.h"
 
 // used by FatFS
 PARTITION VolToPart[FF_VOLUMES] = {
@@ -128,27 +129,30 @@ int main(void)
 		return 1; /* never reached */
 	}
 
-	int has_splash = 0;
-	if (has_fs && config_splashimage) {
-		u32 read;
-		void *png = load_file(config_splashimage, MAX_SPLASH_SIZE, &read);
-		if (png) {
-			int err = console_render_splash(png, read);
-			free(png);
-			if (!err)
-				has_splash = 1;
-			sleep(10);
-		}		
-	}
-
 	init_font(FONT_ERROR);
 	init_font(FONT_NORMAL);
 	init_font(FONT_HIGHLIGHT);
 	init_font(FONT_HELPTEXT);
 	init_font(FONT_HEADING);
+
+	raster splash, *valid_splash = NULL;
+	if (has_fs && config_splashimage) {
+		u32 read;
+		void *png = load_file(config_splashimage, MAX_SPLASH_SIZE, &read);
+		if (png) {
+			// convert to raster
+			int err = png_to_raster(png, read, splash);
+			free(png);
+			if (err) {
+				log_printf("error %u: %s\n", err, lodepng_error_text(err));
+			} else {
+				valid_splash = &splash;
+			}
+		}		
+	}	
 			
     menu_selection = config_default;
-    menu_init();
+    menu_init(valid_splash);
     
     if (config_nomenu) {
 		if (!menu_activate())
@@ -161,7 +165,7 @@ int main(void)
 	
 	// check whether to draw help area or not
 	menu_draw_entries_and_help();
-
+	
     // put all the backbuffer log lines below the menu entries
     console_move(0, HEAD_LINES + 1 + config_entries_count + 1);
 	// flush log lines from the backbuffer - if any
@@ -214,21 +218,5 @@ parse_input:
 quit:
 	powerpc_hang();
 
-	return 0;
-}
-
-int console_render_splash(void *png, size_t pngsize) {
-	unsigned char* image;
-	unsigned width, height;
-
-	int err = lodepng_decode32(&image, &width, &height, png, pngsize);
-	if (err) {
-		log_printf("error %u: %s\n", err, lodepng_error_text(err));
-		return err;
-	}
-	
-	console_blit(RESOLUTION_W-width, 0, image, width, height, config_color_heading[1]);
-	
-	free(image);
 	return 0;
 }

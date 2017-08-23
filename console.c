@@ -344,32 +344,38 @@ void console_set_blinker(int status) {
 		gfx_printch_at(CONSOLE_COLUMNS-1, 0, ' ');
 }
 
-void console_blit(int dx, int dy, void *mem, u32 width, u32 height, rgb solid_bg) {
+void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 	u32 x, y;
 	u32 *fb = xfb;
-	u32 *pixel_data = (u32 *)mem;
+	u32 *pixel_data = (u32 *)rst.pixels;
 
 	fb += ((dy + y_add) * (RESOLUTION_W >> 1));
 	fb += (dx >> 1);
+	
+	// allocate a buffer that will be used for the RGB->YUV conversion
+	u32 row_len = rst.width >> 1;
+	u32 *row_buf = (u32 *)malloc(row_len);
 
-	for(y = 0; y < height; y++) {
-		for (x = 0; x < width; x+=4) {
+	for(y = 0; y < rst.height; y++) {
+		for (x = 0; x < rst.width; x+=2) {
 			// convert two pixels from source into one destination pixels
-//			rgb left  = {.as_u32 = pixel_data[x     + y * width]};
-//			rgb right = {.as_u32 = pixel_data[x + 1 + y * width]};
-			rgb left = solid_bg;
-			rgb right = solid_bg;
-			
-/*			left.r = (left.r & left.a) + (solid_bg.r & ^left.a);
-			left.g = (left.g & left.a) + (solid_bg.g & ^left.a);
-			left.b = (left.b & left.a) + (solid_bg.b & ^left.a);*/
-			
-			u32 *row_ofs = fb + (x >> 1);
-			row_ofs[0] = make_yuv(left, right);
-			row_ofs[1] = make_yuv(left, right);
+			rgb left  = {.as_u32 = pixel_data[x     + y * rst.width]};
+			rgb right = {.as_u32 = pixel_data[x + 1 + y * rst.width]};
 
-			sync_after_write((const void *)row_ofs, 4);
+			// apply alpha channel
+			u8 left_alpha = left.as_rgba.a,
+				right_alpha = right.as_rgba.a;
+			left.as_rgba.r = (left.as_rgba.r & left_alpha) + (solid_bg.as_rgba.r & ~left_alpha);
+			left.as_rgba.g = (left.as_rgba.g & left_alpha) + (solid_bg.as_rgba.g & ~left_alpha);
+			left.as_rgba.b = (left.as_rgba.b & left_alpha) + (solid_bg.as_rgba.b & ~left_alpha);
+			right.as_rgba.r = (right.as_rgba.r & right_alpha) + (solid_bg.as_rgba.r & ~right_alpha);
+			right.as_rgba.g = (right.as_rgba.g & right_alpha) + (solid_bg.as_rgba.g & ~right_alpha);
+			right.as_rgba.b = (right.as_rgba.b & right_alpha) + (solid_bg.as_rgba.b & ~right_alpha);
+
+			row_buf[x >> 1] = make_yuv(left, right);
 		}
+		
+		memcpy32(fb, row_buf, row_len);
 		fb += (RESOLUTION_W >> 1);
 	}
 }

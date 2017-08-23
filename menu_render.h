@@ -26,7 +26,7 @@ extern int menu_selection;
 void draw_box_at(int x, int y, int w, int h);
 void menu_draw_head_and_box(u16 mini_version_major, u16 mini_version_minor);
 void menu_draw_entries_and_help(void);
-void menu_init(void);
+void menu_init(raster *splash);
 
 void menu_update_timeout(int seconds);
 void menu_clear_timeout(void);

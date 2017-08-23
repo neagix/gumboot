@@ -1,6 +1,14 @@
 
 #include "menu_render.h"
 #include "console_common.h"
+#include "raster.h"
+
+extern int gumboot_logo_width,
+	gumboot_logo_height;
+
+extern unsigned char gumboot_logo_pixels[];
+
+raster gumboot_logo;
 
 #define DISP_UP		0x18
 #define DISP_DOWN	0x19
@@ -109,6 +117,10 @@ static void menu_draw_help(void) {
 	gfx_print_at(1, BOX_H+HEAD_LINES, sel->help_text);
 }
 
+void menu_render_logo() {
+	console_blit(RESOLUTION_W-gumboot_logo.width-CONSOLE_CHAR_WIDTH, (HEAD_LINES+2) * CONSOLE_CHAR_HEIGHT, gumboot_logo, config_color_normal[1]);
+}
+
 void menu_draw_entries_and_help(void) {
 	int i;
 
@@ -128,11 +140,27 @@ void menu_draw_entries_and_help(void) {
 		gfx_clear(1 + l, HEAD_LINES+1+i, CONSOLE_COLUMNS-l-2, 1, c);
 	}
 	
+	menu_render_logo();
+	
 	menu_draw_help();
 }
 
-void menu_init(void) {
+raster *menu_splash;
+
+void menu_init(raster *splash) {
+	menu_splash = splash;
 	gfx_clear(0, 		  0, CONSOLE_COLUMNS, HELP_LINES, config_color_heading[1]);
 	gfx_clear(0, HEAD_LINES, CONSOLE_COLUMNS, CONSOLE_LINES-HELP_LINES-HEAD_LINES, config_color_normal[1]);
 	gfx_clear(0, CONSOLE_LINES-HELP_LINES, CONSOLE_COLUMNS, HELP_LINES, config_color_helptext[1]);
+	
+	// set correct pointers for the logo
+	gumboot_logo.width = gumboot_logo_width;
+	gumboot_logo.height = gumboot_logo_height;
+	gumboot_logo.pixels = gumboot_logo_pixels;
+}
+
+int menu_render_splash(raster rst) {
+	// blit the pixel data, centered on screen
+	console_blit((RESOLUTION_W-rst.width)/2, (RESOLUTION_H-rst.height)/2, rst, config_color_normal[1]);
+	return 0;
 }

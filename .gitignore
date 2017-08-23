@@ -2,3 +2,4 @@
 .deps/
 gumboot.elf
 gumboot.elf.map
+logo.c

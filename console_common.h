@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "config.h"
+#include "raster.h"
 
 #define CONSOLE_CHAR_WIDTH 8
 #define CONSOLE_CHAR_HEIGHT 16
@@ -40,8 +41,8 @@ extern char pf_buffer[4096];
 
 // defined either by XFB or VFB implementations
 extern void gfx_draw_char(int x, int y, unsigned char c);
-extern int console_render_splash(void *mem, u32 sz);
-extern void console_blit(int dx, int dy, void *mem, u32 width, u32 height, rgb solid_bg);
+extern int console_render_splash(raster rst);
+extern void console_blit(int dx, int dy, raster rst, rgb solid_bg);
 
 // defined in font.c
 extern unsigned char console_font_8x16[256*CONSOLE_CHAR_HEIGHT];
