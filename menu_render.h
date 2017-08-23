@@ -18,7 +18,8 @@
 #endif
 
 #define HELP_LINES 5
-#define BOX_H (CONSOLE_LINES-4-HELP_LINES)
+#define HEAD_LINES 3
+#define BOX_H (CONSOLE_LINES-HEAD_LINES-HELP_LINES)
 
 extern int menu_selection;
 

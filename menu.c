@@ -21,7 +21,7 @@ void menu_update_timeout(int seconds) {
 }
 
 void menu_clear_timeout(void) {
-	gfx_clear(2, BOX_H+3+3, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
+	gfx_clear(2, BOX_H+HEAD_LINES+2, strlen(timeout_prompt) + 2 + strlen(timeout_prompt_term), 1, config_color_helptext[1]);
 }
 
 void menu_down(void) {

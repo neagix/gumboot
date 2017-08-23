@@ -35,6 +35,7 @@
 #define ERR_NO_ROOT				0xC0
 #define ERR_INVALID_ROOT		0xD0
 #define ERR_INVALID_VIDEO_MODE	0xE0
+#define ERR_UNKNOWN_TOKEN		0xF0
 
 // all configuration options
 int config_timeout = 0,
@@ -116,6 +117,42 @@ char *config_load(const char *fname, u32 *read) {
 }
 #endif
 
+const char *config_strerr(int err) {
+	switch (err) {
+		case ERR_MISSING_TOKEN 		:
+			return "missing token";
+		case ERR_INVALID_NUMBER		:
+			return "invalid number";
+		case ERR_EXTRA_TOKEN 		:
+			return "extra token";
+		case ERR_MISSING_TITLE		:
+			return "missing title";
+		case ERR_UNEXPECTED_TOKEN	:
+			return "unexpected token";
+		case ERR_NOTHING_TO_DO	 	:
+			return "no action specified";
+		case	ERR_TOO_MANY_ACTIONS:
+			return "too many actions";
+		case ERR_TOO_MANY_STANZAS	:
+			return "too many stanzas";
+		case ERR_INVALID_COLOR		:
+			return "invalid color";
+		case ERR_TOO_MANY_COLORS	:
+			return "too many colors";
+		case ERR_DOUBLE_DEFINITION	:
+			return "duplicate definition";
+		case ERR_NO_ROOT			:
+			return "no root specified";
+		case ERR_INVALID_ROOT		:
+			return "invalid root";
+		case ERR_INVALID_VIDEO_MODE	:
+			return "invalid video mode";
+		case ERR_UNKNOWN_TOKEN		:
+			return "unknown token";
+	}
+	return "???";
+}
+
 int config_load_from_buffer(char *cfg_data, u32 read) {
 	char *start = cfg_data, *last_line = cfg_data;
 	int line_no = 0;
@@ -129,7 +166,7 @@ int config_load_from_buffer(char *cfg_data, u32 read) {
 		
 		int err = process_line(last_line);
 		if (err) {
-			log_printf("error processing line %d: %d\n", line_no, err);
+			log_printf("error processing line %d: %s\n", line_no, config_strerr(err));
 			// in case of error, abort
 			return err;
 		}
@@ -516,11 +553,10 @@ static int atocolor(char *str, rgb *result)
 // color NORMAL [HIGHLIGHT [HELPTEXT [HEADING]]]
 // see http://diddy.boot-land.net/grub4dos/files/commands.htm#color
 int parse_color(char *s) {
-	int parsed;
 	char *next_token = tokenize(s);
 	
-	parsed = atocolor(s, (rgb *)&config_color_normal);
-	if (parsed == -1)
+	int err = atocolor(s, (rgb *)&config_color_normal);
+	if (err)
 		return ERR_INVALID_COLOR;
 
 	if (!next_token)
@@ -528,8 +564,8 @@ int parse_color(char *s) {
 	s = next_token;
 	next_token = tokenize(s);
 
-	parsed = atocolor(s, (rgb *)&config_color_highlight);
-	if (parsed == -1)
+	err = atocolor(s, (rgb *)&config_color_highlight);
+	if (err)
 		return ERR_INVALID_COLOR;
 
 	if (!next_token)
@@ -537,8 +573,8 @@ int parse_color(char *s) {
 	s = next_token;
 	next_token = tokenize(s);
 
-	parsed = atocolor(s, (rgb *)&config_color_helptext);
-	if (parsed == -1)
+	err = atocolor(s, (rgb *)&config_color_helptext);
+	if (err)
 		return ERR_INVALID_COLOR;
 
 	if (!next_token)
@@ -546,8 +582,8 @@ int parse_color(char *s) {
 	s = next_token;
 	next_token = tokenize(s);
 
-	parsed = atocolor(s, (rgb *)&config_color_heading);
-	if (parsed == -1)
+	err = atocolor(s, (rgb *)&config_color_heading);
+	if (err)
 		return ERR_INVALID_COLOR;
 	
 	if (next_token)
@@ -744,6 +780,7 @@ int process_line(char *line) {
 		return parse_browse();
 	} else {
 		log_printf("unknown token: %s\n", line);
+		return ERR_UNKNOWN_TOKEN;
 	}
 	
 	return 0;

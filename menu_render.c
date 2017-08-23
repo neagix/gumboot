@@ -52,12 +52,12 @@ static int help_drawn = 0;
 void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor) {
     // draw help text
     select_font(FONT_HELPTEXT);
-    gfx_print_at(1, BOX_H+3, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
+    gfx_print_at(1, BOX_H+HEAD_LINES+1, "Use the power (\x18) and reset (\x19) buttons to highlight an entry.\n"
 												"Long-press reset (1s) or press eject to boot.");
 
 	// draw timeout text
 	if (seconds != 0)
-		gfx_printf_at(1, BOX_H+3+4, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
+		gfx_printf_at(1, BOX_H+HEAD_LINES+2, "%s%*d%s", timeout_prompt, 2, seconds, timeout_prompt_term);
 
 	select_font(FONT_HEADING);
     gfx_print_at((CONSOLE_COLUMNS-strlen(menu_title))/2, 1, menu_title);

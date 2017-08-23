@@ -6,12 +6,16 @@
 # NTSC, PAL50, PAL60, PROGRESSIVE
 video PAL60
 
-splashimage (sd0)/gumboot/splash.ppm
+splashimage (sd0)/gumboot/splash.png
 
 #color NORMAL HIGHLIGHT HELPTEXT HEADING
 #color red/blue green/black white/blue white/blue
-color blue/green green/black white/magenta white/magenta
+#color blue/green green/black white/magenta white/magenta
 #color blue/green green/black white/blue
+#color light-blue/blue light-red/red light-green/green light-magenta/magenta 
+
+## colors can also be expressed in RGB format
+color rgb(255,0,0)/rgb(0,255,0) green/black white/blue
 
 ## timeout 0 means show the menu and do not enable any countdown
 timeout 30
@@ -22,7 +26,7 @@ timeout 30
 ## alias of 'hiddenmenu'
 #nomenu
 
-default 0
+default 2
 
 title wii-linux-ngx\nOpen default boot menu
 	root (sd0)/gumboot
