@@ -285,11 +285,6 @@ void clear_fb(rgb fill_rgb) {
 	}
 }
 
-/*void console_clear(void) {
-	console_pos = 0;
-	clear_fb(config_color_normal[1]);
-}*/
-
 void select_font(int font) {
 	switch (font) {
 		case FONT_HEADING:
@@ -355,7 +350,7 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 	
 	// allocate a buffer that will be used for the RGB->YUV conversion
 	u32 row_len = rst.width >> 1;
-	u32 *row_buf = (u32 *)malloc(row_len);
+	u32 *yuv_row = (u32 *)malloc(row_len);
 
 	for(y = 0; y < rst.height; y++) {
 		for (x = 0; x < rst.width; x+=2) {
@@ -364,8 +359,7 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 			rgb right = {.as_u32 = pixel_data[x + 1 + y * rst.width]};
 
 			// apply alpha channel
-			u8 left_alpha = left.as_rgba.a,
-				right_alpha = right.as_rgba.a;
+			u8 left_alpha = left.as_rgba.a, right_alpha = right.as_rgba.a;
 			left.as_rgba.r = (left.as_rgba.r & left_alpha) + (solid_bg.as_rgba.r & ~left_alpha);
 			left.as_rgba.g = (left.as_rgba.g & left_alpha) + (solid_bg.as_rgba.g & ~left_alpha);
 			left.as_rgba.b = (left.as_rgba.b & left_alpha) + (solid_bg.as_rgba.b & ~left_alpha);
@@ -373,10 +367,12 @@ void console_blit(int dx, int dy, raster rst, rgb solid_bg) {
 			right.as_rgba.g = (right.as_rgba.g & right_alpha) + (solid_bg.as_rgba.g & ~right_alpha);
 			right.as_rgba.b = (right.as_rgba.b & right_alpha) + (solid_bg.as_rgba.b & ~right_alpha);
 
-			row_buf[x >> 1] = make_yuv(left, right);
+			yuv_row[x >> 1] = make_yuv(left, right);
 		}
 		
-		memcpy32(fb, row_buf, row_len);
+		memcpy32(fb, yuv_row, row_len);
 		fb += (RESOLUTION_W >> 1);
 	}
+	
+	free(yuv_row);
 }
