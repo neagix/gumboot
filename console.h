@@ -25,7 +25,7 @@ void gfx_print(const char *str, size_t len);
 void gfx_clear(int x, int y, int w, int h, rgb c);
 u32 *get_xfb(void);
 void clear_fb(rgb fill_rgbc);
-void console_clear(void);
+
 void console_move(int x, int y);
 void console_set_blinker(int status);
 

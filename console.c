@@ -270,6 +270,7 @@ void init_fb(int vmode) {
 	xfb = memalign(32, RESOLUTION_W * (RESOLUTION_H + (y_add*2)) * 2);
 }
 
+// does not take splash screen in account
 void clear_fb(rgb fill_rgb) {
 	int i;
 	u32 *fb;
@@ -284,10 +285,10 @@ void clear_fb(rgb fill_rgb) {
 	}
 }
 
-void console_clear(void) {
+/*void console_clear(void) {
 	console_pos = 0;
 	clear_fb(config_color_normal[1]);
-}
+}*/
 
 void select_font(int font) {
 	switch (font) {

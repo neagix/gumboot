@@ -18,7 +18,13 @@ OBJS = realmode.o crt0.o main.o string.o sync.o time.o printf.o input.o \
 
 include common.mk
 
+mklogo/mklogo:
+	make -C mklogo
+
+logo.c: logo.png mklogo/mklogo
+	mklogo/mklogo logo.png > logo.c
+
 upload: $(TARGET)
 	@$(WIIDEV)/bin/bootmii -p $<
 
-.PHONY: upload
+.PHONY: upload mklogo/mklogo
