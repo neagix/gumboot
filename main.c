@@ -30,8 +30,19 @@ Copyright (C) 2017              neagix
 #include "menu_render.h"
 #include "config.h"
 #include "log.h"
+#include "utils.h"
+
+// used by FatFS
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},     /* "0:" ==> Physical drive 0, 1st partition */
+    {0, 2},     /* "1:" ==> Physical drive 0, 2nd partition */
+    {0, 3},     /* "2:" ==> Physical drive 0, 3rd partition */
+    {0, 4}      /* "3:" ==> Physical drive 0, 4th partition */
+};
 
 #define MINIMUM_MINI_VERSION 0x00010001
+
+static rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
 
 int main(void)
 {
@@ -57,8 +68,11 @@ int main(void)
 	FRESULT res = f_mount(&fatfs, "0:", 1);
 	if (res == FR_OK) {
 		u32 read;
-		char *cfg_data = config_load(DEFAULT_LST, &read);
+		char *cfg_data = (char*)load_file(DEFAULT_LST, MAX_LST_SIZE, &read);
 		if (cfg_data) {
+			// terminate string
+			cfg_data[read] = 0;
+
 			if (config_load_from_buffer(cfg_data, read)) {
 				// in case of error disable some features
 				config_timeout = 0;
@@ -73,9 +87,22 @@ int main(void)
 	
     input_init();
 	init_fb(config_vmode);
-
-	rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
-	clear_fb(black);
+	
+	if (config_splashimage) {
+		u32 read;
+		void *png = load_file(config_splashimage, 3*1024*1024, &read);
+		if (png) {
+			int err = console_render_splash(png);
+			free(png);
+			if (err)
+				goto no_splash;
+		} else
+			goto no_splash;
+	} else {
+no_splash:
+		// no splash image, paint it black
+		clear_fb(black);
+	}
 
 	VIDEO_Init(config_vmode);
 	VIDEO_SetFrameBuffer(get_xfb());
@@ -146,8 +173,6 @@ int main(void)
 
 	u16 btn;
 	while (1) {
-normal_loop:
-		;
 		do {
 			if (config_timeout) {
 				// update timeout as needed

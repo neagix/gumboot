@@ -32,6 +32,7 @@
 
 int gfx_printf_at(int x, int y, const char *fmt, ...);
 void gfx_print_at(int x, int y, const char *str);
+int console_render_splash(void *mem);
 
 #define gfx_printch_at(x, y, c)		gfx_draw_char(CONSOLE_X_OFFSET + (x) * CONSOLE_CHAR_WIDTH, CONSOLE_Y_OFFSET + (y) * CONSOLE_ROW_HEIGHT, c)
 

@@ -1,16 +1,12 @@
 
 #include "config.h"
-#include "fatfs/ff.h"
 #include "video_low.h"
 #include "atoi.h"
 
 #ifdef GUMBOOT
-#include "malloc.h"
-#include "string.h"
-//#include "menu.h"
 #include "log.h"
-
-#define MAX_LST_SIZE 16*1024
+#include "string.h"
+#include "malloc.h"
 
 #else
 #include <stddef.h>
@@ -74,57 +70,9 @@ rgb config_color_normal[2] = {
 stanza config_entries[MAX_CONFIG_ENTRIES];
 static stanza *wip_stanza = NULL;
 
-// used by FatFS
-PARTITION VolToPart[FF_VOLUMES] = {
-    {0, 1},     /* "0:" ==> Physical drive 0, 1st partition */
-    {0, 2},     /* "1:" ==> Physical drive 0, 2nd partition */
-    {0, 3},     /* "2:" ==> Physical drive 0, 3rd partition */
-    {0, 4}      /* "3:" ==> Physical drive 0, 4th partition */
-};
-
 int process_line(char *line);
 int complete_stanza();
 char *tokenize(char *line);
-
-#ifdef	GUMBOOT
-char *config_load(const char *fname, u32 *read) {
-	FRESULT res;
-	FIL fd;
-	FILINFO stat;
-
-	res = f_stat(DEFAULT_LST, &stat);
-	if (res != FR_OK) {
-		log_printf("failed to stat %s: %d\n", DEFAULT_LST, res);
-		return NULL;
-	}
-
-	res = f_open(&fd, DEFAULT_LST, FA_READ);
-	if (res != FR_OK) {
-		log_printf("failed to open %s: %d\n", DEFAULT_LST, res);
-		return NULL;
-	}
-	
-	int fsize = stat.fsize;
-	if (fsize > MAX_LST_SIZE) {
-		fsize = MAX_LST_SIZE;
-		log_printf("truncating %s to %d bytes\n", fname, fsize);
-	}
-	char *cfg_data = malloc(fsize);
-	
-	res = f_read(&fd, cfg_data, fsize, read);
-	if (res != FR_OK) {
-		log_printf("failed to read %s: %d\n", fname, res);
-		free(cfg_data);
-		f_close(&fd);
-		return NULL;
-	}
-	// terminate string
-	cfg_data[*read] = 0;
-	f_close(&fd);
-	
-	return cfg_data;
-}
-#endif
 
 const char *config_strerr(int err) {
 	switch (err) {

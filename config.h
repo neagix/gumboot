@@ -4,7 +4,7 @@
 #include "types.h"
 
 #define MAX_CONFIG_ENTRIES 32
-
+#define MAX_LST_SIZE 16*1024
 #define DEFAULT_LST "gumboot/gumboot.lst"
 
 typedef union {
@@ -42,6 +42,7 @@ extern rgb config_color_normal[2],
 
 extern rgb color_error[2];
 extern rgb color_default[2];
+extern char *config_splashimage;
 
 #define get_bgcolor(c) ((unsigned long)(c >> 32))
 #define get_fgcolor(c) ((unsigned long)c)
