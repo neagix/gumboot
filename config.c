@@ -504,49 +504,85 @@ static char *color_list[16] =
     "white"
 };
 
+static int atocolor_half(char *str, rgb *result) {
+      if (!strncmp(str, "rgb(", 4)) {
+		  char *ptr;
+		str+=4;
+		  
+		// read red component
+		ptr = strchr(str, ',');
+		if (!ptr)
+			return -1;
+		*ptr=0;
+		ptr++;
+		
+		size_t parsed;
+		int val = atoi_base(str, 10, &parsed);
+		if (parsed != strlen(str) || (val > 255))
+			return ERR_INVALID_NUMBER;
+		result->as_rgba.r = val;
+
+		str = ptr;
+		ptr = strchr(ptr, ',');
+		if (!ptr)
+			return -1;
+		*ptr=0;
+		ptr++;
+
+		val = atoi_base(str, 10, &parsed);
+		if (parsed != strlen(str) || (val > 255))
+			return ERR_INVALID_NUMBER;
+		result->as_rgba.g = val;
+
+		str = ptr;
+		ptr = strchr(ptr, ')');
+		if (!ptr)
+			return -1;
+		*ptr=0;
+
+		val = atoi_base(str, 10, &parsed);
+		if (parsed != strlen(str) || (val > 255))
+			return ERR_INVALID_NUMBER;
+		result->as_rgba.b = val;
+		
+		return 0;
+	  }
+      /* Search for the color name.  */
+      for (int i = 0; i < 16; i++) {
+		if (strcmp (color_list[i], str) == 0)
+		  {
+			*result = color_to_rgb[i];
+			return 0;
+		  }
+	  }
+	
+	return -1;
+}
+
 /* Convert the color name STR into the magical number.  */
 static int atocolor(char *str, rgb *result)
 {
       char *ptr;
-      int i;
-      
-      /* Find the separator.  */
-      for (ptr = str; *ptr && *ptr != '/'; ptr++){
+
+    /* Find the separator.  */
+    for (ptr = str; *ptr && *ptr != '/'; ptr++){
 		  ;
-	  }
+	}
 
-      /* If not found, return -1.  */
-      if (! *ptr)
+	/* If not found, return -1.  */
+	if (! *ptr)
 		return -1;
+	/* Terminate the string STR.  */
+	*ptr = 0;
+	ptr++;
+      
+	// detect first half
+	int err = atocolor_half(str, &result[0]);
+	if (err)
+		return err;
 
-      /* Terminate the string STR.  */
-      *ptr = 0;
-      /* Search for the color name.  */
-      for (i = 0; i < 16; i++) {
-		if (strcmp (color_list[i], str) == 0)
-		  {
-			result[0] = color_to_rgb[i];
-			break;
-		  }
-	  }
-      if (i == 16)
-		return -1;
-
-      str = ptr+1;
-
-      /* Search for the color name.  */      
-      for (i = 0; i < 16; i++) {
-		if (strcmp (color_list[i], str) == 0)
-		  {
-			result[1] = color_to_rgb[i];
-			break;
-		  }
-	  }
-
-      if (i == 16)
-		return -1;
-
-	return 0;
+	// detect second half
+	return atocolor_half(ptr, &result[1]);
 }
 
 // parse colors second:
