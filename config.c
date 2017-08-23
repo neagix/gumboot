@@ -352,12 +352,10 @@ int parse_kernel(char *s) {
 
 	if (wip_stanza->kernel)
 		return ERR_DOUBLE_DEFINITION;
-	
-	if (*s == '/')
-		s++;
-	if (!*s)
+
+	if (!s[1] && (s[0] == '/'))
 		return ERR_MISSING_TOKEN;
-	
+
 	// find arguments (if any)
 	char *pos = strchr(s, ' ');
 	if (pos) {
@@ -367,7 +365,7 @@ int parse_kernel(char *s) {
 	} else {
 		wip_stanza->kernel_args = "";
 	}
-	
+
 	wip_stanza->kernel = strdup(s);
 	return 0;
 }
@@ -398,12 +396,11 @@ int parse_root(char *s) {
 	// let's patch  & re-use the string
 	s[1] = ':';
 
-	// make sure there is a trailing slash
+	// make sure there is no trailing slash
 	char *last = s + strlen(s) - 1;
-	if (*last != '/') {
-		wip_stanza->root = strcat(s, "/");
-	} else
-		wip_stanza->root = strdup(s);
+	if (*last == '/')
+		*last = 0;
+	wip_stanza->root = strdup(s);
 
 	return 0;
 }

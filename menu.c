@@ -69,7 +69,8 @@ char browse_current_path[4096];
 int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
-
+	
+	// hot-patch the last character
 	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
 		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
@@ -117,7 +118,7 @@ int menu_activate(void) {
 			free_browse_menu();
 
 			// "0:/" for example
-			if (strlen(browse_current_path)<=3) {
+			if (strlen(browse_current_path)<=2) {
 				// end of line: go back
 				menu_selection = old_menu_selection;
 				menu_clear_entries();
@@ -129,7 +130,7 @@ int menu_activate(void) {
 
 			// find before-last slash in the current path
 			int i;
-			for(i=strlen(browse_current_path)-2;i>2;i++) {
+			for(i=strlen(browse_current_path)-1;i>2;i++) {
 				if (browse_current_path[i] == '/') {
 					// cut here
 					browse_current_path[i] = 0;
@@ -139,7 +140,7 @@ int menu_activate(void) {
 			}
 			
 			// truncate to root directory
-			browse_current_path[3] = 0;
+			browse_current_path[2] = 0;
 			return menu_browse();
 		}
 
@@ -147,8 +148,8 @@ int menu_activate(void) {
 		char *label = browse_buffer + browse_menu_entries[menu_selection];
 		int l = strlen(label);
 		if (label[l-1] == '/') {
-			// append subdirectory to the current path
-			memcpy(browse_current_path+strlen(browse_current_path), label, l+1);
+			// append subdirectory to the current path without trailing slash
+			memcpy(browse_current_path+strlen(browse_current_path)-1, label, l);
 			free_browse_menu();
 			
 			return menu_browse();
@@ -188,8 +189,7 @@ int menu_activate(void) {
 			// use first logical drive by default
 			browse_current_path[0] = '0';
 			browse_current_path[1] = ':';
-			browse_current_path[2] = '/';
-			browse_current_path[3] = 0;
+			browse_current_path[2] = 0;
 		}
 
 		return menu_browse();
@@ -203,7 +203,7 @@ int menu_activate(void) {
 	// at this point root must have been setup
 	// and we are going to boot a kernel
 
-	// root has always trailing slash, kernel has always no leading slash
+	// root has never trailing slash, kernel has always leading slash
 	char *kernel_fn = strcat(root, sel->kernel);
 	
 	// sanity check
