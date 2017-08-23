@@ -104,3 +104,9 @@ void menu_draw_entries(void) {
 		gfx_clear(1 + l, 4+i, CONSOLE_COLUMNS-l-2, 1, c);
 	}
 }
+
+void menu_init(void) {
+	gfx_clear(0, 		  0, CONSOLE_COLUMNS, HELP_LINES, config_color_heading[1]);
+	gfx_clear(0, HEAD_LINES, CONSOLE_COLUMNS, CONSOLE_LINES-HELP_LINES-HEAD_LINES, config_color_normal[1]);
+	gfx_clear(0, CONSOLE_LINES-HELP_LINES, CONSOLE_COLUMNS, HELP_LINES, config_color_helptext[1]);
+}

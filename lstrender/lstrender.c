@@ -75,11 +75,9 @@ int main(int argc, char **argv)
 	
 	printf("columns = %d, lines = %d\n", CONSOLE_COLUMNS, CONSOLE_LINES);
 
-	gfx_clear(0, 0, CONSOLE_COLUMNS, HELP_LINES, config_color_heading[1]);
-	gfx_clear(0, HEAD_LINES, CONSOLE_COLUMNS, CONSOLE_LINES-HELP_LINES-HEAD_LINES, config_color_normal[1]);
-	gfx_clear(0, CONSOLE_LINES-HELP_LINES, CONSOLE_COLUMNS, HELP_LINES, config_color_helptext[1]);
-
 	menu_selection = config_default;
+	menu_init();
+
 	menu_draw(config_timeout, 1, 3);
 	menu_draw_entries();
 

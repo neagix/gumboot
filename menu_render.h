@@ -26,6 +26,7 @@ extern int menu_selection;
 void draw_box_at(int x, int y, int w, int h);
 void menu_draw(int seconds, u16 mini_version_major, u16 mini_version_minor);
 void menu_draw_entries(void);
+void menu_init(void);
 
 extern const char	*timeout_prompt, *timeout_prompt_term;
 

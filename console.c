@@ -246,9 +246,6 @@ void init_fb(int vmode) {
 	}
 
 	xfb = memalign(32, RESOLUTION_W * (RESOLUTION_H + (y_add*2)) * 2);
-	
-	rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
-	clear_fb(black);
 }
 
 void clear_fb(rgb fill_rgb) {

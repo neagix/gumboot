@@ -67,6 +67,8 @@ int main(void)
 	
     input_init();
 	init_fb(config_vmode);
+	rgb black = {.as_rgba = {0, 0, 0, 0xFF}};
+	clear_fb(black);
 
 	VIDEO_Init(config_vmode);
 	VIDEO_SetFrameBuffer(get_xfb());
@@ -113,8 +115,9 @@ int main(void)
 	init_font(config_color_highlight, font_yuv_highlight);
 	init_font(config_color_helptext, font_yuv_helptext);
 	init_font(config_color_heading, font_yuv_heading);
-    
+
     menu_selection = config_default;
+    menu_init();
     
     if (config_nomenu) {
 		if (!menu_activate())

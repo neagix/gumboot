@@ -547,8 +547,9 @@ static int atocolor_half(char *str, rgb *result) {
 		
 		return 0;
 	  }
+	  int i;
       /* Search for the color name.  */
-      for (int i = 0; i < 16; i++) {
+      for (i = 0; i < 16; i++) {
 		if (strcmp (color_list[i], str) == 0)
 		  {
 			*result = color_to_rgb[i];
