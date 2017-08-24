@@ -98,7 +98,7 @@ static void menu_draw_help(void) {
 	// do not clear the timeout line
 	gfx_clear(0, BOX_H+HEAD_LINES, CONSOLE_COLUMNS-LOGO_COLUMNS, HELP_LINES-1, config_color_helptext[1]);
 
-	if (browse_buffer || !config_entries_count) {
+	if (browse_menu_entries_count || !config_entries_count) {
 		menu_draw_default_help();
 		return;
 	}
@@ -115,7 +115,7 @@ static void menu_draw_help(void) {
 
 void menu_draw_entries_and_help(void) {
 	int max;
-	if (browse_buffer) {
+	if (browse_menu_entries_count) {
 		max = browse_menu_entries_count;
 	} else {
 		max = config_entries_count;
@@ -132,8 +132,8 @@ void menu_draw_entries_and_help(void) {
 			c = config_color_normal[1];
 		}
 		char *label;		
-		if (browse_buffer) {
-			label = browse_buffer + browse_menu_entries[i];
+		if (browse_menu_entries_count) {
+			label = browse_menu_entries[i];
 		} else {
 			label = config_entries[i].title;
 		}

@@ -7,9 +7,8 @@
 int menu_browse();
 int menu_browse_activate(void);
 
-extern char *browse_buffer;
 extern char browse_current_path[4096];
-extern int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
-extern int browse_buffer_sz, browse_menu_entries_count;
+extern char *browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
+extern int browse_menu_entries_count;
 
 #endif // __BROWSE_H

@@ -5,9 +5,8 @@
 #include "log.h"
 #include "powerpc_elf.h"
 
-char *browse_buffer = NULL;
-int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
-int browse_buffer_sz = 0, browse_menu_entries_count = 0;
+char *browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
+int browse_menu_entries_count = 0;
 
 char browse_current_path[4096];
 
@@ -24,25 +23,10 @@ static void browse_append(const char *name, int is_directory) {
 	if (browse_menu_entries_count == sizeof(browse_menu_entries))
 		return;
 
-	// get directory name length
-	int len = strlen(name);
-	// reallocate to make room for trailing slash and delimiter
-	int end_offset = browse_buffer_sz;
-	// add one for the 0x0 delimiter
-	browse_buffer_sz+=len+1;
-	if (is_directory)
-		browse_buffer_sz++;
-	browse_buffer = realloc(browse_buffer, browse_buffer_sz);
-	// copy the name
-	memcpy(browse_buffer+end_offset, name, len);
-	if (is_directory) {
-		browse_buffer[end_offset+len] = '/';
-		browse_buffer[end_offset+len+1] = 0;
-	} else {
-		browse_buffer[end_offset+len] = 0;
-	}
-	// store what was the previous end as the start of this new entry
-	browse_menu_entries[browse_menu_entries_count++] = end_offset;
+	if (!is_directory)
+		browse_menu_entries[browse_menu_entries_count++] = strdup(name);
+	else
+		browse_menu_entries[browse_menu_entries_count++] = strcat(name, "/");
 }
 
 static void menu_browse_leave(void) {
@@ -65,12 +49,8 @@ int menu_browse() {
 
 	//NOTE: buffer must already be free on entry
 
-	// add first entry to go back
-	browse_buffer_sz = 3;
-	browse_buffer = malloc(browse_buffer_sz);
-	memcpy(browse_buffer, "..", browse_buffer_sz);
-	browse_menu_entries[0] = 0;
-	browse_menu_entries_count = 1;
+	// add first entry to go back one level
+	browse_append("..", 0);
 
 	while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {
 		if (Fno.fattrib & AM_DIR) {
@@ -93,11 +73,12 @@ int menu_browse() {
 }
 
 static void free_browse_menu() {
+	int i;
 	// free all browse menu entries
-	free(browse_buffer);
+	for(i=0;i<browse_menu_entries_count;i++) {
+		free(browse_menu_entries[i]);
+	}
 	browse_menu_entries_count = 0;
-	browse_buffer = NULL;
-	browse_buffer_sz = 0;
 }
 
 int menu_browse_activate(void) {
@@ -113,17 +94,24 @@ int menu_browse_activate(void) {
 			return 1;
 		}
 		free_browse_menu();
+		
+		log_printf("checking %s\n", browse_current_path);
 
 		// find before-last slash in the current path
+		// length is above 3 thanks to criteria above
 		int i;
-		for(i=strlen(browse_current_path);i>2;i--) {
+		for(i=strlen(browse_current_path)-1;i>2;i--) {
 			if (browse_current_path[i] == '/') {
 				// cut here
 				browse_current_path[i] = 0;
+				
+				log_printf("picked subdir %s\n", browse_current_path);
 
 				return menu_browse();
 			}
 		}
+		
+		log_printf("picked root dir %s\n", browse_current_path);
 		
 		// truncate to root directory
 		browse_current_path[2] = 0;
@@ -131,7 +119,7 @@ int menu_browse_activate(void) {
 	}
 
 	// is the selection a subdirectory?
-	char *label = browse_buffer + browse_menu_entries[menu_selection];
+	char *label = browse_menu_entries[menu_selection];
 	int l = strlen(label);
 	if (label[l-1] == '/') {
 		// append subdirectory to the current path without trailing slash
@@ -143,7 +131,7 @@ int menu_browse_activate(void) {
 		
 		return menu_browse();
 	}
-	
+
 	// a file was selected, try too boot it
 	l = strlen(browse_current_path);
 	browse_current_path[l] = '/';

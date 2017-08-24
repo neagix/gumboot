@@ -108,6 +108,5 @@ encode:
 }
 
 // for compatibility purposes
-char *browse_buffer;
 int browse_menu_entries_count = 0;
-int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
+char *browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];

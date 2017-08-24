@@ -33,7 +33,7 @@ size_t strnlen(const char *s, size_t count)
 	return len;
 }
 
-char *strdup(char *s) {
+char *strdup(const char *s) {
 	size_t l = strlen(s)+1;
 	char *r = malloc(l);
 	memcpy(r, s, l);
@@ -106,7 +106,7 @@ size_t strlcpy(char *dest, const char *src, size_t maxlen)
 	return needed-1;
 }
 
-char *strcat(char *dest, const char *src) {
+char *strcat(const char *dest, const char *src) {
 	int l1 = strlen(dest),
 		l2 = strlen(src);
 	char *result = malloc(l1+l2+1);

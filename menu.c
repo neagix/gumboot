@@ -14,7 +14,7 @@
 
 void menu_down(void) {
 	int max;
-	if (browse_buffer) {
+	if (browse_menu_entries_count) {
 		max = browse_menu_entries_count;
 	} else {
 		max = config_entries_count;
@@ -27,7 +27,7 @@ void menu_down(void) {
 
 void menu_up(void) {
 	int max;
-	if (browse_buffer) {
+	if (browse_menu_entries_count) {
 		max = browse_menu_entries_count;
 	} else {
 		max = config_entries_count;
@@ -41,7 +41,7 @@ void menu_up(void) {
 
 int menu_activate(void) {
 	int m_err;
-	if (browse_buffer) {
+	if (browse_menu_entries_count) {
 		return menu_browse_activate();
 	}
 	stanza *sel = &config_entries[menu_selection];
