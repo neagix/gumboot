@@ -1,4 +1,5 @@
-*.o
+.obj/*.o
+.obj/fatfs/*.o
 .deps/
 gumboot.elf
 gumboot.elf.map

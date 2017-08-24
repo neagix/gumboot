@@ -1,5 +1,7 @@
 include broadway.mk
 
+OBJDIR := .obj
+
 DEFINES = -DLACKS_SYS_TYPES_H -DLACKS_ERRNO_H -DLACKS_STDLIB_H -DLACKS_STRING_H -DLACKS_STRINGS_H -DLACKS_UNISTD_H \
 	-DGUMBOOT \
 	-DLODEPNG_NO_COMPILE_DISK -DLODEPNG_NO_COMPILE_ANCILLARY_CHUNKS -DLODEPNG_NO_COMPILE_CPP
@@ -9,12 +11,13 @@ LIBS = -lgcc
 
 TARGET = gumboot.elf
 
-OBJS = realmode.o crt0.o main.o string.o sync.o time.o printf.o input.o \
-	exception.o exception_2200.o malloc.o gecko.o video_low.o \
-	ipc.o mini_ipc.o diskio.o font.o console.o \
-	menu.o powerpc.o config.o atoi.o powerpc_elf.o log.o \
-	menu_render.o console_common.o fatfs/ff.o fatfs/ffunicode.o \
-	utils.o lodepng.o logo.o browse.o
+OBJS = $(OBJDIR)/realmode.o $(OBJDIR)/crt0.o $(OBJDIR)/main.o $(OBJDIR)/string.o \
+	$(OBJDIR)/sync.o $(OBJDIR)/time.o $(OBJDIR)/printf.o $(OBJDIR)/input.o \
+	$(OBJDIR)/exception.o $(OBJDIR)/exception_2200.o $(OBJDIR)/malloc.o $(OBJDIR)/gecko.o $(OBJDIR)/video_low.o \
+	$(OBJDIR)/ipc.o $(OBJDIR)/mini_ipc.o $(OBJDIR)/diskio.o $(OBJDIR)/font.o $(OBJDIR)/console.o \
+	$(OBJDIR)/menu.o $(OBJDIR)/powerpc.o $(OBJDIR)/config.o $(OBJDIR)/atoi.o $(OBJDIR)/powerpc_elf.o $(OBJDIR)/log.o \
+	$(OBJDIR)/menu_render.o $(OBJDIR)/console_common.o $(OBJDIR)/fatfs/ff.o $(OBJDIR)/fatfs/ffunicode.o \
+	$(OBJDIR)/utils.o $(OBJDIR)/lodepng.o $(OBJDIR)/logo.o $(OBJDIR)/browse.o
 
 include common.mk
 

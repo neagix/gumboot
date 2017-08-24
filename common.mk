@@ -29,16 +29,16 @@ ifneq ($(LDSCRIPT),)
 $(TARGET): $(LDSCRIPT)
 endif
 
-%.o: %.c
+$(OBJDIR)/%.o: %.c
 	@echo "  COMPILE   $<"
 	@mkdir -p $(DEPDIR)
 	@$(CC) $(CFLAGS) $(DEFINES) -Wp,-MMD,$(DEPDIR)/$(*F).d,-MQ,"$@",-MP -c $< -o $@
 
-%.o: %.s
+$(OBJDIR)/%.o: %.s
 	@echo "  ASSEMBLE  $<"
 	@$(CC) $(CFLAGS) $(DEFINES) $(ASFLAGS) -c $< -o $@
 
-%.o: %.S
+$(OBJDIR)/%.o: %.S
 	@echo "  ASSEMBLE  $<"
 	@$(CC) $(CFLAGS) $(DEFINES) $(ASFLAGS) -c $< -o $@
 
@@ -57,4 +57,3 @@ endef
 -include $(DEPDIR)/*
 
 .PHONY: clean
-
