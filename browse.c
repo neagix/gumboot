@@ -45,13 +45,21 @@ static void browse_append(const char *name, int is_directory) {
 	browse_menu_entries[browse_menu_entries_count++] = end_offset;
 }
 
+static void menu_browse_leave(void) {
+	menu_selection = old_menu_selection;
+	menu_clear_entries();
+	menu_draw_entries_and_help();
+}
+
 int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
 	
 	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
+		menu_browse_leave();
 		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
+
 		return (int)res;
 	}
 
@@ -99,9 +107,7 @@ int menu_browse_activate(void) {
 		if ((strlen(browse_current_path)<=2) || (menu_selection == browse_menu_entries_count-1)) {
 			free_browse_menu();
 			// end of line: go back
-			menu_selection = old_menu_selection;
-			menu_clear_entries();
-			menu_draw_entries_and_help();
+			menu_browse_leave();
 
 			// return non-zero so that input loop continues
 			return 1;
@@ -145,5 +151,6 @@ int menu_browse_activate(void) {
 	char *elf_fn = strcat(browse_current_path, label);
 	int err = try_boot_file(elf_fn, "");
 	free(elf_fn);
+
 	return err;
 }
