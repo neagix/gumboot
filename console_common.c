@@ -49,10 +49,16 @@ int gfx_printf_at(int x, int y, const char *fmt, ...)
 	return i;
 }
 
-// apply alpha channel
+// apply (pre-multiplied) alpha blending
+// https://www.ocf.berkeley.edu/~horie/alphablend.html
 rgb apply_alpha(rgb pixel, rgb bg) {
-	pixel.as_rgba.r = (pixel.as_rgba.r & pixel.as_rgba.a) + (bg.as_rgba.r & ~pixel.as_rgba.a);
-	pixel.as_rgba.g = (pixel.as_rgba.g & pixel.as_rgba.a) + (bg.as_rgba.g & ~pixel.as_rgba.a);
-	pixel.as_rgba.b = (pixel.as_rgba.b & pixel.as_rgba.a) + (bg.as_rgba.b & ~pixel.as_rgba.a);
-	return pixel;
+	rgb result;
+	result.as_rgba.a = 0xFF;
+	u8 invalpha = 0xFF - pixel.as_rgba.a;
+
+	result.as_rgba.r = (pixel.as_rgba.r   * pixel.as_rgba.a + bg.as_rgba.r   * invalpha)/256;
+	result.as_rgba.g = (pixel.as_rgba.g   * pixel.as_rgba.a + bg.as_rgba.g   * invalpha)/256;
+	result.as_rgba.b = (pixel.as_rgba.b   * pixel.as_rgba.a + bg.as_rgba.b   * invalpha)/256;
+	
+	return result;
 }
