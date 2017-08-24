@@ -402,6 +402,7 @@ int parse_root(char *s) {
 	return 0;
 }
 
+#ifndef NO_SPLASHIMAGE
 int parse_splashimage(char *s) {
 	if (config_splashimage)
 		return ERR_DOUBLE_DEFINITION;
@@ -413,6 +414,7 @@ int parse_splashimage(char *s) {
 	config_splashimage = strdup(s+8);
 	return 0;
 }
+#endif
 
 rgb color_to_rgb[16]={
 		{.as_rgba = {0, 0, 0, 0xFF}}, 
@@ -695,12 +697,14 @@ int process_line(char *line) {
 		}
 		
 		return parse_title(token);
+#ifndef NO_SPLASHIMAGE
 	} else if (0 == strcmp(line, "splashimage")) {
 		if (token == NULL) {
 			return ERR_MISSING_TOKEN;
 		}
 		
 		return parse_splashimage(token);
+#endif
 	} else if (0 == strcmp(line, "color")) {
 		if (token == NULL) {
 			return ERR_MISSING_TOKEN;

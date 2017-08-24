@@ -12,8 +12,6 @@
 #include "malloc.h"
 #include "browse.h"
 
-int vol_mounted[FF_VOLUMES] = {0,0,0,0};
-
 void menu_down(void) {
 	int max;
 	if (browse_buffer) {
@@ -61,12 +59,13 @@ int menu_activate(void) {
 	// if root is set, initialize the corresponding volume
 	if (sel->root) {
 		u8 part_no = sel->root[0]-'0';
-		if (!vol_mounted[part_no]) {
+		char target[3];
+		target[0] = part_no + '0'; target[1] = ':'; target[2] = 0;
+
+		if (FR_OK != is_mounted(target)) {
 			FATFS fatfs;
-			FRESULT res = f_mount(&fatfs, "0:", 1);
-			if (res == FR_OK) {
-				vol_mounted[part_no] = 1;
-			} else {
+			FRESULT res = f_mount(&fatfs, target, 1);
+			if (res != FR_OK) {
 				log_printf("could not mount volume %d: %d\n", part_no, res);
 				return res;
 			}

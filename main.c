@@ -34,8 +34,6 @@ Copyright (C) 2017              neagix
 #include "lodepng/lodepng.h"
 #include "raster.h"
 
-extern int vol_mounted[FF_VOLUMES];
-
 #define MINIMUM_MINI_VERSION 0x00010001
 
 int main(void)
@@ -58,12 +56,12 @@ int main(void)
 		return -1;
 	}
 	
+	// mount the first partition, where we expect to find gumboot/gumboot.lst
 	int has_fs = 0;
 	FATFS fatfs;
 	FRESULT res = f_mount(&fatfs, "0:", 1);
 	if (res == FR_OK) {
 		has_fs = 1;
-		vol_mounted[0] = 1;
 
 		u32 read;
 		char *cfg_data = (char*)load_file(DEFAULT_LST, MAX_LST_SIZE, &read);

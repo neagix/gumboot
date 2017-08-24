@@ -1,33 +1,35 @@
 ##
-## This is a sample menu.lst file for gumboot.
+## This is the default gumboot.lst menu for gumboot.
 ##
 
 # Video mode, possible settings:
 # NTSC, PAL50, PAL60, PROGRESSIVE
 video PAL60
 
-splashimage (sd0,0)/gumboot/mario.png
+## not yet supported - work in progress
+#splashimage (sd0,0)/gumboot/mario.png
 
+# supported colors are the official GRUB legacy set available at:
+# http://www.gnu.org/software/grub/manual/legacy/grub.html#color
+# syntax:
 #color NORMAL HIGHLIGHT HELPTEXT HEADING
-#color red/blue green/black white/blue white/blue
-#color blue/green green/black white/magenta white/magenta
-#color blue/green green/black white/blue
-#color light-blue/blue light-red/red light-green/green light-magenta/magenta 
-color light-blue/white white/blue white/light-blue green/white
 
 ## colors can also be expressed in RGB format
 #color rgb(255,0,0)/rgb(0,255,0) green/black white/blue
+
+## official/default Gumboot color set
+color light-blue/white white/blue white/light-blue green/white
 
 ## timeout 0 means show the menu and do not enable any countdown
 timeout 30
 
 ## Gumboot-specific option
 ## do not display the menu and boot directly
-## if timeout is non-zero, gives error
+## timeout must be zero
 ## alias of 'hiddenmenu'
 #nomenu
 
-default 1
+default 0
 
 title wii-linux-ngx\nOpen default boot menu
 	root (sd0,1)/linux
@@ -39,8 +41,16 @@ title Browse SD
 	root (sd0,0)
 	browse
 
-title Browse SD exFAT partition
+title Browse SD 2nd partition
 	root (sd0,1)
+	browse
+
+title Browse SD 3rd partition
+	root (sd0,2)
+	browse
+
+title Browse SD 4th partition
+	root (sd0,3)
 	browse
 
 title Bootmii GUI
