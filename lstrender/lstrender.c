@@ -93,3 +93,8 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
+// for compatibility purposes
+char *browse_buffer;
+int browse_menu_entries_count = 0;
+int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];

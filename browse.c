@@ -28,6 +28,7 @@ static void browse_append(const char *name, int is_directory) {
 	int len = strlen(name);
 	// reallocate to make room for trailing slash and delimiter
 	int end_offset = browse_buffer_sz;
+	// add one for the 0x0 delimiter
 	browse_buffer_sz+=len+1;
 	if (is_directory)
 		browse_buffer_sz++;
@@ -48,7 +49,6 @@ int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
 	
-	// hot-patch the last character
 	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
 		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
@@ -58,11 +58,11 @@ int menu_browse() {
 	//NOTE: buffer must already be free on entry
 
 	// add first entry to go back
-	browse_buffer = malloc(3);
-	memcpy(browse_buffer, "..", 3);
+	browse_buffer_sz = 3;
+	browse_buffer = malloc(browse_buffer_sz);
+	memcpy(browse_buffer, "..", browse_buffer_sz);
 	browse_menu_entries[0] = 0;
-	browse_menu_entries_count++;
-	browse_buffer_sz+=3;
+	browse_menu_entries_count = 1;
 
 	while (((res = f_readdir(&dirs, &Fno)) == FR_OK) && Fno.fname[0]) {
 		if (Fno.fattrib & AM_DIR) {
