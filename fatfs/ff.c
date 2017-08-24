@@ -3300,6 +3300,19 @@ FRESULT validate (	/* Returns FR_OK or FR_INVALID_OBJECT */
 
 ----------------------------------------------------------------------------*/
 
+FRESULT is_mounted(const TCHAR* path) {
+	int vol;
+	FATFS *fs;
+	const TCHAR *rp = path;
+
+	/* Get logical drive number */
+	vol = get_ldnumber(&rp);
+	if (vol < 0) return FR_INVALID_DRIVE;
+	/* Check if the filesystem object is valid or not */
+	fs = FatFs[vol];					/* Get pointer to the filesystem object */
+	if (!fs) return FR_NOT_ENABLED;		/* Is the filesystem object available? */
+	return FR_OK;
+}
 
 
 /*-----------------------------------------------------------------------*/
