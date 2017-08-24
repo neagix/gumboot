@@ -244,3 +244,22 @@ int powerpc_boot_file(const char *path, const char *args) {
 	}
 	return err;
 }
+
+int try_boot_file(char *kernel_fn, const char *args) {
+	// sanity check
+	int err = is_valid_elf(kernel_fn);
+	if (err)
+		// error message printed by function
+		return err;
+	
+	//TODO: shutdown video to see if kernel 2.6 recovers
+	//VIDEO_Shutdown();
+	
+	err = powerpc_boot_file(kernel_fn, args);
+	if (err) {
+		log_printf("MINI boot failed: %d\n", err);
+		return err;
+	}
+	
+	return 0;
+}

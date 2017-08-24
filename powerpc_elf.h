@@ -14,6 +14,7 @@ Copyright (C) 2009			Andre Heider "dhewg" <dhewg@wiibrew.org>
 
 int is_valid_elf(const char *path);
 int powerpc_boot_file(const char *path, const char *args);
+int try_boot_file(char *kernel_fn, const char *args);
 
 #endif
 

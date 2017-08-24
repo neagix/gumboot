@@ -37,8 +37,4 @@ void menu_draw_timeout(int seconds);
 
 extern const char	*timeout_prompt, *timeout_prompt_term;
 
-extern char *browse_buffer;
-extern int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
-extern int browse_buffer_sz, browse_menu_entries_count;
-
 #endif // _MENU_RENDER_H

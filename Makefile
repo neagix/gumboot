@@ -14,7 +14,7 @@ OBJS = realmode.o crt0.o main.o string.o sync.o time.o printf.o input.o \
 	ipc.o mini_ipc.o diskio.o font.o console.o \
 	menu.o powerpc.o config.o atoi.o powerpc_elf.o log.o \
 	menu_render.o console_common.o fatfs/ff.o fatfs/ffunicode.o \
-	utils.o lodepng.o logo.o
+	utils.o lodepng.o logo.o browse.o
 
 include common.mk
 

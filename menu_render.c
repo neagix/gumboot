@@ -2,6 +2,7 @@
 #include "menu_render.h"
 #include "console_common.h"
 #include "raster.h"
+#include "browse.h"
 
 extern unsigned char gumboot_logo_pixels[];
 
@@ -9,10 +10,6 @@ raster gumboot_logo;
 
 #define DISP_UP		0x18
 #define DISP_DOWN	0x19
-
-char *browse_buffer = NULL;
-int browse_menu_entries[CONSOLE_LINES-HELP_LINES-HEAD_LINES-2];
-int browse_buffer_sz = 0, browse_menu_entries_count = 0;
 
 int old_menu_selection;
 int menu_selection = 0;
