@@ -34,13 +34,7 @@ Copyright (C) 2017              neagix
 #include "lodepng/lodepng.h"
 #include "raster.h"
 
-// used by FatFS
-PARTITION VolToPart[FF_VOLUMES] = {
-    {0, 1},     /* "0:" ==> Physical drive 0, 1st partition */
-    {0, 2},     /* "1:" ==> Physical drive 0, 2nd partition */
-    {0, 3},     /* "2:" ==> Physical drive 0, 3rd partition */
-    {0, 4}      /* "3:" ==> Physical drive 0, 4th partition */
-};
+extern int vol_mounted[FF_VOLUMES];
 
 #define MINIMUM_MINI_VERSION 0x00010001
 
@@ -69,6 +63,7 @@ int main(void)
 	FRESULT res = f_mount(&fatfs, "0:", 1);
 	if (res == FR_OK) {
 		has_fs = 1;
+		vol_mounted[0] = 1;
 
 		u32 read;
 		char *cfg_data = (char*)load_file(DEFAULT_LST, MAX_LST_SIZE, &read);

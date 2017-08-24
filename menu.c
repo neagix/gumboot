@@ -186,6 +186,17 @@ int menu_browse_activate(void) {
 	return err;
 }
 
+
+// used by FatFS
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},     /* "0:" ==> Physical drive 0, 1st partition */
+    {0, 2},     /* "1:" ==> Physical drive 0, 2nd partition */
+    {0, 3},     /* "2:" ==> Physical drive 0, 3rd partition */
+    {0, 4}      /* "3:" ==> Physical drive 0, 4th partition */
+};
+
+int vol_mounted[FF_VOLUMES] = {0,0,0,0};
+
 int menu_activate(void) {
 	if (browse_buffer) {
 		return menu_browse_activate();
@@ -201,6 +212,21 @@ int menu_activate(void) {
 		VIDEO_Shutdown();
 		powerpc_poweroff();
 		return 0;
+	}
+	
+	// if root is set, initialize the corresponding volume
+	if (sel->root) {
+		u8 part_no = sel->root[0]-'0';
+		if (!vol_mounted[part_no]) {
+			FATFS fatfs;
+			FRESULT res = f_mount(&fatfs, "0:", 1);
+			if (res == FR_OK) {
+				vol_mounted[part_no] = 1;
+			} else {
+				log_printf("could not mount volume %d: %d\n", part_no, res);
+				return res;
+			}
+		}
 	}
 
 	if (sel->browse) {

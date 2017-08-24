@@ -39,6 +39,10 @@ title Browse SD
 	root (sd0,0)
 	browse
 
+title Browse SD exFAT partition
+	root (sd0,1)
+	browse
+
 title Bootmii GUI
 	root (sd0,0)
 	kernel /bootmii/gui.elf
