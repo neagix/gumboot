@@ -34,6 +34,8 @@ Copyright (C) 2017              neagix
 #include "lodepng/lodepng.h"
 #include "raster.h"
 
+void flush_logs_and_enable_gfx(void);
+
 #define MINIMUM_MINI_VERSION 0x00010001
 
 int main(void)
@@ -101,17 +103,12 @@ int main(void)
 	u16 mini_version_minor = version & 0xFFFF;
 
 	// from now, console could be used
-	// however we assume it is not going to be used
-	// until the graphical setup has been completed,
-	// because log is still ripe with backbuffer entries
-	gfx_console_init = 1;
+	// however 'gfx_console_init' is set to 1 later on
 
 	if (version < MINIMUM_MINI_VERSION) {
 		init_font(FONT_ERROR);
 		init_font(FONT_NORMAL);
-		// flush log lines from the backbuffer - if any
-		log_flush_bb();
-		log_free_bb();
+		flush_logs_and_enable_gfx();
 
 		log_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
 		log_printf("Sorry, this version of MINI (armboot.bin)\n"
@@ -129,19 +126,25 @@ int main(void)
 	init_font(FONT_HEADING);
 
 	raster splash, *valid_splash = NULL;
-	if (has_fs && config_splashimage) {
-		u32 read;
-		void *png = load_file(config_splashimage, MAX_SPLASH_SIZE, &read);
-		if (png) {
-			// convert to raster
-			int err = png_to_raster(png, read, splash);
-			free(png);
-			if (err) {
-				log_printf("error %u: %s\n", err, lodepng_error_text(err));
-			} else {
-				valid_splash = &splash;
+	if (has_fs) {
+		if (config_splashimage) {
+			u32 read;
+			void *png = load_file(config_splashimage, MAX_SPLASH_SIZE, &read);
+			if (png) {
+				// convert to raster
+				int err = png_to_raster(png, read, splash);
+				free(png);
+				if (err) {
+					log_printf("error %u: %s\n", err, lodepng_error_text(err));
+				} else {
+					valid_splash = &splash;
+				}
 			}
-		}		
+		}
+		int err = f_mount(NULL, "0:", 0);
+		if (err) {
+			log_printf("failed to unmount: %d\n", err);
+		}
 	}	
 
     menu_selection = config_default;
@@ -153,17 +156,10 @@ int main(void)
 	}
     
 	menu_draw_head_and_box(mini_version_major, mini_version_minor);
-	
 	menu_draw_timeout(config_timeout);
-	
-	// check whether to draw help area or not
 	menu_draw_entries_and_help();
-	
-    // put all the backbuffer log lines below the menu entries
-    console_move(0, HEAD_LINES + 1 + config_entries_count + 1);
-	// flush log lines from the backbuffer - if any
-	log_flush_bb();
-	log_free_bb();
+
+	flush_logs_and_enable_gfx();
 
 	u64 start_time = mftb_usec();
 	int last_time_elapsed = 0;
@@ -212,4 +208,15 @@ quit:
 	powerpc_hang();
 
 	return 0;
+}
+
+void flush_logs_and_enable_gfx(void) {
+	// do not buffer log entries anymore
+	gfx_console_init = 1;
+
+    // put all the backbuffer log lines below the menu entries
+    console_move(0, HEAD_LINES + 1 + config_entries_count + 1);
+	// flush log lines from the backbuffer - if any
+	log_flush_bb();
+	log_free_bb();
 }

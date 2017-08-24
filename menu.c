@@ -40,6 +40,7 @@ void menu_up(void) {
 }
 
 int menu_activate(void) {
+	int m_err;
 	if (browse_buffer) {
 		return menu_browse_activate();
 	}
@@ -57,21 +58,20 @@ int menu_activate(void) {
 	}
 	
 	// if root is set, initialize the corresponding volume
+	FATFS fatfs;
+	char target[3];
 	if (sel->root) {
-		u8 part_no = sel->root[0]-'0';
-		char target[3];
-		target[0] = part_no + '0'; target[1] = ':'; target[2] = 0;
+		memcpy(target, sel->root, 3);
+		target[2] = 0;
 
-		if (FR_OK != is_mounted(target)) {
-			FATFS fatfs;
-			FRESULT res = f_mount(&fatfs, target, 1);
-			if (res != FR_OK) {
-				log_printf("could not mount volume %d: %d\n", part_no, res);
-				return res;
-			}
+		FRESULT res = f_mount(&fatfs, target, 1);
+		if (res != FR_OK) {
+			log_printf("could not mount %s: %d\n", target, res);
+			return res;
 		}
 	}
 
+	//NOTE: fatfs is not unmounted when browsing, re-mounting will cleanup the previous object
 	if (sel->browse) {
 		old_menu_selection = menu_selection;
 
@@ -89,9 +89,11 @@ int menu_activate(void) {
 		return menu_browse();
 	}
 
+	int err;
 	if (!sel->kernel) {
 		log_printf("BUG: invalid menu entry\n");
-		return -1;
+		err = -1;
+		goto unmount_and_exit;
 	}
 	
 	// at this point root must have been setup
@@ -99,7 +101,14 @@ int menu_activate(void) {
 
 	// root has never trailing slash, kernel has always leading slash
 	char *kernel_fn = strcat(sel->root, sel->kernel);
-	int err = try_boot_file(kernel_fn, sel->kernel_args);
+	err = try_boot_file(kernel_fn, sel->kernel_args);
 	free(kernel_fn);
+
+unmount_and_exit:
+	m_err = f_mount(NULL, target, 0);
+	if (m_err) {
+		log_printf("failed to unmount: %d\n", m_err);
+	}
+
 	return err;
 }
