@@ -4,3 +4,4 @@
 gumboot.elf
 gumboot.elf.map
 logo.c
+logo.h

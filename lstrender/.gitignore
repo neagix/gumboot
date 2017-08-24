@@ -1,1 +1,3 @@
+.obj/*.o
+.obj/shared/*.o
 lstrender
