@@ -128,18 +128,18 @@ int menu_browse_activate(void) {
 
 	// a file was selected, try too boot it
 	int cur_len = strlen(browse_current_path);
-
-	// is the selection a subdirectory?
 	char *label = browse_menu_entries[menu_selection];
 	int l = strlen(label);
+
+	// is the selection a subdirectory?
 	if (label[l-1] == '/') {
-		// append subdirectory to the current path without trailing slash
+		// append subdirectory to the current path
 		browse_current_path[cur_len] = '/';
 		cur_len++;
 
 		l--;
 		memcpy(browse_current_path+cur_len, label, l);
-		browse_current_path[cur_len + l + 1] = 0;
+		browse_current_path[cur_len + l] = 0;
 
 		free_browse_menu();
 		return menu_browse();
