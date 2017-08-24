@@ -111,56 +111,84 @@ static void free_browse_menu() {
 	browse_buffer_sz = 0;
 }
 
+int try_boot_file(char *kernel_fn, const char *args) {
+	// sanity check
+	int err = is_valid_elf(kernel_fn);
+	if (err)
+		// error message printed by function
+		return err;
+	
+	//TODO: shutdown video to see if kernel 2.6 recovers
+	//VIDEO_Shutdown();
+	
+	err = powerpc_boot_file(kernel_fn, args);
+	if (err) {
+		log_printf("MINI boot failed: %d\n", err);
+		return err;
+	}
+	
+	return 0;
+}
+
+int menu_browse_activate(void) {
+	// shall we go back?
+	if (menu_selection == 0) {
+		free_browse_menu();
+
+		// "0:/" for example
+		if (strlen(browse_current_path)<=2) {
+			// end of line: go back
+			menu_selection = old_menu_selection;
+			menu_clear_entries();
+			menu_draw_entries_and_help();
+
+			// return non-zero so that input loop continues
+			return 1;
+		}
+
+		// find before-last slash in the current path
+		int i;
+		for(i=strlen(browse_current_path);i>2;i--) {
+			if (browse_current_path[i] == '/') {
+				// cut here
+				browse_current_path[i] = 0;
+
+				return menu_browse();
+			}
+		}
+		
+		// truncate to root directory
+		browse_current_path[2] = 0;
+		return menu_browse();
+	}
+
+	// is the selection a subdirectory?
+	char *label = browse_buffer + browse_menu_entries[menu_selection];
+	int l = strlen(label);
+	if (label[l-1] == '/') {
+		// append subdirectory to the current path without trailing slash
+		int cur_len = strlen(browse_current_path);
+		browse_current_path[cur_len] = '/';
+		memcpy(browse_current_path+cur_len+1, label, l-1);
+		browse_current_path[cur_len+1+l] = 0;
+		free_browse_menu();
+		
+		return menu_browse();
+	}
+	
+	// a file was selected, try too boot it
+	l = strlen(browse_current_path);
+	browse_current_path[l] = '/';
+	browse_current_path[l+1] = 0;
+	char *elf_fn = strcat(browse_current_path, label);
+	int err = try_boot_file(elf_fn, "");
+	free(elf_fn);
+	return err;
+}
+
 int menu_activate(void) {
 	if (browse_buffer) {
-		// shall we go back?
-		if (menu_selection == 0) {
-			free_browse_menu();
-
-			// "0:/" for example
-			if (strlen(browse_current_path)<=2) {
-				// end of line: go back
-				menu_selection = old_menu_selection;
-				menu_clear_entries();
-				menu_draw_entries_and_help();
-
-				// return non-zero so that input loop continues
-				return 1;
-			}
-
-			// find before-last slash in the current path
-			int i;
-			for(i=strlen(browse_current_path);i>2;i--) {
-				if (browse_current_path[i] == '/') {
-					// cut here
-					browse_current_path[i] = 0;
-
-					return menu_browse();
-				}
-			}
-			
-			// truncate to root directory
-			browse_current_path[2] = 0;
-			return menu_browse();
-		}
-
-		// is the selection a subdirectory?
-		char *label = browse_buffer + browse_menu_entries[menu_selection];
-		int l = strlen(label);
-		if (label[l-1] == '/') {
-			// append subdirectory to the current path without trailing slash
-			int cur_len = strlen(browse_current_path);
-			browse_current_path[cur_len] = '/';
-			memcpy(browse_current_path+cur_len+1, label, l-1);
-			browse_current_path[cur_len+1+l] = 0;
-			free_browse_menu();
-			
-			return menu_browse();
-		}
-		
-		log_printf("selected a file\n");
-		
-		return 1;
+		return menu_browse_activate();
 	}
 	stanza *sel = &config_entries[menu_selection];
 	
@@ -175,10 +203,6 @@ int menu_activate(void) {
 		return 0;
 	}
 
-	u8 part_no = 0xFF;
-	char *root = NULL;
-
-	// root setup
 	if (sel->browse) {
 		old_menu_selection = menu_selection;
 
@@ -194,9 +218,9 @@ int menu_activate(void) {
 		}
 
 		return menu_browse();
-	} else if (sel->root) {
-		root = sel->root;
-	} else {
+	}
+
+	if (!sel->kernel) {
 		log_printf("BUG: invalid menu entry\n");
 		return -1;
 	}
@@ -205,23 +229,8 @@ int menu_activate(void) {
 	// and we are going to boot a kernel
 
 	// root has never trailing slash, kernel has always leading slash
-	char *kernel_fn = strcat(root, sel->kernel);
-	
-	// sanity check
-	int err = is_valid_elf(kernel_fn);
-	if (err) {
-		// error message printed by function
-		return err;
-	}
-	
-	//TODO: shutdown video to see if kernel 2.6 recovers
-	//VIDEO_Shutdown();
-	
-	err = powerpc_boot_file(part_no, kernel_fn, sel->kernel_args);
-	if (err) {
-		log_printf("MINI boot failed: %d\n", err);
-		return err;
-	}
-	
-	return 0;
+	char *kernel_fn = strcat(sel->root, sel->kernel);
+	int err = try_boot_file(kernel_fn, sel->kernel_args);
+	free(kernel_fn);
+	return err;
 }

@@ -13,7 +13,7 @@ Copyright (C) 2009			Andre Heider "dhewg" <dhewg@wiibrew.org>
 #define __POWERPC_ELF_H__
 
 int is_valid_elf(const char *path);
-int powerpc_boot_file(u8 part_no, const char *path, const char *args);
+int powerpc_boot_file(const char *path, const char *args);
 
 #endif
 

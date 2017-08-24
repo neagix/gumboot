@@ -180,14 +180,14 @@ static int edit_bootargs(char *mem, unsigned int fsize, const char *args, char *
 }
 
 // will boot via IPC call to MINI
-int powerpc_boot_file(u8 part_no, const char *path, const char *args) {
+int powerpc_boot_file(const char *path, const char *args) {
 	FRESULT res;
 	FILINFO stat;
 	FIL fd;
 	
 	// display information about the booting kernel
 	select_font(FONT_HEADING);
-	gfx_printf_at(0, 2, "Loading (sd0,%d)/%s...", part_no, path);
+	gfx_printf_at(0, 2, "Loading %s...", path);
 
 	res = f_stat(path, &stat);
 	if (res != FR_OK) {
@@ -235,7 +235,7 @@ int powerpc_boot_file(u8 part_no, const char *path, const char *args) {
 	
 	// this will be shown for really little time, unless boot via MINI IPC fails
 	gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1, config_color_highlight[1]);
-	gfx_printf_at(0, 2, "Booting (sd0,%d)/%s... [%s]", part_no, path, args);
+	gfx_printf_at(0, 2, "Booting %s... [%s]", path, args);
 	
 	err = ipc_powerpc_boot(mem, fsize);
 	if (err) {
