@@ -31,7 +31,7 @@ static void browse_append(const char *name, int is_directory) {
 
 static void menu_browse_leave(void) {
 	// for debugging purposes
-	int i;
+	unsigned int i;
 	for(i=0;i<sizeof(browse_current_path);i+=4) {
 		browse_current_path[0]=DISP_RIGHT;
 		browse_current_path[1]=DISP_RIGHT;
@@ -51,6 +51,7 @@ int menu_browse() {
 	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
 		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
+		sleep(4);
 
 		menu_browse_leave();
 		return (int)res;
@@ -106,18 +107,21 @@ int menu_browse_activate(void) {
 		
 		// find before-last slash in the current path
 		// length is above 3 thanks to criteria above
-		int i;
-		for(i=strlen(browse_current_path)-1;i>2;i--) {
-			if (browse_current_path[i] == '/') {
-				// cut here
-				browse_current_path[i] = 0;
-
-				return menu_browse();
-			}
+		char *pos = browse_current_path+3, *last_pos = NULL;
+		while (1) {
+			pos = strchr(pos, '/');
+			if (pos)
+				last_pos = pos;
+			else
+				break;
 		}
 		
-		// truncate to root directory
-		browse_current_path[2] = 0;
+		if (last_pos) {
+			// cut here
+			*last_pos = 0;
+		} else
+			// truncate to root directory
+			browse_current_path[2] = 0;
 
 		return menu_browse();
 	}
