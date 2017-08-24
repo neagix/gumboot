@@ -7,6 +7,8 @@
 #include "../config.h"
 #include "../menu_render.h"
 #include "../raster.h"
+
+#define font_test 0
  
 /* The image argument has width * height RGBA pixels or width * height * 4 bytes */
 void encodeOneStep(const char* filename, const unsigned char* image, unsigned width, unsigned height)
@@ -76,6 +78,16 @@ int main(int argc, char **argv)
 	
 	printf("columns = %d, lines = %d\n", CONSOLE_COLUMNS, CONSOLE_LINES);
 	
+	if (font_test) {
+		// print all characters
+		for(char i=0;i<sizeof(console_font_8x16)/CONSOLE_CHAR_HEIGHT;i++) {
+			int x = i % CONSOLE_COLUMNS;
+			int y = i / CONSOLE_COLUMNS;
+			gfx_printch_at(x, y, i);
+		}
+		goto encode;
+	}
+
 	raster *valid_splash = NULL;
 
     menu_selection = config_default;
@@ -86,7 +98,8 @@ int main(int argc, char **argv)
 	
 	// check whether to draw help area or not
 	menu_draw_entries_and_help();
-	
+
+encode:	
 	encodeOneStep(argv[2], vfb, RESOLUTION_W, RESOLUTION_H);
 
 	free(vfb);	

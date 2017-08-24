@@ -72,6 +72,9 @@ int menu_browse() {
 		}
 	}
 
+	// add an extra entry to go back - it uses DISP_LEFT character code point
+	browse_append("\x1b Back to menu", 0);
+
 	// draw the new menu
 	menu_selection = 0;
 	menu_clear_entries();
@@ -90,12 +93,11 @@ static void free_browse_menu() {
 }
 
 int menu_browse_activate(void) {
-	// shall we go back?
-	if (menu_selection == 0) {
-		free_browse_menu();
-
+	// shall we go back? handles first and last menu entries
+	if ((menu_selection == 0) || (menu_selection == browse_menu_entries_count-1)) {
 		// "0:/" for example
-		if (strlen(browse_current_path)<=2) {
+		if ((strlen(browse_current_path)<=2) || (menu_selection == browse_menu_entries_count-1)) {
+			free_browse_menu();
 			// end of line: go back
 			menu_selection = old_menu_selection;
 			menu_clear_entries();
@@ -104,6 +106,7 @@ int menu_browse_activate(void) {
 			// return non-zero so that input loop continues
 			return 1;
 		}
+		free_browse_menu();
 
 		// find before-last slash in the current path
 		int i;

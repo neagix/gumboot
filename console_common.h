@@ -50,4 +50,10 @@ extern void console_blit(int dx, int dy, raster rst, rgb solid_bg, u32 *yuv_row)
 // defined in font.c
 extern unsigned char console_font_8x16[256*CONSOLE_CHAR_HEIGHT];
 
+// some special characters in our console font
+#define DISP_UP		0x18
+#define DISP_DOWN	0x19
+#define DISP_RIGHT	(DISP_DOWN+1)
+#define DISP_LEFT	(DISP_DOWN+2)
+
 #endif // __CONSOLE_COMMON_H

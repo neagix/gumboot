@@ -8,9 +8,6 @@ extern unsigned char gumboot_logo_pixels[];
 
 raster gumboot_logo;
 
-#define DISP_UP		0x18
-#define DISP_DOWN	0x19
-
 int old_menu_selection;
 int menu_selection = 0;
 
