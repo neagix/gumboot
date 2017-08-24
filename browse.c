@@ -30,6 +30,15 @@ static void browse_append(const char *name, int is_directory) {
 }
 
 static void menu_browse_leave(void) {
+	// for debugging purposes
+	int i;
+	for(i=0;i<sizeof(browse_current_path);i+=4) {
+		browse_current_path[0]=DISP_RIGHT;
+		browse_current_path[1]=DISP_RIGHT;
+		browse_current_path[2]=0x0;
+		browse_current_path[3]=DISP_RIGHT;
+	}
+
 	menu_selection = old_menu_selection;
 	menu_clear_entries();
 	menu_draw_entries_and_help();
@@ -38,12 +47,12 @@ static void menu_browse_leave(void) {
 int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
-	
+
 	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
-		menu_browse_leave();
 		log_printf("failed to open directory '%s': %d\n", browse_current_path, res);
 
+		menu_browse_leave();
 		return (int)res;
 	}
 
@@ -84,7 +93,7 @@ static void free_browse_menu() {
 int menu_browse_activate(void) {
 	// shall we go back? handles first and last menu entries
 	if ((menu_selection == 0) || (menu_selection == browse_menu_entries_count-1)) {
-		// "0:/" for example
+		// "0:" for example, or the "go back to menu" entry
 		if ((strlen(browse_current_path)<=2) || (menu_selection == browse_menu_entries_count-1)) {
 			free_browse_menu();
 			// end of line: go back
@@ -95,8 +104,6 @@ int menu_browse_activate(void) {
 		}
 		free_browse_menu();
 		
-		log_printf("checking %s\n", browse_current_path);
-
 		// find before-last slash in the current path
 		// length is above 3 thanks to criteria above
 		int i;
@@ -104,39 +111,42 @@ int menu_browse_activate(void) {
 			if (browse_current_path[i] == '/') {
 				// cut here
 				browse_current_path[i] = 0;
-				
-				log_printf("picked subdir %s\n", browse_current_path);
 
 				return menu_browse();
 			}
 		}
 		
-		log_printf("picked root dir %s\n", browse_current_path);
-		
 		// truncate to root directory
 		browse_current_path[2] = 0;
+
 		return menu_browse();
 	}
+
+	// a file was selected, try too boot it
+	int cur_len = strlen(browse_current_path);
 
 	// is the selection a subdirectory?
 	char *label = browse_menu_entries[menu_selection];
 	int l = strlen(label);
 	if (label[l-1] == '/') {
 		// append subdirectory to the current path without trailing slash
-		int cur_len = strlen(browse_current_path);
 		browse_current_path[cur_len] = '/';
-		memcpy(browse_current_path+cur_len+1, label, l-1);
-		browse_current_path[cur_len+1+l] = 0;
+		cur_len++;
+
+		l--;
+		memcpy(browse_current_path+cur_len, label, l);
+		browse_current_path[cur_len + l + 1] = 0;
+
 		free_browse_menu();
-		
 		return menu_browse();
 	}
 
-	// a file was selected, try too boot it
-	l = strlen(browse_current_path);
-	browse_current_path[l] = '/';
-	browse_current_path[l+1] = 0;
-	char *elf_fn = strcat(browse_current_path, label);
+	// previous length + 1 slash + filename + delimiter
+	char *elf_fn = malloc(cur_len+l+2);
+	memcpy(elf_fn, browse_current_path, cur_len);
+	elf_fn[cur_len]='/';
+	cur_len++;
+	memcpy(browse_current_path+cur_len, label, l+1);
 	int err = try_boot_file(elf_fn, "");
 	free(elf_fn);
 
