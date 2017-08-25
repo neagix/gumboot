@@ -30,15 +30,6 @@ static void browse_append(const char *name, int is_directory) {
 }
 
 static void menu_browse_leave(void) {
-	// for debugging purposes
-	unsigned int i;
-	for(i=0;i<sizeof(browse_current_path);i+=4) {
-		browse_current_path[0]=DISP_RIGHT;
-		browse_current_path[1]=DISP_RIGHT;
-		browse_current_path[2]=0x0;
-		browse_current_path[3]=DISP_RIGHT;
-	}
-
 	menu_selection = old_menu_selection;
 	menu_clear_entries();
 	menu_draw_entries_and_help();
