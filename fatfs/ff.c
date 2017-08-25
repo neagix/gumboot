@@ -1372,7 +1372,7 @@ DWORD create_chain (	/* 0:No free cluster, 1:Internal error, 0xFFFFFFFF:Disk err
 		ncl = find_bitmap(fs, scl, 1);				/* Find a free cluster */
 		if (ncl == 0 || ncl == 0xFFFFFFFF) return ncl;	/* No free cluster or hard error? */
 		res = change_bitmap(fs, ncl, 1, 1);			/* Mark the cluster 'in use' */
-		if (res == FR_INT_ERR) return 1;
+		if (res >= FR_INT_ERR) return 1;
 		if (res == FR_DISK_ERR) return 0xFFFFFFFF;
 		if (clst == 0) {							/* Is it a new chain? */
 			obj->stat = 2;							/* Set status 'contiguous' */
@@ -1529,7 +1529,7 @@ FRESULT dir_sdi (	/* FR_OK(0):succeeded, !=0:error */
 
 
 	if (ofs >= (DWORD)((FF_FS_EXFAT && fs->fs_type == FS_EXFAT) ? MAX_DIR_EX : MAX_DIR) || ofs % SZDIRE) {	/* Check range of offset and alignment */
-		return FR_INT_ERR;
+		return FR_DIR8_ERR;
 	}
 	dp->dptr = ofs;				/* Set current offset */
 	clst = dp->obj.sclust;		/* Table start cluster (0:root) */
@@ -1539,21 +1539,21 @@ FRESULT dir_sdi (	/* FR_OK(0):succeeded, !=0:error */
 	}
 
 	if (clst == 0) {	/* Static table (root-directory on the FAT volume) */
-		if (ofs / SZDIRE >= fs->n_rootdir) return FR_INT_ERR;	/* Is index out of range? */
+		if (ofs / SZDIRE >= fs->n_rootdir) return FR_DIR9_ERR;	/* Is index out of range? */
 		dp->sect = fs->dirbase;
-
+		if (dp->sect == 0) return FR_DIR12_ERR;
 	} else {			/* Dynamic table (sub-directory or root-directory on the FAT32/exFAT volume) */
 		csz = (DWORD)fs->csize * SS(fs);	/* Bytes per cluster */
 		while (ofs >= csz) {				/* Follow cluster chain */
 			clst = get_fat(&dp->obj, clst);				/* Get next cluster */
 			if (clst == 0xFFFFFFFF) return FR_DISK_ERR;	/* Disk error */
-			if (clst < 2 || clst >= fs->n_fatent) return FR_INT_ERR;	/* Reached to end of table or internal error */
+			if (clst < 2 || clst >= fs->n_fatent) return FR_DIR10_ERR;	/* Reached to end of table or internal error */
 			ofs -= csz;
 		}
 		dp->sect = clst2sect(fs, clst);
+		if (dp->sect == 0) return FR_DIR11_ERR;
 	}
 	dp->clust = clst;					/* Current cluster# */
-	if (dp->sect == 0) return FR_INT_ERR;
 	dp->sect += ofs / SS(fs);			/* Sector# of the directory entry */
 	dp->dir = fs->win + (ofs % SS(fs));	/* Pointer to the entry in the win[] */
 
@@ -1591,7 +1591,7 @@ FRESULT dir_next (	/* FR_OK(0):succeeded, FR_NO_FILE:End of table, FR_DENIED:Cou
 		else {					/* Dynamic table */
 			if ((ofs / SS(fs) & (fs->csize - 1)) == 0) {	/* Cluster changed? */
 				clst = get_fat(&dp->obj, dp->clust);		/* Get next cluster */
-				if (clst <= 1) return FR_INT_ERR;			/* Internal error */
+				if (clst <= 1) return FR_CLS_INT_ERR;			/* Internal error */
 				if (clst == 0xFFFFFFFF) return FR_DISK_ERR;	/* Disk error */
 				if (clst >= fs->n_fatent) {					/* It reached end of dynamic table */
 #if !FF_FS_READONLY
@@ -1605,7 +1605,7 @@ FRESULT dir_next (	/* FR_OK(0):succeeded, FR_NO_FILE:End of table, FR_DENIED:Cou
 					if (dir_clear(fs, clst) != FR_OK) return FR_DISK_ERR;	/* Clean up the stretched table */
 					if (FF_FS_EXFAT) dp->obj.stat |= 4;			/* exFAT: The directory has been stretched */
 #else
-					if (!stretch) dp->sect = 0;					/* (this line is to suppress compiler warning) */
+					if (stretch) {}								/* (this line is to suppress compiler warning) */
 					dp->sect = 0; return FR_NO_FILE;			/* Report EOT */
 #endif
 				}
@@ -2013,36 +2013,36 @@ FRESULT load_xdir (	/* FR_INT_ERR: invalid entry block */
 	/* Load 85 entry */
 	res = move_window(dp->obj.fs, dp->sect);
 	if (res != FR_OK) return res;
-	if (dp->dir[XDIR_Type] != 0x85) return FR_INT_ERR;	/* Invalid order */
+	if (dp->dir[XDIR_Type] != 0x85) return FR_DIR1_ERR;	/* Invalid order */
 	mem_cpy(dirb + 0 * SZDIRE, dp->dir, SZDIRE);
 	sz_ent = (dirb[XDIR_NumSec] + 1) * SZDIRE;
-	if (sz_ent < 3 * SZDIRE || sz_ent > 19 * SZDIRE) return FR_INT_ERR;
+	if (sz_ent < 3 * SZDIRE || sz_ent > 19 * SZDIRE) return FR_DIR2_ERR;
 
 	/* Load C0 entry */
 	res = dir_next(dp, 0);
-	if (res == FR_NO_FILE) res = FR_INT_ERR;	/* It cannot be */
+	if (res == FR_NO_FILE) res = FR_DIR3_ERR;	/* It cannot be */
 	if (res != FR_OK) return res;
 	res = move_window(dp->obj.fs, dp->sect);
 	if (res != FR_OK) return res;
-	if (dp->dir[XDIR_Type] != 0xC0) return FR_INT_ERR;	/* Invalid order */
+	if (dp->dir[XDIR_Type] != 0xC0) return FR_DIR3_ERR;	/* Invalid order */
 	mem_cpy(dirb + 1 * SZDIRE, dp->dir, SZDIRE);
-	if (MAXDIRB(dirb[XDIR_NumName]) > sz_ent) return FR_INT_ERR;
+	if (MAXDIRB(dirb[XDIR_NumName]) > sz_ent) return FR_DIR4_ERR;
 
 	/* Load C1 entries */
 	i = 2 * SZDIRE;	/* C1 offset to load */
 	do {
 		res = dir_next(dp, 0);
-		if (res == FR_NO_FILE) res = FR_INT_ERR;	/* It cannot be */
+		if (res == FR_NO_FILE) res = FR_DIR5_ERR;	/* It cannot be */
 		if (res != FR_OK) return res;
 		res = move_window(dp->obj.fs, dp->sect);
 		if (res != FR_OK) return res;
-		if (dp->dir[XDIR_Type] != 0xC1) return FR_INT_ERR;	/* Invalid order */
+		if (dp->dir[XDIR_Type] != 0xC1) return FR_DIR6_ERR;	/* Invalid order */
 		if (i < MAXDIRB(FF_MAX_LFN)) mem_cpy(dirb + i, dp->dir, SZDIRE);
 	} while ((i += SZDIRE) < sz_ent);
 
 	/* Sanity check (do it for only accessible object) */
 	if (i <= MAXDIRB(FF_MAX_LFN)) {
-		if (xdir_sum(dirb) != ld_word(dirb + XDIR_SetSum)) return FR_INT_ERR;
+		if (xdir_sum(dirb) != ld_word(dirb + XDIR_SetSum)) return FR_DIR7_ERR;
 	}
 	return FR_OK;
 }
