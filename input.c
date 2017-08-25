@@ -89,7 +89,7 @@ u16 pad_read(GC_Pad *pad, int chan) {
 	return btns;
 }
 
-#define LONG_PRESS_USEC 1000000 // 1 second
+#define LONG_PRESS_USEC 800000 // 0.7 seconds
 
 #define	RST_DOWN	!((read32(0x0C003000) >> 16) & 1)
 
