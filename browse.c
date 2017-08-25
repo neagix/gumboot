@@ -47,6 +47,7 @@ static void menu_browse_leave(void) {
 int menu_browse() {
 	DIR dirs;
 	FILINFO Fno;
+	//NOTE: menu entries must have already been free'd on entry
 
 	FRESULT res = f_opendir(&dirs, browse_current_path);
 	if (res != FR_OK) {
@@ -57,8 +58,6 @@ int menu_browse() {
 		return (int)res;
 	}
 
-	//NOTE: buffer must already be free on entry
-
 	// add first entry to go back one level
 	browse_append("..", 0);
 
@@ -68,6 +67,10 @@ int menu_browse() {
 		} else {
 			browse_append(Fno.fname, 0);
 		}
+	}
+	if (res != FR_OK) {
+		log_printf("failed to read directory '%s': %d\n", browse_current_path, res);
+		sleep(3);
 	}
 
 	// add an extra entry to go back - it uses DISP_LEFT character code point
