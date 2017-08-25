@@ -49,7 +49,7 @@ void draw_box_at(int x, int y, int w, int h) {
 
 const char	*timeout_prompt = "The highlighted entry will be booted automatically in ",
 			*timeout_prompt_term = " seconds.";
-const char *menu_title = "Gumboot menu v0.1";			
+const char *menu_title = "Gumboot menu v" GUMBOOT_VERSION;
 
 void menu_draw_head_and_box(u16 mini_version_major, u16 mini_version_minor) {
 	select_font(FONT_HEADING);

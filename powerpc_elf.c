@@ -236,12 +236,11 @@ int powerpc_boot_file(const char *path, const char *args) {
 	// this will be shown for really little time, unless boot via MINI IPC fails
 	gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1, config_color_highlight[1]);
 	gfx_printf_at(0, 2, "Booting %s... [%s]", path, args);
-	
+
 	err = ipc_powerpc_boot(mem, fsize);
-	if (err) {
+	if (err)
 		// in case of error, clear the 'Booting' message
-		gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1, config_color_highlight[1]);
-	}
+		gfx_clear(0, 2, CONSOLE_COLUMNS-2, 1, config_color_heading[1]);
 	return err;
 }
 

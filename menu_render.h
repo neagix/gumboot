@@ -18,6 +18,8 @@
 #include "lstrender/virtual_console.h"
 #endif
 
+#define GUMBOOT_VERSION "0.7"
+
 #define HELP_LINES 5
 #define HEAD_LINES 3
 #define BOX_H (CONSOLE_LINES-HEAD_LINES-HELP_LINES)
