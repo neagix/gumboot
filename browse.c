@@ -153,7 +153,8 @@ int menu_browse_activate(void) {
 	memcpy(elf_fn, browse_current_path, cur_len);
 	elf_fn[cur_len]='/';
 	cur_len++;
-	memcpy(browse_current_path+cur_len, label, l+1);
+	memcpy(elf_fn+cur_len, label, l+1);
+
 	int err = try_boot_file(elf_fn, "");
 	free(elf_fn);
 
