@@ -24,6 +24,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo "  LINK      $@"
 	@$(CC) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	$(STRIP) $@
 
 ifneq ($(LDSCRIPT),)
 $(TARGET): $(LDSCRIPT)
