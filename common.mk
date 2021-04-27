@@ -19,7 +19,7 @@ endif
 
 DEPDIR = .deps
 
-all: $(TARGET)
+all: logo.c $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo "  LINK      $@"

@@ -23,6 +23,7 @@ OBJS = $(OBJDIR)/realmode.o $(OBJDIR)/crt0.o $(OBJDIR)/main.o $(OBJDIR)/string.o
 include common.mk
 
 mklogo/mklogo:
+	if patch --forward --batch -p1 --dry-run < lodepng-gumboot.patch >/dev/null; then exec patch -p1 < lodepng-gumboot.patch; fi
 	make -C mklogo
 
 logo.c: logo.png mklogo/mklogo

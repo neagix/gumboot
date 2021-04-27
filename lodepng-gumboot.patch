@@ -1,0 +1,46 @@
+diff --git a/lodepng/lodepng.cpp b/lodepng/lodepng.cpp
+index bf237df..6af8ee8 100644
+--- a/lodepng/lodepng.cpp
++++ b/lodepng/lodepng.cpp
+@@ -30,6 +30,8 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
+ 
+ #include "lodepng.h"
+ 
++#ifndef GUMBOOT
++
+ #include <limits.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -39,6 +41,16 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
+ #pragma warning( disable : 4996 ) /*VS does not like fopen, but fopen_s is not standard C so unusable here*/
+ #endif /*_MSC_VER */
+ 
++#else
++
++#include "string.h"
++#include "malloc.h"
++
++// emulate abs()
++#define abs(a) ((a) < 0 ? (-(a)) : (a))
++
++#endif // GUMBOOT
++
+ const char* LODEPNG_VERSION_STRING = "20161127";
+ 
+ /*
+diff --git a/lodepng/lodepng.h b/lodepng/lodepng.h
+index 8c634d2..527a3d6 100644
+--- a/lodepng/lodepng.h
++++ b/lodepng/lodepng.h
+@@ -26,7 +26,11 @@ freely, subject to the following restrictions:
+ #ifndef LODEPNG_H
+ #define LODEPNG_H
+ 
++#ifdef GUMBOOT
++#include <stddef.h> /*for size_t*/
++#else
+ #include <string.h> /*for size_t*/
++#endif
+ 
+ extern const char* LODEPNG_VERSION_STRING;
+ 
